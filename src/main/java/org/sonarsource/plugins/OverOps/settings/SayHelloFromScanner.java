@@ -17,31 +17,26 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.plugins.example.settings;
+package org.sonarsource.plugins.OverOps.settings;
 
-import java.util.List;
-import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.resources.Qualifiers;
+import org.sonar.api.batch.sensor.Sensor;
+import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.utils.log.Loggers;
 
-import static java.util.Arrays.asList;
+public class SayHelloFromScanner implements Sensor {
 
-public class FooLanguageProperties {
-
-  public static final String FILE_SUFFIXES_KEY = "sonar.foo.file.suffixes";
-  public static final String FILE_SUFFIXES_DEFAULT_VALUE = ".foo";
-
-  private FooLanguageProperties() {
-    // only statics
+  @Override
+  public void describe(SensorDescriptor descriptor) {
+    descriptor.name(getClass().getName());
   }
 
-  public static List<PropertyDefinition> getProperties() {
-    return asList(PropertyDefinition.builder(FILE_SUFFIXES_KEY)
-      .defaultValue(FILE_SUFFIXES_DEFAULT_VALUE)
-      .category("Foo")
-      .name("File Suffixes")
-      .description("Comma-separated list of suffixes for files to analyze.")
-      .onQualifiers(Qualifiers.PROJECT)
-      .build());
+  @Override
+  public void execute(SensorContext context) {
+    if (context.settings().getBoolean(HelloWorldProperties.HELLO_KEY)) {
+      // print log only if property is set to true
+      Loggers.get(getClass()).info("Hello World!");
+    }
   }
 
 }

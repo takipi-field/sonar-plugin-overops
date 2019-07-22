@@ -1,4 +1,4 @@
-package org.sonarsource.plugins.example.web;
+package org.sonarsource.plugins.OverOps.web;
 
 import org.sonar.api.web.page.Context;
 import org.sonar.api.web.page.Page;
@@ -10,24 +10,31 @@ public class MyPluginPageDefinition implements PageDefinition {
   @Override
   public void define(Context context) {
     context
-      .addPage(Page.builder("example/custom_page_4_project")
+      .addPage(Page.builder("overops/custom_page_4_project")
         .setName("Custom Project Page (Pure JS)")
         .setScope(Scope.COMPONENT).build())
-      .addPage(Page.builder("example/measures_history")
+      
+      .addPage(Page.builder("overops/measures_history")
         .setName("Custom Project Page using ReactJS")
         .setScope(Scope.COMPONENT).build())
 
-      .addPage(Page.builder("example/custom_page_4_admin")
+      .addPage(Page.builder("overops/custom_page_4_admin")
         .setName("Custom Admin Page")
         .setScope(Scope.GLOBAL)
         .setAdmin(Boolean.TRUE).build())
-      .addPage(Page.builder("example/sanity_check")
+      
+      .addPage(Page.builder("overops/sanity_check")
         .setName("Custom Admin Page Sanity Check")
         .setScope(Scope.GLOBAL)
         .setAdmin(Boolean.TRUE).build())
 
-      .addPage(Page.builder("example/custom_page_global")
+      .addPage(Page.builder("overops/custom_page_global")
         .setName("Custom Global Page")
-        .setScope(Scope.GLOBAL).build());
+        .setScope(Scope.GLOBAL).build())
+      
+      .addPage(Page.builder("overops/overops_config_form")
+    		  .setName("OverOps Configuration")
+    		  .setScope(Scope.COMPONENT)
+    		  .setAdmin(Boolean.FALSE).build());
   }
 }

@@ -17,23 +17,31 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.plugins.example.hooks;
+package org.sonarsource.plugins.OverOps.settings;
 
-import org.sonar.api.ce.posttask.PostProjectAnalysisTask;
-import org.sonar.api.ce.posttask.QualityGate;
-import org.sonar.api.utils.log.Loggers;
+import java.util.List;
+import org.sonar.api.config.PropertyDefinition;
+import org.sonar.api.resources.Qualifiers;
 
-/**
- * Logs the Quality gate status in Compute Engine when analysis is finished (browse
- * Administration > Projects > Background Tasks).
- * A real use-case would be to send an email or to notify an IRC channel.
- */
-public class DisplayQualityGateStatus implements PostProjectAnalysisTask {
-  @Override
-  public void finished(ProjectAnalysis analysis) {
-    QualityGate gate = analysis.getQualityGate();
-    if (gate != null) {
-      Loggers.get(getClass()).info("Quality gate is " + gate.getStatus());
-    }
+import static java.util.Arrays.asList;
+
+public class FooLanguageProperties {
+
+  public static final String FILE_SUFFIXES_KEY = "sonar.foo.file.suffixes";
+  public static final String FILE_SUFFIXES_DEFAULT_VALUE = ".foo";
+
+  private FooLanguageProperties() {
+    // only statics
   }
+
+  public static List<PropertyDefinition> getProperties() {
+    return asList(PropertyDefinition.builder(FILE_SUFFIXES_KEY)
+      .defaultValue(FILE_SUFFIXES_DEFAULT_VALUE)
+      .category("Foo")
+      .name("File Suffixes")
+      .description("Comma-separated list of suffixes for files to analyze.")
+      .onQualifiers(Qualifiers.PROJECT)
+      .build());
+  }
+
 }

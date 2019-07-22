@@ -17,14 +17,14 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.plugins.example.languages;
+package org.sonarsource.plugins.OverOps.languages;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.resources.AbstractLanguage;
-import org.sonarsource.plugins.example.settings.FooLanguageProperties;
+import org.sonarsource.plugins.OverOps.settings.FooLanguageProperties;
 
 /**
  * This class defines the fictive Foo language.

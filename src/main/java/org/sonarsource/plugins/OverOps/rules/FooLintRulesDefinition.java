@@ -17,13 +17,13 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.plugins.example.rules;
+package org.sonarsource.plugins.OverOps.rules;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.api.server.rule.RulesDefinitionXmlLoader;
-import org.sonarsource.plugins.example.languages.FooLanguage;
+import org.sonarsource.plugins.OverOps.languages.FooLanguage;
 
 public final class FooLintRulesDefinition implements RulesDefinition {
 

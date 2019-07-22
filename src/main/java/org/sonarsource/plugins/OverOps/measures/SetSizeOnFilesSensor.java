@@ -17,15 +17,15 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.plugins.example.measures;
+package org.sonarsource.plugins.OverOps.measures;
+
+import static org.sonarsource.plugins.OverOps.measures.OverOpsMetrics.FILENAME_SIZE;
 
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-
-import static org.sonarsource.plugins.example.measures.ExampleMetrics.FILENAME_SIZE;
 
 /**
  * Scanner feeds raw measures on files but must not aggregate values to directories and project.

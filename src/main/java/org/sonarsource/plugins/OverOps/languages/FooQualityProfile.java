@@ -17,11 +17,11 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.plugins.example.languages;
+package org.sonarsource.plugins.OverOps.languages;
+
+import static org.sonarsource.plugins.OverOps.rules.FooLintRulesDefinition.REPO_KEY;
 
 import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
-
-import static org.sonarsource.plugins.example.rules.FooLintRulesDefinition.REPO_KEY;
 
 /**
  * Default, BuiltIn Quality Profile for the projects having files of the language "foo"

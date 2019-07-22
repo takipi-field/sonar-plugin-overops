@@ -17,30 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.plugins.example.settings;
+package org.sonarsource.plugins.OverOps.hooks;
 
-import java.util.List;
-import org.sonar.api.config.PropertyDefinition;
+import org.sonar.api.ce.posttask.PostProjectAnalysisTask;
+import org.sonar.api.ce.posttask.QualityGate;
+import org.sonar.api.utils.log.Loggers;
 
-import static java.util.Arrays.asList;
-
-public class HelloWorldProperties {
-
-  public static final String HELLO_KEY = "sonar.example.hello";
-  public static final String CATEGORY = "Properties Example";
-
-  private HelloWorldProperties() {
-    // only statics
+/**
+ * Logs the Quality gate status in Compute Engine when analysis is finished (browse
+ * Administration > Projects > Background Tasks).
+ * A real use-case would be to send an email or to notify an IRC channel.
+ */
+public class DisplayQualityGateStatus implements PostProjectAnalysisTask {
+  @Override
+  public void finished(ProjectAnalysis analysis) {
+    QualityGate gate = analysis.getQualityGate();
+    if (gate != null) {
+      Loggers.get(getClass()).info("Quality gate is " + gate.getStatus());
+    }
   }
-
-  public static List<PropertyDefinition> getProperties() {
-    return asList(
-      PropertyDefinition.builder(HELLO_KEY)
-        .name("Hello")
-        .description("Say Hello")
-        .defaultValue(String.valueOf(false))
-        .category(CATEGORY)
-        .build());
-  }
-
 }

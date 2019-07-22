@@ -1,4 +1,4 @@
-window.registerExtension('overops/custom_page_4_project', function (options) {
+window.registerExtension('overops/overops_config_form', function (options) {
 
   // let's create a flag telling if the page is still displayed
   var isDisplayed = true;
@@ -20,7 +20,7 @@ window.registerExtension('overops/custom_page_4_project', function (options) {
 
       // let's create an `h2` tag and place the text inside
       var header = document.createElement('h2');
-      header.textContent = 'The project ' + options.component.key + ' has ' + response.total + ' issues';
+      header.textContent = 'OverOps config form ' + options.component.key + ' has ' + response.total + ' issues';
 
       // append just created element to the container
       options.el.appendChild(header);
