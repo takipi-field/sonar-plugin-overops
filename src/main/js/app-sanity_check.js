@@ -8,7 +8,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import InstanceStatisticsApp from './components/InstanceStatisticsApp';
 import './style.css';
 
-window.registerExtension('example/sanity_check', options => {
+window.registerExtension('overops/sanity_check', options => {
 
   const { el } = options;
 
