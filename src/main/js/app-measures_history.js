@@ -8,7 +8,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import VersionsMeasuresHistoryApp from './components/VersionsMeasuresHistoryApp';
 import './style.css';
 
-window.registerExtension('example/measures_history', options => {
+window.registerExtension('overops/measures_history', options => {
 
   const { el } = options;
 
