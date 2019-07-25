@@ -21,8 +21,6 @@ package org.sonarsource.plugins.OverOps;
 
 import org.sonar.api.Plugin;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonarsource.plugins.OverOps.hooks.DisplayIssuesInScanner;
-import org.sonarsource.plugins.OverOps.hooks.DisplayQualityGateStatus;
 import org.sonarsource.plugins.OverOps.measures.ComputeSizeAverage;
 import org.sonarsource.plugins.OverOps.measures.ComputeSizeRating;
 import org.sonarsource.plugins.OverOps.measures.OverOpsMetrics;
@@ -41,10 +39,6 @@ public class OverOpsPlugin implements Plugin {
 
 	@Override
 	public void define(Context context) {
-		// tutorial on hooks
-		// http://docs.sonarqube.org/display/DEV/Adding+Hooks
-		context.addExtensions(DisplayIssuesInScanner.class, DisplayQualityGateStatus.class);
-
 		// tutorial on measures
 		context.addExtensions(OverOpsMetrics.class, SetSizeOnFilesSensor.class, ComputeSizeAverage.class,
 				ComputeSizeRating.class);
