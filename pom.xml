@@ -10,7 +10,7 @@
 	<version>6.7.1</version>
 
 	<name>OverOps Plugin for SonarQube 6.7.x LTS</name>
-	<description>Example of Plugin for SonarQube: </description>
+	<description>OverOps Plugin for SonarQube: </description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
