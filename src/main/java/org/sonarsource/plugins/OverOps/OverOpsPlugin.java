@@ -19,17 +19,19 @@
  */
 package org.sonarsource.plugins.OverOps;
 
+import static java.util.Arrays.asList;
+
 import org.sonar.api.Plugin;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonarsource.plugins.OverOps.measures.ComputeSizeAverage;
 import org.sonarsource.plugins.OverOps.measures.ComputeSizeRating;
+import org.sonarsource.plugins.OverOps.measures.OOSensor;
 import org.sonarsource.plugins.OverOps.measures.OverOpsMetrics;
 import org.sonarsource.plugins.OverOps.measures.SetSizeOnFilesSensor;
 import org.sonarsource.plugins.OverOps.rules.CreateIssuesOnJavaFilesSensor;
 import org.sonarsource.plugins.OverOps.rules.JavaRulesDefinition;
 import org.sonarsource.plugins.OverOps.settings.OverOpsProperties;
 import org.sonarsource.plugins.OverOps.web.MyPluginPageDefinition;
-import static java.util.Arrays.asList;
 
 /**
  * This class is the entry point for all extensions. It is referenced in
@@ -51,6 +53,8 @@ public class OverOpsPlugin implements Plugin {
 
 		// tutorial on web extensions
 		context.addExtension(MyPluginPageDefinition.class);
+		
+		context.addExtension(OOSensor.class);
 
 		context.addExtensions(asList(PropertyDefinition.builder("sonar.foo.file.suffixes").name("Suffixes FooLint")
 				.description("Suffixes supported by FooLint").category("FooLint").defaultValue("").build()));

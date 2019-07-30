@@ -56,7 +56,7 @@ public class OverOpsProperties {
 						.description("OverOps Api Key found in Account").category(CATEGORY).subCategory(SUBCATEGORY)
 						.type(PropertyType.PASSWORD).index(2).build(),
 				PropertyDefinition.builder(OO_ENVID).name("OverOps Environment ID").category(CATEGORY)
-						.subCategory(SUBCATEGORY).type(PropertyType.STRING).index(3).build(),
+						.subCategory(SUBCATEGORY).type(PropertyType.PASSWORD).index(3).build(),
 				PropertyDefinition.builder(APP_NAME).name("Application Name").description("The Agent side App name")
 						.category(CATEGORY).subCategory(SUBCATEGORY).index(4).onlyOnQualifiers(Qualifiers.PROJECT)
 						.build(),
