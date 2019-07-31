@@ -27,26 +27,22 @@ import org.sonar.api.resources.Qualifiers;
 
 import static java.util.Arrays.asList;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class OverOpsProperties {
 
-	public static final String OO_URL = "sonar.overops.url";
-	public static final String APIKEY = "sonar.overops.apikey";
-	public static final String APPHOST = "sonar.overops.host";
-	public static final String OO_ENVID = "sonar.overops.envid";
-	public static final String APP_NAME = "sonar.overops.applicaiton_name";
-	public static final String DEP_NAME = "sonar.overops.deployment_name";
-	public static final String TOTAL_ERROR_VOLUME_GATE = "Number";
-	public static final String EVENTID = "sonar.overops.eventid";
+	public static String OO_URL = "sonar.overops.url";
+	public static String APIKEY = "sonar.overops.apikey";
+	public static String OO_ENVID = "sonar.overops.environmentId";
+	public static String APP_NAME = "sonar.overops.applicaiton_name";
+	public static String DEP_NAME = "sonar.overops.deployment_name";
+	public static String TOTAL_ERROR_VOLUME_GATE = "Number";
+	public static String EVENTID = "sonar.overops.eventid";
 
-	public static final String CATEGORY = "OverOps";
-	public static final String SUBCATEGORY = "configuration";
-	public static final String SUBCATEGORY_QUALITYGATE = "quality_gate";
-
-	private OverOpsProperties() {
-		// only statics
-	}
+	public static String CATEGORY = "OverOps";
+	public static String SUBCATEGORY = "configuration";
+	public static String SUBCATEGORY_QUALITYGATE = "quality_gate";
 
 	public static List<PropertyDefinition> getProperties() {
 		return Arrays.asList(
@@ -56,17 +52,14 @@ public class OverOpsProperties {
 						.description("OverOps Api Key found in Account").category(CATEGORY).subCategory(SUBCATEGORY)
 						.type(PropertyType.PASSWORD).index(2).build(),
 				PropertyDefinition.builder(OO_ENVID).name("OverOps Environment ID").category(CATEGORY)
-						.subCategory(SUBCATEGORY).type(PropertyType.PASSWORD).index(3).build(),
+						.subCategory(SUBCATEGORY).type(PropertyType.STRING).index(3).build(),
 				PropertyDefinition.builder(APP_NAME).name("Application Name").description("The Agent side App name")
 						.category(CATEGORY).subCategory(SUBCATEGORY).index(4).onlyOnQualifiers(Qualifiers.PROJECT)
 						.build(),
 				PropertyDefinition.builder(DEP_NAME).name("Deployment Name").category(CATEGORY)
 						.subCategory(SUBCATEGORY_QUALITYGATE).index(5).type(PropertyType.INTEGER).build(),
 				PropertyDefinition.builder(EVENTID).name("Event Id").category(CATEGORY).subCategory(SUBCATEGORY)
-						.index(6).onlyOnQualifiers(Qualifiers.PROJECT).build(),
-				PropertyDefinition.builder(APPHOST).name("Application Host").category(CATEGORY).subCategory(SUBCATEGORY)
-						.index(7).type(PropertyType.STRING).build());
-				
+						.index(6).onlyOnQualifiers(Qualifiers.PROJECT).build());				
 	}
 
 }
