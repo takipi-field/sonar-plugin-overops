@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
+import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsResult;
@@ -24,6 +25,7 @@ import org.sonarsource.plugins.OverOps.settings.OverOpsProperties;
 
 public class OOSensor implements Sensor{
 
+	public static EventsResult eventList = null;
 	private static final Logger LOGGER = Loggers.get(OOSensor.class);	
 	@Override
 	public void describe(SensorDescriptor descriptor) {
@@ -60,7 +62,7 @@ public class OOSensor implements Sensor{
 		LOGGER.info(eventsResponse.toString());
 		if (eventsResponse.isBadResponse())
 			throw new IllegalStateException("Failed getting events.");
-
+		eventList = eventsResponse.data;
 		LOGGER.info("This is a test string HELOOOOWIHPDGHSJKHGLSKJDGHLSDJGHLSD:GISPIOG:");
 		LOGGER.info(eventsResponse.data.events.get(0).toString());
 	}

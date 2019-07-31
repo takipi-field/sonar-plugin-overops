@@ -42,6 +42,13 @@ public class OverOpsMetrics implements Metrics {
     .setDomain(CoreMetrics.DOMAIN_GENERAL)
     .create();
 
+    public static final Metric<Integer> SUMVIEW = new Metric.Builder("overops_summarized_events", "OverOps Summarized", Metric.ValueType.STRING)
+    .setDescription("Report after configuring")
+    .setDirection(Metric.DIRECTION_BETTER)
+    .setQualitative(true)
+    .setDomain(CoreMetrics.DOMAIN_GENERAL)
+    .create();
+
   @Override
   public List<Metric> getMetrics() {
     return asList(FILENAME_SIZE, FILENAME_SIZE_RATING);
