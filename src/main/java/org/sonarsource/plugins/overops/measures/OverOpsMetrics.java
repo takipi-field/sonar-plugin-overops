@@ -32,25 +32,24 @@ public class OverOpsMetrics implements Metrics {
     .setDescription("OverOps configuration form ")
     .setDirection(Metric.DIRECTION_BETTER)
     .setQualitative(false)
-    .setDomain(CoreMetrics.DOMAIN_GENERAL)
+    .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
   public static final Metric<Integer> FILENAME_SIZE_RATING = new Metric.Builder("overops_reliability_report", "OverOps Reliability Form", Metric.ValueType.RATING)
     .setDescription("Report after configuring")
     .setDirection(Metric.DIRECTION_BETTER)
     .setQualitative(true)
-    .setDomain(CoreMetrics.DOMAIN_GENERAL)
+    .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
-    public static final Metric<Integer> SUMVIEW = new Metric.Builder("overops_summarized_events", "OverOps Summarized", Metric.ValueType.STRING)
-    .setDescription("Report after configuring")
-    .setDirection(Metric.DIRECTION_BETTER)
-    .setQualitative(true)
-    .setDomain(CoreMetrics.DOMAIN_GENERAL)
+    public static final Metric<Integer> NEW_ERROR_COUNT = new Metric.Builder("overops_new_error_count", "New Errors", Metric.ValueType.INT)
+    .setDescription("New errors")
+    .setQualitative(false)
+    .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
   @Override
   public List<Metric> getMetrics() {
-    return asList(FILENAME_SIZE, FILENAME_SIZE_RATING, SUMVIEW);
+    return asList(FILENAME_SIZE, FILENAME_SIZE_RATING, NEW_ERROR_COUNT);
   }
 }

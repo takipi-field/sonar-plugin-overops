@@ -54,28 +54,18 @@ public class OOSensor implements Sensor{
 		
 		DateTimeFormatter dtf = ISODateTimeFormat.dateTime().withZoneUTC();
 		DateTime to = DateTime.now();
-		DateTime from = to.minusDays(1);
+		DateTime from = to.minusDays(7);
 
 		EventsVolumeRequest eventsVolumeRequest = EventsVolumeRequest.newBuilder()
-				.setServiceId(envIdKey).setFrom(from.toString(dtf)).setTo(to.toString(dtf))
+				.setServiceId(envIdKey.toUpperCase()).setFrom(from.toString(dtf)).setTo(to.toString(dtf))
 				.setViewId(view.id).setVolumeType(VolumeType.all).build();
 
 		Response<EventsResult> eventsResponse = apiClient.get(eventsVolumeRequest);
-		LOGGER.info(eventsResponse.toString());
 		if (eventsResponse.isBadResponse())
 			throw new IllegalStateException("Failed getting events.");
 		eventList = eventsResponse.data;
 		LOGGER.info("This is a test string HELOOOOWIHPDGHSJKHGLSKJDGHLSDJGHLSD:GISPIOG:");
 		LOGGER.info(eventsResponse.data.events.get(0).toString());
-		FileSystem fs = context.fileSystem();
-		try {
-			fs.baseDir().createNewFile();
-		} catch (IOException e) {
-			LOGGER.info("could not create file in the base directory in OOSensor");
-			e.printStackTrace();
-		}
-
-		
 	}
 
 	

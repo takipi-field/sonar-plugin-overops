@@ -25,7 +25,6 @@ import org.sonar.api.Plugin;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonarsource.plugins.overops.measures.ComputeSizeAverage;
 import org.sonarsource.plugins.overops.measures.ComputeSizeRating;
-import org.sonarsource.plugins.overops.measures.ComputeTotalErrors;
 import org.sonarsource.plugins.overops.measures.OOSensor;
 import org.sonarsource.plugins.overops.measures.OverOpsMetrics;
 import org.sonarsource.plugins.overops.measures.SetSizeOnFilesSensor;
@@ -42,7 +41,7 @@ public class OverOpsPlugin implements Plugin {
 	public void define(Context context) {
 		// tutorial on measures
 		context.addExtensions(OverOpsMetrics.class, SetSizeOnFilesSensor.class, ComputeSizeAverage.class,
-				ComputeSizeRating.class, ComputeTotalErrors.class);
+				ComputeSizeRating.class);
 
 		// tutorial on settings
 		context.addExtensions(OverOpsProperties.getProperties());

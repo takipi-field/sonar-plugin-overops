@@ -20,6 +20,7 @@
 package org.sonarsource.plugins.overops.measures;
 
 import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.FILENAME_SIZE;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.NEW_ERROR_COUNT;;
 
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
@@ -30,7 +31,7 @@ public class ComputeSizeAverage implements MeasureComputer {
   @Override
   public MeasureComputerDefinition define(MeasureComputerDefinitionContext def) {
     return def.newDefinitionBuilder()
-      .setOutputMetrics(FILENAME_SIZE.key())
+      .setOutputMetrics(FILENAME_SIZE.key(), NEW_ERROR_COUNT.key())
       .build();
   }
 
@@ -38,15 +39,25 @@ public class ComputeSizeAverage implements MeasureComputer {
   public void compute(MeasureComputerContext context) {
     // measure is already defined on files by {@link SetSizeOnFilesSensor}
     // in scanner stack
-    if (context.getComponent().getType() != Component.Type.FILE) {
+
+    // context.getComponent().getType() == Component.Type.MODULE
+    // Component.Type.PROJECT
+    if (context.getComponent().getType() == Component.Type.PROJECT) {
+      context.addMeasure(FILENAME_SIZE.key(), 7777);
+      context.addMeasure(NEW_ERROR_COUNT.key(), 1000000);
+    }
+
+    if (context.getComponent().getType() != Component.Type.FILE &&
+        context.getComponent().getType() != Component.Type.PROJECT) {
       int sum = 0;
       int count = 0;
       for (Measure child : context.getChildrenMeasures(FILENAME_SIZE.key())) {
         sum += child.getIntValue();
         count++;
       }
-      int average = count == 0 ? 0 : sum / count;
-      context.addMeasure(FILENAME_SIZE.key(), average);
+      // int average = count == 0 ? 0 : sum / count;
+      // context.addMeasure(FILENAME_SIZE.key(), average);
+      context.addMeasure(FILENAME_SIZE.key(), 42);
     }
   }
 }
