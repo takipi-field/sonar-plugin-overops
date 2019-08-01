@@ -46,20 +46,13 @@ public class OverOpsProperties {
 
 	public static List<PropertyDefinition> getProperties() {
 		return Arrays.asList(
-				PropertyDefinition.builder(OO_URL).name("OverOps URL").description("URL to access GitLab.")
+				PropertyDefinition.builder(OO_URL).name("OverOps URL").description("URL to access OverOps API")
 						.category(CATEGORY).subCategory(SUBCATEGORY).index(1).build(),
 				PropertyDefinition.builder(APIKEY).name("OverOps API Key")
 						.description("OverOps Api Key found in Account").category(CATEGORY).subCategory(SUBCATEGORY)
 						.type(PropertyType.PASSWORD).index(2).build(),
 				PropertyDefinition.builder(OO_ENVID).name("OverOps Environment ID").category(CATEGORY)
-						.subCategory(SUBCATEGORY).type(PropertyType.STRING).index(3).build(),
-				PropertyDefinition.builder(APP_NAME).name("Application Name").description("The Agent side App name")
-						.category(CATEGORY).subCategory(SUBCATEGORY).index(4).onlyOnQualifiers(Qualifiers.PROJECT)
-						.build(),
-				PropertyDefinition.builder(DEP_NAME).name("Deployment Name").category(CATEGORY)
-						.subCategory(SUBCATEGORY_QUALITYGATE).index(5).type(PropertyType.INTEGER).build(),
-				PropertyDefinition.builder(EVENTID).name("Event Id").category(CATEGORY).subCategory(SUBCATEGORY)
-						.index(6).onlyOnQualifiers(Qualifiers.PROJECT).build());				
+						.subCategory(SUBCATEGORY).type(PropertyType.STRING).index(3).build());
 	}
 
 }
