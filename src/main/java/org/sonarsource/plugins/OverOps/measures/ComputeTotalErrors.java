@@ -18,12 +18,12 @@ public class ComputeTotalErrors implements MeasureComputer {
     @Override
     public MeasureComputerDefinition define(MeasureComputerDefinitionContext defContext) {
         return defContext.newDefinitionBuilder().setInputMetrics(FILENAME_SIZE.key())
-                .setOutputMetrics(SUMVIEW.key()).build();
+                .setInputMetrics(SUMVIEW.key()).build();
     }
 
     @Override
     public void compute(MeasureComputerContext context) {
-        context.addMeasure(SUMVIEW.key(), OOSensor.eventList.events.get(0).toString());
+        context.addMeasure(SUMVIEW.key(), OOSensor.eventList.events.size());
     }
 
 }

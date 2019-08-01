@@ -1,5 +1,6 @@
 package org.sonarsource.plugins.OverOps.measures;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import com.takipi.api.client.RemoteApiClient;
@@ -15,6 +16,7 @@ import com.takipi.api.core.url.UrlClient.Response;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
@@ -65,6 +67,15 @@ public class OOSensor implements Sensor{
 		eventList = eventsResponse.data;
 		LOGGER.info("This is a test string HELOOOOWIHPDGHSJKHGLSKJDGHLSDJGHLSD:GISPIOG:");
 		LOGGER.info(eventsResponse.data.events.get(0).toString());
+		FileSystem fs = context.fileSystem();
+		try {
+			fs.baseDir().createNewFile();
+		} catch (IOException e) {
+			LOGGER.info("could not create file in the base directory in OOSensor");
+			e.printStackTrace();
+		}
+
+		
 	}
 
 	
