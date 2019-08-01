@@ -51,6 +51,6 @@ public class OverOpsMetrics implements Metrics {
 
   @Override
   public List<Metric> getMetrics() {
-    return asList(FILENAME_SIZE, FILENAME_SIZE_RATING);
+    return asList(FILENAME_SIZE, FILENAME_SIZE_RATING, SUMVIEW);
   }
 }
