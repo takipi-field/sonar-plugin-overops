@@ -20,7 +20,7 @@
 package org.sonarsource.plugins.overops.measures;
 
 import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.FILENAME_SIZE;
-import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.NEW_ERROR_COUNT;;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.NEW_ERROR_COUNT;
 
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
