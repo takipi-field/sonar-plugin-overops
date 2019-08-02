@@ -33,6 +33,7 @@ public class ComputeSizeRating implements MeasureComputer {
   private static final int THRESHOLD = 20;
   private static final int RATING_A = 1;
   private static final int RATING_B = 2;
+  
 
   @Override
   public MeasureComputerDefinition define(MeasureComputerDefinitionContext def) {

@@ -42,7 +42,7 @@ public class OverOpsMetrics implements Metrics {
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
-    public static final Metric<Integer> NEW_ERROR_COUNT = new Metric.Builder("overops_new_error_count", "Total Number of errors", Metric.ValueType.INT)
+    public static final Metric<Integer> List_Size = new Metric.Builder("overops_new_error_count", "Total Number of errors", Metric.ValueType.INT)
     .setDescription("New errors")
     .setQualitative(true)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
@@ -50,6 +50,6 @@ public class OverOpsMetrics implements Metrics {
 
   @Override
   public List<Metric> getMetrics() {
-    return asList(FILENAME_SIZE, FILENAME_SIZE_RATING, NEW_ERROR_COUNT);
+    return asList(FILENAME_SIZE, FILENAME_SIZE_RATING, List_Size);
   }
 }
