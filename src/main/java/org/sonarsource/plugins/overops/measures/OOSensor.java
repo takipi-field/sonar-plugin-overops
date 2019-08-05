@@ -78,14 +78,15 @@ public class OOSensor implements Sensor {
 		setEventsResult(eventsResponse.data);
 
 		HashMap<String, Integer> exceptionCounts = getAndCountExceptions();
-		context.<Integer>newMeasure().forMetric(event_list_size).on(context.module())
-				.withValue(exceptionCounts.get("Total Errors")).save();
-		context.<Integer>newMeasure().forMetric(Total_Unique_Errors).on(context.module())
-				.withValue(exceptionCounts.get("UnCaught Exception")).save();
+
 		context.<Integer>newMeasure().forMetric(UncaughtExceptionCount).on(context.module())
 				.withValue(exceptionCounts.get("Caught Exception")).save();
 		context.<Integer>newMeasure().forMetric(SwallowedExceptionCount).on(context.module())
 				.withValue(exceptionCounts.get("Swallowed Exception")).save();
+		context.<Integer>newMeasure().forMetric(event_list_size).on(context.module())
+				.withValue(exceptionCounts.get("Total Errors")).save();
+		context.<Integer>newMeasure().forMetric(Total_Unique_Errors).on(context.module())
+				.withValue(exceptionCounts.get("UnCaught Exception")).save();
 		context.<Integer>newMeasure().forMetric(LogErrorCount).on(context.module())
 				.withValue(exceptionCounts.get("Logged Error")).save();
 		context.<Integer>newMeasure().forMetric(CustomExceptionCount).on(context.module())
@@ -104,7 +105,17 @@ public class OOSensor implements Sensor {
 			}
 			LOGGER.info("Exception Type: " + eventList.events.get(i).type);
 		}
-		exceptions.put("UnCaught Exception", 0);
+		if (!exceptions.containsKey("Caught Exception")) {
+			exceptions.put("Caught Exception", 0);
+		} else if (!exceptions.containsKey("Swallowed Exception")) {
+			exceptions.put("Swallowed Exception", 0);
+		} else if (!exceptions.containsKey("Custom Event")) {
+			exceptions.put("Custom Event", 0);
+		} else if (!exceptions.containsKey("Logged Error")) {
+			exceptions.put("Logged Error", 0);
+		}else if(!exceptions.containsKey("UnCaught Exception")){
+			exceptions.put("UnCaught Exception", 0);
+		}
 		exceptions.put("Total Errors", eventList.events.size());
 		return exceptions;
 	}
