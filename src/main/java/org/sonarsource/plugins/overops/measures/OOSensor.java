@@ -66,7 +66,7 @@ public class OOSensor implements Sensor {
 
 		DateTimeFormatter dtf = ISODateTimeFormat.dateTime().withZoneUTC();
 		DateTime to = DateTime.now();
-		DateTime from = to.minusDays(14);
+		DateTime from = to.minusDays(1);
 
 		EventsVolumeRequest eventsVolumeRequest = EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase())
 				.setFrom(from.toString(dtf)).setTo(to.toString(dtf)).setViewId(view.id).setVolumeType(VolumeType.all)
