@@ -19,15 +19,10 @@
  */
 package org.sonarsource.plugins.overops;
 
-import static java.util.Arrays.asList;
-
 import org.sonar.api.Plugin;
-import org.sonar.api.config.PropertyDefinition;
 import org.sonarsource.plugins.overops.measures.ComputeSizeAverage;
-import org.sonarsource.plugins.overops.measures.ComputeSizeRating;
 import org.sonarsource.plugins.overops.measures.OOSensor;
 import org.sonarsource.plugins.overops.measures.OverOpsMetrics;
-import org.sonarsource.plugins.overops.measures.SetSizeOnFilesSensor;
 import org.sonarsource.plugins.overops.settings.OverOpsProperties;
 import org.sonarsource.plugins.overops.web.MyPluginPageDefinition;
 
@@ -40,8 +35,7 @@ public class OverOpsPlugin implements Plugin {
 	@Override
 	public void define(Context context) {
 		// tutorial on measures
-		context.addExtensions(OverOpsMetrics.class, SetSizeOnFilesSensor.class, ComputeSizeAverage.class,
-				ComputeSizeRating.class);
+		context.addExtensions(OverOpsMetrics.class, ComputeSizeAverage.class);
 
 		// tutorial on settings
 		context.addExtensions(OverOpsProperties.getProperties());

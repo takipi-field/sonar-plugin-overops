@@ -37,7 +37,6 @@ public class OverOpsProperties {
 	public static String OO_ENVID = "sonar.overops.environmentId";
 	public static String APP_NAME = "sonar.overops.applicaiton_name";
 	public static String DEP_NAME = "sonar.overops.deployment_name";
-	public static String TOTAL_ERROR_VOLUME_GATE = "Number";
 	public static String EVENTID = "sonar.overops.eventid";
 
 	public static String CATEGORY = "OverOps";
