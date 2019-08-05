@@ -23,6 +23,10 @@ import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.event_list
 import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.Total_Unique_Errors;
 import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.UncaughtExceptionCount;
 import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.SwallowedExceptionCount;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.LogErrorCount;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.CustomExceptionCount;
+
+
 
 
 
@@ -34,7 +38,7 @@ public class ComputeSizeAverage implements MeasureComputer {
   @Override
   public MeasureComputerDefinition define(MeasureComputerDefinitionContext def) {
     return def.newDefinitionBuilder()
-      .setOutputMetrics(event_list_size.key(), Total_Unique_Errors.key(), UncaughtExceptionCount.key(), SwallowedExceptionCount.key())
+      .setOutputMetrics(event_list_size.key(), Total_Unique_Errors.key(), UncaughtExceptionCount.key(), SwallowedExceptionCount.key(), LogErrorCount.key(), CustomExceptionCount.key())
       .build();
   }
 
