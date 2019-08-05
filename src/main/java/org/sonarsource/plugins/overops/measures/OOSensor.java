@@ -9,6 +9,7 @@ import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.UncaughtEx
 import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.SwallowedExceptionCount;
 import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.LogErrorCount;
 import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.CustomExceptionCount;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.HTTPErrors;
 
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
@@ -37,7 +38,7 @@ public class OOSensor implements Sensor {
 
 	@Override
 	public void describe(SensorDescriptor descriptor) {
-		descriptor.name("OverOps sensor calling OO_TALKER");
+		descriptor.name("OverOps sensor calling the Summarized View API and setting up the default Measures");
 	}
 
 	public static EventsResult getEventResult() {
@@ -86,15 +87,18 @@ public class OOSensor implements Sensor {
 		context.<Integer>newMeasure().forMetric(event_list_size).on(context.module())
 				.withValue(exceptionCounts.get("Total Errors")).save();
 		context.<Integer>newMeasure().forMetric(Total_Unique_Errors).on(context.module())
-				.withValue(exceptionCounts.get("UnCaught Exception")).save();
+				.withValue(exceptionCounts.get("Uncaught Exception")).save();
 		context.<Integer>newMeasure().forMetric(LogErrorCount).on(context.module())
 				.withValue(exceptionCounts.get("Logged Error")).save();
 		context.<Integer>newMeasure().forMetric(CustomExceptionCount).on(context.module())
 				.withValue(exceptionCounts.get("Custom Event")).save();
+		context.<Integer>newMeasure().forMetric(HTTPErrors).on(context.module())
+				.withValue(exceptionCounts.get("HTTP Error")).save();
 
 	}
 
 	public HashMap<String, Integer> getAndCountExceptions() {
+		//counts all the relevant errors
 		HashMap<String, Integer> exceptions = new HashMap<>();
 		for (int i = 0; i < eventList.events.size(); ++i) {
 			if (exceptions.containsKey(eventList.events.get(i).type)) {
@@ -105,6 +109,7 @@ public class OOSensor implements Sensor {
 			}
 			LOGGER.info("Exception Type: " + eventList.events.get(i).type);
 		}
+		//incase there are no errors of a type I add them
 		if (!exceptions.containsKey("Caught Exception")) {
 			exceptions.put("Caught Exception", 0);
 		} else if (!exceptions.containsKey("Swallowed Exception")) {
@@ -113,8 +118,10 @@ public class OOSensor implements Sensor {
 			exceptions.put("Custom Event", 0);
 		} else if (!exceptions.containsKey("Logged Error")) {
 			exceptions.put("Logged Error", 0);
-		}else if(!exceptions.containsKey("UnCaught Exception")){
-			exceptions.put("UnCaught Exception", 0);
+		} else if (!exceptions.containsKey("Uncaught Exception")) {
+			exceptions.put("Uncaught Exception", 0);
+		}else if(!exceptions.containsKey("HTTP Error")){
+			exceptions.put("HTTP Error", 0);
 		}
 		exceptions.put("Total Errors", eventList.events.size());
 		return exceptions;

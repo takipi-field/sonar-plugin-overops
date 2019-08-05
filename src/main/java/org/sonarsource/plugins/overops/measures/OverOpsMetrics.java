@@ -69,8 +69,15 @@ public class OverOpsMetrics implements Metrics {
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
+    public static final Metric<Integer> HTTPErrors = new Metric.Builder("overops_http_errors", "HTTP Errors", Metric.ValueType.INT)
+    .setDescription("HTTP Error Count")
+    .setDirection(Metric.DIRECTION_BETTER)
+    .setQualitative(false)
+    .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
+    .create();
+
   @Override
   public List<Metric> getMetrics() {
-    return asList(event_list_size, Total_Unique_Errors, UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount);
+    return asList(event_list_size, Total_Unique_Errors, UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors);
   }
 }
