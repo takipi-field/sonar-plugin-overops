@@ -28,28 +28,49 @@ import static java.util.Arrays.asList;
 
 public class OverOpsMetrics implements Metrics {
 
-  public static final Metric<Integer> FILENAME_SIZE = new Metric.Builder("overops_key", "OverOps Measures", Metric.ValueType.INT)
-    .setDescription("OverOps configuration form ")
+    public static final Metric<Integer> event_list_size = new Metric.Builder("overops_num_unique_errors", "Unique Errors", Metric.ValueType.INT)
+    .setDescription("Number of Unique Errors")
+    .setQualitative(true)
+    .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
+    .create();
+
+    public static final Metric<Integer> Total_Unique_Errors = new Metric.Builder("overops_total_volume_errors", "Volume Errors", Metric.ValueType.INT)
+    .setDescription("Number of Unique Errors")
     .setDirection(Metric.DIRECTION_BETTER)
     .setQualitative(false)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
-  public static final Metric<Integer> FILENAME_SIZE_RATING = new Metric.Builder("overops_reliability_report", "OverOps Reliability Form", Metric.ValueType.RATING)
-    .setDescription("Report after configuring")
+    public static final Metric<Integer> UncaughtExceptionCount = new Metric.Builder("overops_uncaught_exceptions", "Uncaught Exceptions", Metric.ValueType.INT)
+    .setDescription("Number of Uncaught Exception")
     .setDirection(Metric.DIRECTION_BETTER)
-    .setQualitative(true)
+    .setQualitative(false)
+    .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
+    .create();
+    
+    public static final Metric<Integer> SwallowedExceptionCount = new Metric.Builder("overops_swallowed_exceptions", "Swallowed Exceptions", Metric.ValueType.INT)
+    .setDescription("Swallowed Exception Count")
+    .setDirection(Metric.DIRECTION_BETTER)
+    .setQualitative(false)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
-    public static final Metric<Integer> List_Size = new Metric.Builder("overops_new_error_count", "Total Number of errors", Metric.ValueType.INT)
-    .setDescription("New errors")
-    .setQualitative(true)
+    public static final Metric<Integer> LogErrorCount = new Metric.Builder("overops_log_exceptions", "Log Errors", Metric.ValueType.INT)
+    .setDescription("Log Error Count")
+    .setDirection(Metric.DIRECTION_BETTER)
+    .setQualitative(false)
+    .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
+    .create();
+
+    public static final Metric<Integer> CustomExceptionCount = new Metric.Builder("overops_custom_errors", "Custom Errors", Metric.ValueType.INT)
+    .setDescription("Custom Error Count")
+    .setDirection(Metric.DIRECTION_BETTER)
+    .setQualitative(false)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
   @Override
   public List<Metric> getMetrics() {
-    return asList(FILENAME_SIZE, FILENAME_SIZE_RATING, List_Size);
+    return asList(event_list_size, Total_Unique_Errors, UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount);
   }
 }

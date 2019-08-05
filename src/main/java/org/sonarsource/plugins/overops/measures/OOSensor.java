@@ -1,13 +1,18 @@
 package org.sonarsource.plugins.overops.measures;
 
-import java.io.IOException;
-import java.util.Optional;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.event_list_size;
+
+import java.util.HashMap;
+
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.Total_Unique_Errors;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.UncaughtExceptionCount;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.SwallowedExceptionCount;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.LogErrorCount;
+import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.CustomExceptionCount;
 
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
-import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
-import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.client.util.view.ViewUtil;
@@ -16,8 +21,6 @@ import com.takipi.api.core.url.UrlClient.Response;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.batch.measure.MetricFinder;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
@@ -25,16 +28,15 @@ import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonarsource.plugins.overops.settings.OverOpsProperties;
-import static org.sonarsource.plugins.overops.measures.OverOpsMetrics.List_Size;
 
 public class OOSensor implements Sensor {
 
-	public static EventsResult eventList;
 	private static final Logger LOGGER = Loggers.get(OOSensor.class);
+
+	public static EventsResult eventList;
 
 	@Override
 	public void describe(SensorDescriptor descriptor) {
-		// TODO Auto-generated method stub
 		descriptor.name("OverOps sensor calling OO_TALKER");
 	}
 
@@ -60,12 +62,11 @@ public class OOSensor implements Sensor {
 		RemoteApiClient apiClient = (RemoteApiClient) RemoteApiClient.newBuilder().setApiKey(apiKey)
 				.setHostname(appHost).build();
 
-		LOGGER.info(context.config().get("sonar.overops.environmentId").toString());
 		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, envIdKey, "All Events");
 
 		DateTimeFormatter dtf = ISODateTimeFormat.dateTime().withZoneUTC();
 		DateTime to = DateTime.now();
-		DateTime from = to.minusDays(7);
+		DateTime from = to.minusDays(14);
 
 		EventsVolumeRequest eventsVolumeRequest = EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase())
 				.setFrom(from.toString(dtf)).setTo(to.toString(dtf)).setViewId(view.id).setVolumeType(VolumeType.all)
@@ -75,15 +76,37 @@ public class OOSensor implements Sensor {
 		if (eventsResponse.isBadResponse())
 			throw new IllegalStateException("Failed getting events.");
 		setEventsResult(eventsResponse.data);
-		LOGGER.info("First event inside of sonarqube" + eventsResponse.data.events.get(0));
-		LOGGER.info("First event inside of sonarqube" + eventsResponse.data.events.get(1));
-		LOGGER.info("First event inside of sonarqube" + eventsResponse.data.events.get(2));
-		LOGGER.info("Size of the response " + eventsResponse.data.events.size());
-		context.<Integer>newMeasure()
-		.forMetric(List_Size)
-		.on(context.module())
-		.withValue(eventList.events.size())
-		.save();
+
+		HashMap<String, Integer> exceptionCounts = getAndCountExceptions();
+		context.<Integer>newMeasure().forMetric(event_list_size).on(context.module())
+				.withValue(exceptionCounts.get("Total Errors")).save();
+		context.<Integer>newMeasure().forMetric(Total_Unique_Errors).on(context.module())
+				.withValue(exceptionCounts.get("UnCaught Exception")).save();
+		context.<Integer>newMeasure().forMetric(UncaughtExceptionCount).on(context.module())
+				.withValue(exceptionCounts.get("Caught Exception")).save();
+		context.<Integer>newMeasure().forMetric(SwallowedExceptionCount).on(context.module())
+				.withValue(exceptionCounts.get("Swallowed Exception")).save();
+		context.<Integer>newMeasure().forMetric(LogErrorCount).on(context.module())
+				.withValue(exceptionCounts.get("Logged Error")).save();
+		context.<Integer>newMeasure().forMetric(CustomExceptionCount).on(context.module())
+				.withValue(exceptionCounts.get("Custom Event")).save();
+
+	}
+
+	public HashMap<String, Integer> getAndCountExceptions() {
+		HashMap<String, Integer> exceptions = new HashMap<>();
+		for (int i = 0; i < eventList.events.size(); ++i) {
+			if (exceptions.containsKey(eventList.events.get(i).type)) {
+				int count = exceptions.remove(eventList.events.get(i).type);
+				exceptions.put(eventList.events.get(i).type, ++count);
+			} else {
+				exceptions.put(eventList.events.get(i).type, 1);
+			}
+			LOGGER.info("Exception Type: " + eventList.events.get(i).type);
+		}
+		exceptions.put("UnCaught Exception", 0);
+		exceptions.put("Total Errors", eventList.events.size());
+		return exceptions;
 	}
 
 }
