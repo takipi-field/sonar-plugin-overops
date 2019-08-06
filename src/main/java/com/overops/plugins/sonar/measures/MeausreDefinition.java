@@ -19,7 +19,7 @@
  */
 package com.overops.plugins.sonar.measures;
 
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.event_list_size;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Unique_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.UncaughtExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.SwallowedExceptionCount;
@@ -34,7 +34,7 @@ public class MeausreDefinition implements MeasureComputer {
   @Override
   public MeasureComputerDefinition define(MeasureComputerDefinitionContext def) {
     return def.newDefinitionBuilder()
-      .setOutputMetrics(event_list_size.key(), Total_Unique_Errors.key(), UncaughtExceptionCount.key(), SwallowedExceptionCount.key(), LogErrorCount.key(), CustomExceptionCount.key(), HTTPErrors.key()).build();
+      .setOutputMetrics(Total_Errors.key(), Total_Unique_Errors.key(), UncaughtExceptionCount.key(), SwallowedExceptionCount.key(), LogErrorCount.key(), CustomExceptionCount.key(), HTTPErrors.key()).build();
   }
 
   @Override

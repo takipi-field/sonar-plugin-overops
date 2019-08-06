@@ -28,13 +28,19 @@ import static java.util.Arrays.asList;
 
 public class OverOpsMetrics implements Metrics {
 
-    public static final Metric<Integer> event_list_size = new Metric.Builder("overops_num_unique_errors", "Unique Errors", Metric.ValueType.INT)
+    public static final Metric<Integer> Total_Errors = new Metric.Builder("overops_num_unique_errors", "Total Errors ", Metric.ValueType.INT)
     .setDescription("Number of Unique Errors")
     .setQualitative(true)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
-    public static final Metric<Integer> Total_Unique_Errors = new Metric.Builder("overops_total_volume_errors", "Volume Errors", Metric.ValueType.INT)
+    public static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
+    .setDescription("Number of Unique Errors")
+    .setQualitative(true)
+    .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
+    .create();
+
+    public static final Metric<Integer> Total_Unique_Errors = new Metric.Builder("overops_total_volume_errors", "Total Unique Errors", Metric.ValueType.INT)
     .setDescription("Number of Unique Errors")
     .setDirection(Metric.DIRECTION_BETTER)
     .setQualitative(false)
@@ -78,6 +84,6 @@ public class OverOpsMetrics implements Metrics {
 
   @Override
   public List<Metric> getMetrics() {
-    return asList(event_list_size, Total_Unique_Errors, UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors);
+    return asList(Total_Errors, Total_Unique_Errors, UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors, CaughtExceptionCount);
   }
 }

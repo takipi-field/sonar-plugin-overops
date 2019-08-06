@@ -6,7 +6,8 @@ import static com.overops.plugins.sonar.measures.OverOpsMetrics.LogErrorCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.SwallowedExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Unique_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.UncaughtExceptionCount;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.event_list_size;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Errors;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.CaughtExceptionCount;
 
 import java.util.HashMap;
 
@@ -36,18 +37,17 @@ public class OOSensor implements Sensor {
 	private static final Logger LOGGER = Loggers.get(OOSensor.class);
 
 	public static EventsResult eventList;
+	public String caughtException = "Caught Exception";
+	public String swallowedException = "Swallowed Exception";
+	public String totalErrors = "Total Errors";
+	public String uncaughtException = "Uncaught Exception";
+	public String loggedError = "Logged Error";
+	public String customEvent = "Custom Event";
+	public String httpError = "HTTP Error";
 
 	@Override
 	public void describe(SensorDescriptor descriptor) {
 		descriptor.name("OverOps sensor calling the Summarized View API and setting up the default Measures");
-	}
-
-	public static EventsResult getEventResult() {
-		return eventList;
-	}
-
-	public static void setEventsResult(EventsResult eventListR) {
-		eventList = eventListR;
 	}
 
 	@Override
@@ -68,8 +68,8 @@ public class OOSensor implements Sensor {
 
 		DateTimeFormatter dtf = ISODateTimeFormat.dateTime().withZoneUTC();
 		DateTime to = DateTime.now();
-		
-		//use the number inputted by the user default is 1 day
+
+		// use the number inputted by the user default is 1 day
 		DateTime from = to.minusDays(context.config().getInt(OverOpsProperties.DAYS).orElse(1));
 
 		EventsVolumeRequest eventsVolumeRequest = EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase())
@@ -78,32 +78,52 @@ public class OOSensor implements Sensor {
 
 		Response<EventsResult> eventsResponse = apiClient.get(eventsVolumeRequest);
 
-		if (eventsResponse.isBadResponse()) {
-			throw new IllegalStateException("Failed getting events.");
-		}
-		setEventsResult(eventsResponse.data);
+		HashMap<String, Integer> exceptionCounts = prepareMapDefault();
 
-		HashMap<String, Integer> exceptionCounts = getAndCountExceptions();
+		// prepare the map values, to set the values of the Measures
+		LOGGER.info("Before the handling of the response");
+		if (eventsResponse.data.events == null) {
+			LOGGER.info("Null event");
+			setContexts(context, exceptionCounts);
+		} else if (eventsResponse.isBadResponse()) {
+			throw new IllegalStateException("Failed getting events.");
+		} else {
+			eventList = eventsResponse.data;
+			exceptionCounts = getAndCountExceptions();
+			setContexts(context, exceptionCounts);
+		}
+	}
+
+	public void setContexts(SensorContext context, HashMap<String, Integer> exceptionCounts) {
+		context.<Integer>newMeasure().forMetric(CaughtExceptionCount).on(context.module())
+				.withValue(exceptionCounts.get(caughtException)).save();
+
+		context.<Integer>newMeasure().forMetric(SwallowedExceptionCount).on(context.module())
+				.withValue(exceptionCounts.get(swallowedException)).save();
+
+		context.<Integer>newMeasure().forMetric(Total_Errors).on(context.module())
+				.withValue(exceptionCounts.get(totalErrors)).save();
+
+		context.<Integer>newMeasure().forMetric(Total_Unique_Errors).on(context.module())
+				.withValue(exceptionCounts.get(totalErrors)).save();
 
 		context.<Integer>newMeasure().forMetric(UncaughtExceptionCount).on(context.module())
-				.withValue(exceptionCounts.get("Caught Exception")).save();
-		context.<Integer>newMeasure().forMetric(SwallowedExceptionCount).on(context.module())
-				.withValue(exceptionCounts.get("Swallowed Exception")).save();
-		context.<Integer>newMeasure().forMetric(event_list_size).on(context.module())
-				.withValue(exceptionCounts.get("Total Errors")).save();
-		context.<Integer>newMeasure().forMetric(Total_Unique_Errors).on(context.module())
-				.withValue(exceptionCounts.get("Uncaught Exception")).save();
+				.withValue(exceptionCounts.get(uncaughtException)).save();
+
 		context.<Integer>newMeasure().forMetric(LogErrorCount).on(context.module())
-				.withValue(exceptionCounts.get("Logged Error")).save();
-		context.<Integer>newMeasure().forMetric(CustomExceptionCount).on(context.module())
-				.withValue(exceptionCounts.get("Custom Event")).save();
+				.withValue(exceptionCounts.get(loggedError)).save();
+
 		context.<Integer>newMeasure().forMetric(HTTPErrors).on(context.module())
-				.withValue(exceptionCounts.get("HTTP Error")).save();
+				.withValue(exceptionCounts.get(httpError)).save();
+
 	}
 
 	public HashMap<String, Integer> getAndCountExceptions() {
 		// counts all the relevant errors
 		HashMap<String, Integer> exceptions = prepareMapDefault();
+		if (eventList == null) {
+			return exceptions;
+		}
 		for (int i = 0; i < eventList.events.size(); ++i) {
 			if (exceptions.containsKey(eventList.events.get(i).type)) {
 				int count = exceptions.remove(eventList.events.get(i).type);
@@ -113,42 +133,19 @@ public class OOSensor implements Sensor {
 			}
 			LOGGER.info("Exception Type: " + eventList.events.get(i).type);
 		}
-		// incase there are no errors of a type I add them
-		if (!exceptions.containsKey("Caught Exception")) {
-			exceptions.put("Caught Exception", 0);
-		}
-		if (!exceptions.containsKey("Swallowed Exception")) {
-			exceptions.put("Swallowed Exception", 0);
-		}
-		if (!exceptions.containsKey("Custom Event")) {
-			exceptions.put("Custom Event", 0);
-		}
-		if (!exceptions.containsKey("Logged Error")) {
-			exceptions.put("Logged Error", 0);
-		}
-		if (!exceptions.containsKey("Uncaught Exception")) {
-			exceptions.put("Uncaught Exception", 0);
-		}
-		if (!exceptions.containsKey("HTTP Error")) {
-			exceptions.put("HTTP Error", 0);
-		}
-		if (eventList == null) {
-			exceptions.put("Total Errors", 0);
-		} else {
-			exceptions.put("Total Errors", eventList.events.size());
-		}
+		exceptions.put(totalErrors, eventList.events.size());
 		return exceptions;
 	}
 
-	public HashMap<String, Integer> prepareMapDefault(){
+	public HashMap<String, Integer> prepareMapDefault() {
 		HashMap<String, Integer> exceptions = new HashMap<>();
-		exceptions.put("Caught Exception", 0);
-		exceptions.put("SwallowedException",0);
-		exceptions.put("Total Errors",0);
-		exceptions.put("Uncaught Exception",0);
-		exceptions.put("Logged Error",0);
-		exceptions.put("Custom Event",0);
-		exceptions.put("HTTP Error",0);
+		exceptions.put(caughtException, 0);
+		exceptions.put(swallowedException, 0);
+		exceptions.put(totalErrors, 0);
+		exceptions.put(uncaughtException, 0);
+		exceptions.put(loggedError, 0);
+		exceptions.put(customEvent, 0);
+		exceptions.put(httpError, 0);
 		return exceptions;
 	}
 }
