@@ -1,11 +1,10 @@
 {
-  "name": "custom-example",
-  "version": "0.0.1",
+  "name": "overops-sonar-plugin",
+  "version": "0.9.0",
   "license": "MIT",
   "devDependencies": {
     "autoprefixer": "6.2.2",
     "babel-core": "6.14.0",
-    "babel-jest": "18.0.0",
     "babel-jest": "18.0.0",
     "babel-loader": "6.2.5",
     "babel-preset-react-app": "0.2.1",

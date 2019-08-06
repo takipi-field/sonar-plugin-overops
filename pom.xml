@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.sonarsource.plugins.OverOps</groupId>
+	<groupId>com.overops.plugins.sonar</groupId>
 	<artifactId>sonar-overops-plugin</artifactId>
 	<packaging>sonar-plugin</packaging>
 	<version>6.7.1</version>
@@ -91,7 +91,7 @@
 				<configuration>
 					<pluginUrl>https://www.overops.com/</pluginUrl>
 					<pluginKey>overops</pluginKey>
-					<pluginClass>org.sonarsource.plugins.OverOps.OverOpsPlugin</pluginClass>
+					<pluginClass>com.overops.plugins.sonar.OverOpsPlugin</pluginClass>
 				</configuration>
 			</plugin>
 			<plugin>
