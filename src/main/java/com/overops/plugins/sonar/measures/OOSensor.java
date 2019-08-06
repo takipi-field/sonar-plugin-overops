@@ -1,17 +1,17 @@
 package com.overops.plugins.sonar.measures;
 
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.CustomExceptionCount;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.CaughtExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.HTTPErrors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.LogErrorCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.SwallowedExceptionCount;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Unique_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.UncaughtExceptionCount;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Errors;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.CaughtExceptionCount;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 
-import com.overops.plugins.sonar.converter.OverOpsPluginConfiguration;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
@@ -21,15 +21,10 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient.Response;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.config.Configuration;
-import org.sonar.api.internal.apachecommons.lang.NullArgumentException;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
@@ -67,14 +62,14 @@ public class OOSensor implements Sensor {
 
 		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, envIdKey, "All Events");
 
-		DateTimeFormatter dtf = ISODateTimeFormat.dateTime().withZoneUTC();
-		DateTime to = DateTime.now();
-
+		Instant today = Instant.now();
+		long days = context.config().getLong(OverOpsProperties.DAYS).orElse(1l);
+		Instant from = today.minus(days, ChronoUnit.DAYS);
+		
 		// use the number inputted by the user default is 1 day
-		DateTime from = to.minusDays(context.config().getInt(OverOpsProperties.DAYS).orElse(1));
 
 		EventsVolumeRequest eventsVolumeRequest = EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase())
-				.setFrom(from.toString(dtf)).setTo(to.toString(dtf)).setViewId(view.id).setVolumeType(VolumeType.all)
+				.setFrom(from.toString()).setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all)
 				.build();
 
 		Response<EventsResult> eventsResponse = apiClient.get(eventsVolumeRequest);
