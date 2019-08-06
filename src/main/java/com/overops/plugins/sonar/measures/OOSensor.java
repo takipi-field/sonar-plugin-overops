@@ -55,7 +55,7 @@ public class OOSensor implements Sensor {
 	public void execute(SensorContext context) {
 		Configuration config = context.config();
 		String envIdKey = config.get(OverOpsProperties.OO_ENVID).orElse(null);
-		String appHost = config.get(OverOpsProperties.OO_URL).orElse(null);
+		String appHost = config.get(OverOpsProperties.OO_URL).orElse("https://api.overops.com");
 		String apiKey = config.get(OverOpsProperties.APIKEY).orElse(null);
 
 		if (OverOpsProperties.APIKEY == null) {
@@ -82,7 +82,6 @@ public class OOSensor implements Sensor {
 		HashMap<String, Integer> exceptionCounts = prepareMapDefault();
 
 		// prepare the map values, to set the values of the Measures
-		LOGGER.info("Before the handling of the response");
 		if (eventsResponse.data.events == null) {
 			LOGGER.info("Null event");
 			setContexts(context, exceptionCounts);
@@ -132,7 +131,6 @@ public class OOSensor implements Sensor {
 			} else {
 				exceptions.put(eventList.events.get(i).type, 1);
 			}
-			LOGGER.info("Exception Type: " + eventList.events.get(i).type);
 		}
 		exceptions.put(totalErrors, eventList.events.size());
 		return exceptions;
