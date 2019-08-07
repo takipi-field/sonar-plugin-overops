@@ -49,12 +49,12 @@ public class OverOpsProperties {
 				PropertyDefinition.builder(APIKEY).name("OverOps API Key")
 						.description("OverOps Api Key found in Account").category(CATEGORY).subCategory(SUBCATEGORY)
 						.type(PropertyType.PASSWORD).index(1).build(),
-				PropertyDefinition.builder(OO_URL).name("OverOps URL")
-						.description("OverOps URL for API endpoint").defaultValue("https://api.overops.com").category(CATEGORY).subCategory(SUBCATEGORY)
+				PropertyDefinition.builder(OO_URL).name("OverOps URL").description("OverOps URL for API endpoint")
+						.defaultValue("https://api.overops.com").category(CATEGORY).subCategory(SUBCATEGORY)
 						.type(PropertyType.STRING).index(2).build(),
 				PropertyDefinition.builder(OO_ENVID).name("OverOps Environment ID").category(CATEGORY)
 						.subCategory(SUBCATEGORY).type(PropertyType.STRING).index(3).build(),
-				PropertyDefinition.builder(DAYS).name("Days to Minus").defaultValue("1").category(CATEGORY)
+				PropertyDefinition.builder(DAYS).name("Number of Days").defaultValue("1").category(CATEGORY)
 						.subCategory(SUBCATEGORY).type(PropertyType.INTEGER).index(4).build());
 	}
 

@@ -67,7 +67,6 @@ public class OOSensor implements Sensor {
 		Instant from = today.minus(days, ChronoUnit.DAYS);
 		
 		// use the number inputted by the user default is 1 day
-
 		EventsVolumeRequest eventsVolumeRequest = EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase())
 				.setFrom(from.toString()).setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all)
 				.build();
@@ -97,9 +96,6 @@ public class OOSensor implements Sensor {
 				.withValue(exceptionCounts.get(swallowedException)).save();
 
 		context.<Integer>newMeasure().forMetric(Total_Errors).on(context.module())
-				.withValue(exceptionCounts.get(totalErrors)).save();
-
-		context.<Integer>newMeasure().forMetric(Total_Unique_Errors).on(context.module())
 				.withValue(exceptionCounts.get(totalErrors)).save();
 
 		context.<Integer>newMeasure().forMetric(UncaughtExceptionCount).on(context.module())

@@ -29,55 +29,49 @@ import static java.util.Arrays.asList;
 public class OverOpsMetrics implements Metrics {
 
     public static final Metric<Integer> Total_Errors = new Metric.Builder("overops_num_unique_errors", "Total Errors ", Metric.ValueType.INT)
-    .setDescription("Number of Unique Errors")
+    .setDescription("Total Errors")
     .setQualitative(true)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
     public static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
-    .setDescription("Number of Unique Errors")
+    .setDescription("Caught Exception Count")
     .setQualitative(true)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
     public static final Metric<Integer> Total_Unique_Errors = new Metric.Builder("overops_total_volume_errors", "Total Unique Errors", Metric.ValueType.INT)
-    .setDescription("Number of Unique Errors")
-    .setDirection(Metric.DIRECTION_BETTER)
+    .setDescription("Unique Errors found")
     .setQualitative(false)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
     public static final Metric<Integer> UncaughtExceptionCount = new Metric.Builder("overops_uncaught_exceptions", "Uncaught Exceptions", Metric.ValueType.INT)
     .setDescription("Number of Uncaught Exception")
-    .setDirection(Metric.DIRECTION_BETTER)
     .setQualitative(false)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
     
     public static final Metric<Integer> SwallowedExceptionCount = new Metric.Builder("overops_swallowed_exceptions", "Swallowed Exceptions", Metric.ValueType.INT)
     .setDescription("Swallowed Exception Count")
-    .setDirection(Metric.DIRECTION_BETTER)
     .setQualitative(false)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
     public static final Metric<Integer> LogErrorCount = new Metric.Builder("overops_log_exceptions", "Log Errors", Metric.ValueType.INT)
     .setDescription("Log Error Count")
-    .setDirection(Metric.DIRECTION_BETTER)
     .setQualitative(false)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
     public static final Metric<Integer> CustomExceptionCount = new Metric.Builder("overops_custom_errors", "Custom Errors", Metric.ValueType.INT)
     .setDescription("Custom Error Count")
-    .setDirection(Metric.DIRECTION_BETTER)
     .setQualitative(false)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
 
     public static final Metric<Integer> HTTPErrors = new Metric.Builder("overops_http_errors", "HTTP Errors", Metric.ValueType.INT)
     .setDescription("HTTP Error Count")
-    .setDirection(Metric.DIRECTION_BETTER)
     .setQualitative(false)
     .setDomain(CoreMetrics.DOMAIN_RELIABILITY)
     .create();
