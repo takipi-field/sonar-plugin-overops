@@ -64,10 +64,13 @@ public class OOSensor implements Sensor {
 
 		LOGGER.info("Deployment Name: " + dep_name);
 		LOGGER.info("APP NAME: " + app_name);
+
 		if (OverOpsProperties.APIKEY == null) {
 			throw new IllegalStateException("APIKey is not filled in correctly");
 		}
-
+		if(apiKey == null || envIdKey == null){
+			return;
+		}
 		RemoteApiClient apiClient = (RemoteApiClient) RemoteApiClient.newBuilder().setApiKey(apiKey)
 				.setHostname(appHost).build();
 
@@ -127,7 +130,6 @@ public class OOSensor implements Sensor {
 			SummarizedView view) {
 		return EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase()).setFrom(from.toString())
 				.setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all).build();
-
 	}
 
 	public EventsVolumeRequest buildEventsVolumeRequestDeploymentName(String envIdKey, Instant from, Instant today,
@@ -135,7 +137,6 @@ public class OOSensor implements Sensor {
 		return EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase()).setFrom(from.toString())
 				.setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all).addDeployment(deploymentName)
 				.build();
-
 	}
 
 	public EventsVolumeRequest buildEventsVolumeRequestApplicationName(String envIdKey, Instant from, Instant today,
@@ -169,6 +170,7 @@ public class OOSensor implements Sensor {
 
 		context.<Integer>newMeasure().forMetric(HTTPErrors).on(context.module())
 				.withValue(exceptionCounts.get(httpError)).save();
+
 
 	}
 
