@@ -42,7 +42,7 @@ public class OverOpsProperties {
 	public static String DAYS = "1";
 
 	public static String CATEGORY = "OverOps";
-	public static String SUBCATEGORY = "configuration";
+	public static String SUBCATEGORY = "Settings";
 	public static String SUBCATEGORY_QUALITYGATE = "quality_gate";
 
 	public static List<PropertyDefinition> getProperties() {
@@ -55,9 +55,9 @@ public class OverOpsProperties {
 						.type(PropertyType.STRING).index(2).build(),
 				PropertyDefinition.builder(OO_ENVID).name("OverOps Environment ID").category(CATEGORY)
 						.subCategory(SUBCATEGORY).type(PropertyType.STRING).index(3).build(),
-				PropertyDefinition.builder(DAYS).name("Number of Days").defaultValue("1").category(CATEGORY)
-						.subCategory(SUBCATEGORY).type(PropertyType.INTEGER).index(4).build(),
-				PropertyDefinition.builder(APP_NAME).name("App Name").category(CATEGORY).subCategory(SUBCATEGORY).onQualifiers(Qualifiers.PROJECT)
+				PropertyDefinition.builder(DAYS).name("Days to look back").defaultValue("1").category(CATEGORY)
+						.subCategory(SUBCATEGORY).type(PropertyType.INTEGER).index(4).description("Enter the amount of days to pull back default is 1").build(),
+				PropertyDefinition.builder(APP_NAME).name("Application Name").category(CATEGORY).subCategory(SUBCATEGORY).onQualifiers(Qualifiers.PROJECT)
 						.type(PropertyType.STRING).index(5).build(),
 				PropertyDefinition.builder(DEP_NAME).onQualifiers(Qualifiers.PROJECT).name("Deployment Name").category(CATEGORY).subCategory(SUBCATEGORY)
 						.type(PropertyType.STRING).index(6).build());

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
+import com.takipi.api.client.request.EventTimeframeRequest;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
@@ -35,8 +36,9 @@ import org.sonar.api.utils.log.Loggers;
 public class OOSensor implements Sensor {
 
 	private static final Logger LOGGER = Loggers.get(OOSensor.class);
-
 	public static EventsResult eventList;
+
+	public EventsVolumeRequest eventsVolumeRequest;
 	public String caughtException = "Caught Exception";
 	public String swallowedException = "Swallowed Exception";
 	public String totalErrors = "Total Errors";
@@ -47,11 +49,12 @@ public class OOSensor implements Sensor {
 
 	@Override
 	public void describe(SensorDescriptor descriptor) {
-		descriptor.name("OverOps sensor calling the Summarized View API and setting up the default Measures");
+		descriptor.name("OverOps sensor calling the Summarized View API with customer configuration and setting up the default Measures");
 	}
 
 	@Override
 	public void execute(SensorContext context) {
+
 		Configuration config = context.config();
 		String envIdKey = config.get(OverOpsProperties.OO_ENVID).orElse(null);
 		String appHost = config.get(OverOpsProperties.OO_URL).orElse("https://api.overops.com");
@@ -59,6 +62,8 @@ public class OOSensor implements Sensor {
 		String dep_name = config.get(OverOpsProperties.DEP_NAME).orElse(null);
 		String app_name = config.get(OverOpsProperties.APP_NAME).orElse(null);
 
+		LOGGER.info("Deployment Name: " + dep_name);
+		LOGGER.info("APP NAME: " + app_name);
 		if (OverOpsProperties.APIKEY == null) {
 			throw new IllegalStateException("APIKey is not filled in correctly");
 		}
@@ -69,29 +74,81 @@ public class OOSensor implements Sensor {
 		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, envIdKey, "All Events");
 
 		Instant today = Instant.now();
-		long days = context.config().getLong(OverOpsProperties.DAYS).orElse(1l);
+		long days = config.getLong(OverOpsProperties.DAYS).orElse(1l);
 		Instant from = today.minus(days, ChronoUnit.DAYS);
 
 		// use the number inputted by the user default is 1 day
-		EventsVolumeRequest eventsVolumeRequest = EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase())
-				.setFrom(from.toString()).setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all)
-				.build();
+		if (dep_name == null && app_name == null) {
+			eventsVolumeRequest = buildEventsVolumeRequest(envIdKey, from, today, view);
+		} else if (app_name == null) {
+			eventsVolumeRequest = buildEventsVolumeRequestDeploymentName(envIdKey, from, today, view, dep_name);
+		} else if (dep_name == null) {
+			eventsVolumeRequest = buildEventsVolumeRequestApplicationName(envIdKey, from, today, view, app_name);
+		} else {
+			eventsVolumeRequest = buildEventsVolumeRequestAppAndDepName(envIdKey, from, today, view, dep_name,
+					app_name);
+		}
 
 		Response<EventsResult> eventsResponse = apiClient.get(eventsVolumeRequest);
-
-		HashMap<String, Integer> exceptionCounts = prepareMapDefault();
+		HashMap<String, Integer> exceptionCounts;
 
 		// prepare the map values, to set the values of the Measures
 		if (eventsResponse.data.events == null) {
 			LOGGER.info("Null event");
-			setContexts(context, exceptionCounts);
+			exceptionCounts = prepareMapDefault();
 		} else if (eventsResponse.isBadResponse()) {
 			throw new IllegalStateException("Failed getting events.");
 		} else {
 			eventList = eventsResponse.data;
 			exceptionCounts = getAndCountExceptions();
-			setContexts(context, exceptionCounts);
 		}
+		setContexts(context, exceptionCounts);
+	}
+
+	public HashMap<String, Integer> getAndCountExceptions() {
+		// counts all the relevant errors
+		HashMap<String, Integer> exceptions = prepareMapDefault();
+		exceptions.put(totalErrors, eventList.events.size());
+		if (eventList == null) {
+			return exceptions;
+		}
+		for (int i = 0; i < eventList.events.size(); ++i) {
+			if (exceptions.containsKey(eventList.events.get(i).type)) {
+				int count = exceptions.remove(eventList.events.get(i).type);
+				exceptions.put(eventList.events.get(i).type, ++count);
+			} else {
+				exceptions.put(eventList.events.get(i).type, 1);
+			}
+		}
+		return exceptions;
+	}
+
+	public EventsVolumeRequest buildEventsVolumeRequest(String envIdKey, Instant from, Instant today,
+			SummarizedView view) {
+		return EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase()).setFrom(from.toString())
+				.setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all).build();
+
+	}
+
+	public EventsVolumeRequest buildEventsVolumeRequestDeploymentName(String envIdKey, Instant from, Instant today,
+			SummarizedView view, String deploymentName) {
+		return EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase()).setFrom(from.toString())
+				.setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all).addDeployment(deploymentName)
+				.build();
+
+	}
+
+	public EventsVolumeRequest buildEventsVolumeRequestApplicationName(String envIdKey, Instant from, Instant today,
+			SummarizedView view, String appName) {
+		return EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase()).setFrom(from.toString())
+				.setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all).addApp(appName).build();
+	}
+
+	public EventsVolumeRequest buildEventsVolumeRequestAppAndDepName(String envIdKey, Instant from, Instant today,
+			SummarizedView view, String depName, String appName) {
+		return EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase()).setFrom(from.toString())
+				.setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all).addApp(appName)
+				.addDeployment(depName).build();
 	}
 
 	public void setContexts(SensorContext context, HashMap<String, Integer> exceptionCounts) {
@@ -113,24 +170,6 @@ public class OOSensor implements Sensor {
 		context.<Integer>newMeasure().forMetric(HTTPErrors).on(context.module())
 				.withValue(exceptionCounts.get(httpError)).save();
 
-	}
-
-	public HashMap<String, Integer> getAndCountExceptions() {
-		// counts all the relevant errors
-		HashMap<String, Integer> exceptions = prepareMapDefault();
-		exceptions.put(totalErrors, eventList.events.size());
-		if (eventList == null) {
-			return exceptions;
-		}
-		for (int i = 0; i < eventList.events.size(); ++i) {
-			if (exceptions.containsKey(eventList.events.get(i).type)) {
-				int count = exceptions.remove(eventList.events.get(i).type);
-				exceptions.put(eventList.events.get(i).type, ++count);
-			} else {
-				exceptions.put(eventList.events.get(i).type, 1);
-			}
-		}
-		return exceptions;
 	}
 
 	public HashMap<String, Integer> prepareMapDefault() {
