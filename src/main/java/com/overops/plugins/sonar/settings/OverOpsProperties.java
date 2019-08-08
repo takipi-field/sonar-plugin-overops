@@ -57,7 +57,7 @@ public class OverOpsProperties {
 						.subCategory(SUBCATEGORY).type(PropertyType.STRING).index(3).build(),
 				PropertyDefinition.builder(DAYS).name("Number of Days").defaultValue("1").category(CATEGORY)
 						.subCategory(SUBCATEGORY).type(PropertyType.INTEGER).index(4).build(),
-				PropertyDefinition.builder(APP_NAME).name("App Name").category(CATEGORY).subCategory(SUBCATEGORY)
+				PropertyDefinition.builder(APP_NAME).name("App Name").category(CATEGORY).subCategory(SUBCATEGORY).onQualifiers(Qualifiers.PROJECT)
 						.type(PropertyType.STRING).index(5).build(),
 				PropertyDefinition.builder(DEP_NAME).onQualifiers(Qualifiers.PROJECT).name("Deployment Name").category(CATEGORY).subCategory(SUBCATEGORY)
 						.type(PropertyType.STRING).index(6).build());
