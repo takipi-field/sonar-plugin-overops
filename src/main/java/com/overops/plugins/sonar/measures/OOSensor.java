@@ -5,7 +5,6 @@ import static com.overops.plugins.sonar.measures.OverOpsMetrics.HTTPErrors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.LogErrorCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.SwallowedExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Errors;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Unique_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.UncaughtExceptionCount;
 
 import java.time.Instant;
@@ -20,11 +19,16 @@ import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient.Response;
+import com.takipi.api.client.util.regression.RegressionInput;
 
+import org.sonar.api.batch.fs.FilePredicate;
+import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.config.Configuration;
+import org.sonar.api.resources.File;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
@@ -52,6 +56,8 @@ public class OOSensor implements Sensor {
 		String envIdKey = config.get(OverOpsProperties.OO_ENVID).orElse(null);
 		String appHost = config.get(OverOpsProperties.OO_URL).orElse("https://api.overops.com");
 		String apiKey = config.get(OverOpsProperties.APIKEY).orElse(null);
+		String dep_name = config.get(OverOpsProperties.DEP_NAME).orElse(null);
+		String app_name = config.get(OverOpsProperties.APP_NAME).orElse(null);
 
 		if (OverOpsProperties.APIKEY == null) {
 			throw new IllegalStateException("APIKey is not filled in correctly");
@@ -65,7 +71,7 @@ public class OOSensor implements Sensor {
 		Instant today = Instant.now();
 		long days = context.config().getLong(OverOpsProperties.DAYS).orElse(1l);
 		Instant from = today.minus(days, ChronoUnit.DAYS);
-		
+
 		// use the number inputted by the user default is 1 day
 		EventsVolumeRequest eventsVolumeRequest = EventsVolumeRequest.newBuilder().setServiceId(envIdKey.toUpperCase())
 				.setFrom(from.toString()).setTo(today.toString()).setViewId(view.id).setVolumeType(VolumeType.all)
@@ -112,6 +118,7 @@ public class OOSensor implements Sensor {
 	public HashMap<String, Integer> getAndCountExceptions() {
 		// counts all the relevant errors
 		HashMap<String, Integer> exceptions = prepareMapDefault();
+		exceptions.put(totalErrors, eventList.events.size());
 		if (eventList == null) {
 			return exceptions;
 		}
@@ -123,7 +130,6 @@ public class OOSensor implements Sensor {
 				exceptions.put(eventList.events.get(i).type, 1);
 			}
 		}
-		exceptions.put(totalErrors, eventList.events.size());
 		return exceptions;
 	}
 
