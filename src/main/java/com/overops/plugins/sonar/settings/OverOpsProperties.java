@@ -38,7 +38,8 @@ public class OverOpsProperties {
 	public static String APP_NAME = "sonar.overops.applicaiton_name";
 	public static String DEP_NAME = "sonar.overops.deployment_name";
 	public static String EVENTID = "sonar.overops.eventid";
-	public static String DAYS = "0";
+	public static String versionNum = "sonar.overops.versionNum";
+	public static String DAYS = "1";
 
 	public static String CATEGORY = "OverOps";
 	public static String SUBCATEGORY = "configuration";
@@ -55,7 +56,12 @@ public class OverOpsProperties {
 				PropertyDefinition.builder(OO_ENVID).name("OverOps Environment ID").category(CATEGORY)
 						.subCategory(SUBCATEGORY).type(PropertyType.STRING).index(3).build(),
 				PropertyDefinition.builder(DAYS).name("Number of Days").defaultValue("1").category(CATEGORY)
-						.subCategory(SUBCATEGORY).type(PropertyType.INTEGER).index(4).build());
+						.subCategory(SUBCATEGORY).type(PropertyType.INTEGER).index(4).build(),
+				PropertyDefinition.builder(APP_NAME).name("App Name").category(CATEGORY).subCategory(SUBCATEGORY)
+						.type(PropertyType.STRING).index(5).build(),
+				PropertyDefinition.builder(DEP_NAME).onQualifiers(Qualifiers.PROJECT).name("Deployment Name").category(CATEGORY).subCategory(SUBCATEGORY)
+						.type(PropertyType.STRING).index(6).build());
+
 	}
 
 }
