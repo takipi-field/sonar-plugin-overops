@@ -19,7 +19,6 @@
  */
 package com.overops.plugins.sonar.measures;
 
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.UncaughtExceptionCount;
 
 import java.util.ArrayList;
@@ -44,7 +43,7 @@ public class MeasureDefinition implements MeasureComputer {
   @Override
   public MeasureComputerDefinition define(MeasureComputerDefinitionContext def) {
     return def.newDefinitionBuilder()
-        .setOutputMetrics(Total_Errors.key(), CaughtExceptionCount.key(), UncaughtExceptionCount.key(),
+        .setOutputMetrics(CaughtExceptionCount.key(), UncaughtExceptionCount.key(),
             SwallowedExceptionCount.key(), LogErrorCount.key(), CustomExceptionCount.key(), HTTPErrors.key())
         .build();
   }
@@ -72,15 +71,12 @@ public class MeasureDefinition implements MeasureComputer {
       for(Measure measure : context.getChildrenMeasures(HTTPErrors.key())){
         sum_HTTP += measure.getIntValue();
       }
-      int sum_total = sum + sum_Uncaught + sum_Custom + sum_HTTP + sum_Caught;
-
 
       context.addMeasure(SwallowedExceptionCount.key(), sum);
       context.addMeasure(UncaughtExceptionCount.getKey(), sum_Uncaught);
       context.addMeasure(CaughtExceptionCount.key(), sum_Caught);
       context.addMeasure(CustomExceptionCount.key(), sum_Custom);
       context.addMeasure(HTTPErrors.key(), sum_HTTP);
-      context.addMeasure(Total_Errors.key(), sum_total);
     }
   }
 }

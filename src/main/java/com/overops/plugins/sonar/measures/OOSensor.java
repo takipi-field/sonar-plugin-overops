@@ -3,8 +3,6 @@ package com.overops.plugins.sonar.measures;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.CaughtExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.HTTPErrors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.LogErrorCount;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.SwallowedExceptionCount;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.UncaughtExceptionCount;
 
 import java.sql.PreparedStatement;
@@ -48,7 +46,6 @@ public class OOSensor implements Sensor {
 	// the event type labels
 	public final String caughtException = "Caught Exception";
 	public final String swallowedException = "Swallowed Exception";
-	public final String totalErrors = "Total Errors";
 	public final String uncaughtException = "Uncaught Exception";
 	public final String loggedError = "Logged Error";
 	public final String customEvent = "Custom Event";
@@ -162,7 +159,6 @@ public class OOSensor implements Sensor {
 							.withValue(classErrorCountMap.get(shortEnedName).get(key)).save();
 				}
 			}
-
 		}
 	}
 }

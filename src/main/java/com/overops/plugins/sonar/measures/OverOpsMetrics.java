@@ -32,24 +32,8 @@ public class OverOpsMetrics implements Metrics {
 
   public static String OO_DOMAIN = "OverOps Exceptions";
 
-    public static final Metric<Integer> Total_Errors = new Metric.Builder("overops_num_unique_errors", "Total Errors ", Metric.ValueType.INT)
-    .setDescription("Total Errors")
-    .setQualitative(true)
-    .setDirection(Metric.DIRECTION_WORST)
-    .setDomain(OO_DOMAIN)
-    .setBestValue(0.0)
-    .create();
-
     public static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
     .setDescription("Caught Exception Count")
-    .setQualitative(true)
-    .setDirection(Metric.DIRECTION_WORST)
-    .setDomain(OO_DOMAIN)
-    .setBestValue(0.0)
-    .create();
-
-    public static final Metric<Integer> Total_Unique_Errors = new Metric.Builder("overops_total_volume_errors", "Total Unique Errors", Metric.ValueType.INT)
-    .setDescription("Unique Errors found")
     .setQualitative(true)
     .setDirection(Metric.DIRECTION_WORST)
     .setDomain(OO_DOMAIN)
@@ -98,6 +82,6 @@ public class OverOpsMetrics implements Metrics {
 
   @Override
   public List<Metric> getMetrics() {
-    return asList(Total_Errors, UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors, CaughtExceptionCount);
+    return asList(UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors, CaughtExceptionCount);
   }
 }

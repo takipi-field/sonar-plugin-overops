@@ -18,7 +18,6 @@ public class CountEvents {
 
 	public final String caughtException = "Caught Exception";
 	public final String swallowedException = "Swallowed Exception";
-	public final String totalErrors = "Total Errors";
 	public final String uncaughtException = "Uncaught Exception";
 	public final String loggedError = "Logged Error";
 	public final String customEvent = "Custom Event";
@@ -32,7 +31,6 @@ public class CountEvents {
     public HashMap<String, Integer> prepareMap(HashMap<String, Integer> map){
         map.put(caughtException, 0);
         map.put(swallowedException, 0);
-        map.put(totalErrors, 0);
         map.put(uncaughtException, 0);
         map.put(loggedError, 0);
         map.put(customEvent, 0);
@@ -86,7 +84,6 @@ public class CountEvents {
         exceptions.put(httpError, OverOpsMetrics.HTTPErrors);
         exceptions.put(loggedError, OverOpsMetrics.LogErrorCount);
         exceptions.put(swallowedException, OverOpsMetrics.SwallowedExceptionCount);
-        exceptions.put(totalErrors, OverOpsMetrics.Total_Errors);
         exceptions.put(uncaughtException, OverOpsMetrics.UncaughtExceptionCount);
         return exceptions;
     }
