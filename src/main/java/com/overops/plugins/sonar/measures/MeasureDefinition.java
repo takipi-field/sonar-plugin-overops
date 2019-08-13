@@ -22,6 +22,9 @@ package com.overops.plugins.sonar.measures;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.UncaughtExceptionCount;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.SwallowedExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.LogErrorCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.CustomExceptionCount;
@@ -33,6 +36,7 @@ import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
+import org.sonar.api.measures.Metric;
 
 public class MeasureDefinition implements MeasureComputer {
   private static final Logger LOGGER = Loggers.get(MeasureDefinition.class);
@@ -48,12 +52,35 @@ public class MeasureDefinition implements MeasureComputer {
   @Override
   public void compute(MeasureComputerContext context) {
     if (context.getComponent().getType() != Component.Type.FILE) {
-      context.addMeasure(SwallowedExceptionCount.getKey(), 1);
-      context.addMeasure(CaughtExceptionCount.key(), 2);
-      context.addMeasure(UncaughtExceptionCount.key(), 3);
-      context.addMeasure(CustomExceptionCount.key(), 4);
-      context.addMeasure(HTTPErrors.key(), 5);
-      context.addMeasure(Total_Errors.key(), 6);
+      int sum = 0; 
+      for(Measure measure : context.getChildrenMeasures(SwallowedExceptionCount.key())){
+        sum += measure.getIntValue();
+      }
+      int sum_Uncaught = 0;
+      for(Measure measure : context.getChildrenMeasures(UncaughtExceptionCount.key())){
+        sum_Uncaught += measure.getIntValue();
+      }
+      int sum_Custom = 0;
+      for(Measure measure : context.getChildrenMeasures(CustomExceptionCount.key())){
+        sum_Custom += measure.getIntValue();
+      }
+      int sum_Caught = 0;
+      for(Measure measure : context.getChildrenMeasures(CaughtExceptionCount.key())){
+        sum_Caught += measure.getIntValue();
+      }
+      int sum_HTTP = 0;
+      for(Measure measure : context.getChildrenMeasures(HTTPErrors.key())){
+        sum_HTTP += measure.getIntValue();
+      }
+      int sum_total = sum + sum_Uncaught + sum_Custom + sum_HTTP + sum_Caught;
+
+
+      context.addMeasure(SwallowedExceptionCount.key(), sum);
+      context.addMeasure(UncaughtExceptionCount.getKey(), sum_Uncaught);
+      context.addMeasure(CaughtExceptionCount.key(), sum_Caught);
+      context.addMeasure(CustomExceptionCount.key(), sum_Custom);
+      context.addMeasure(HTTPErrors.key(), sum_HTTP);
+      context.addMeasure(Total_Errors.key(), sum_total);
     }
   }
 }
