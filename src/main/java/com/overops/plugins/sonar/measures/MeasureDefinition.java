@@ -20,24 +20,40 @@
 package com.overops.plugins.sonar.measures;
 
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Errors;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.Total_Unique_Errors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.UncaughtExceptionCount;
+
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.SwallowedExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.LogErrorCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.CustomExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.HTTPErrors;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.CaughtExceptionCount;
 
+import org.sonar.api.ce.measure.Component;
+import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
-public class MeausreDefinition implements MeasureComputer {
+public class MeasureDefinition implements MeasureComputer {
+  private static final Logger LOGGER = Loggers.get(MeasureDefinition.class);
 
   @Override
   public MeasureComputerDefinition define(MeasureComputerDefinitionContext def) {
     return def.newDefinitionBuilder()
-      .setOutputMetrics(Total_Errors.key(), UncaughtExceptionCount.key(), SwallowedExceptionCount.key(), LogErrorCount.key(), CustomExceptionCount.key(), HTTPErrors.key()).build();
+        .setOutputMetrics(Total_Errors.key(), CaughtExceptionCount.key(), UncaughtExceptionCount.key(),
+            SwallowedExceptionCount.key(), LogErrorCount.key(), CustomExceptionCount.key(), HTTPErrors.key())
+        .build();
   }
 
   @Override
   public void compute(MeasureComputerContext context) {
+    if (context.getComponent().getType() != Component.Type.FILE) {
+      context.addMeasure(SwallowedExceptionCount.getKey(), 1);
+      context.addMeasure(CaughtExceptionCount.key(), 2);
+      context.addMeasure(UncaughtExceptionCount.key(), 3);
+      context.addMeasure(CustomExceptionCount.key(), 4);
+      context.addMeasure(HTTPErrors.key(), 5);
+      context.addMeasure(Total_Errors.key(), 6);
+    }
   }
 }

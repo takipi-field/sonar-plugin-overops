@@ -19,7 +19,7 @@
  */
 package com.overops.plugins.sonar;
 
-import com.overops.plugins.sonar.measures.MeausreDefinition;
+import com.overops.plugins.sonar.measures.MeasureDefinition;
 import com.overops.plugins.sonar.measures.OOSensor;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
@@ -36,7 +36,7 @@ public class OverOpsPlugin implements Plugin {
 	@Override
 	public void define(Context context) {
 		// tutorial on measures
-		context.addExtensions(OverOpsMetrics.class, MeausreDefinition.class);
+		context.addExtensions(OverOpsMetrics.class, MeasureDefinition.class);
 
 		// tutorial on settings
 		context.addExtensions(OverOpsProperties.getProperties());
