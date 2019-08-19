@@ -21,21 +21,19 @@ package com.overops.plugins.sonar.measures;
 
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.UncaughtExceptionCount;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.SwallowedExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.LogErrorCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.CustomExceptionCount;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.HTTPErrors;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.CaughtExceptionCount;
 
+
+
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
-import org.sonar.api.measures.Metric;
 
 public class MeasureDefinition implements MeasureComputer {
   private static final Logger LOGGER = Loggers.get(MeasureDefinition.class);
@@ -71,12 +69,17 @@ public class MeasureDefinition implements MeasureComputer {
       for(Measure measure : context.getChildrenMeasures(HTTPErrors.key())){
         sum_HTTP += measure.getIntValue();
       }
+      int sum_Log = 0;
+      for(Measure measure : context.getChildrenMeasures(LogErrorCount.key())){
+        sum_Log += measure.getIntValue();
+      }
 
       context.addMeasure(SwallowedExceptionCount.key(), sum);
       context.addMeasure(UncaughtExceptionCount.getKey(), sum_Uncaught);
       context.addMeasure(CaughtExceptionCount.key(), sum_Caught);
       context.addMeasure(CustomExceptionCount.key(), sum_Custom);
       context.addMeasure(HTTPErrors.key(), sum_HTTP);
+      context.addMeasure(LogErrorCount.key(), sum_Log);
     }
   }
 }
