@@ -1,27 +1,19 @@
 package com.overops.plugins.sonar.measures;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.logging.Logger;
+import java.util.List;
 
-import com.takipi.api.client.RemoteApiClient;
-import com.takipi.api.client.request.event.EventSnapshotRequest;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.result.event.EventSnapshotResult;
 import com.takipi.api.client.result.event.EventsResult;
-import com.takipi.api.core.url.UrlClient.Response;
-
-import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
+import org.sonar.api.rules.RuleType;
 
 public class CountEvents {
     EventsResult events;// overops api data
 
     HashMap<String, Metric<Integer>> typeToMetricMap;
-    HashMap<String, ArrayList<String>> classNameToMethodNameMap;
-   
+
     public final String caughtException = "Caught Exception";
     public final String swallowedException = "Swallowed Exception";
     public final String uncaughtException = "Uncaught Exception";
@@ -33,29 +25,6 @@ public class CountEvents {
     public CountEvents(EventsResult result) {
         events = result;
         typeToMetricMap = ooErrorTypeToMetricSetUp();
-        classNameToMethodNameMap = new HashMap<>();
-    }
-
-    public void classToMethodBuilder() {
-        String shortEnedName;
-        for (EventResult event : events.events) {
-            if (event.error_location.class_name.contains(".")) {
-                int lastPeriod = event.error_location.class_name.lastIndexOf('.');
-                shortEnedName = event.error_location.class_name.substring(lastPeriod + 1,
-                        event.error_location.class_name.length());
-            } else {
-                shortEnedName = event.error_location.class_name;
-            }
-            if (classNameToMethodNameMap.containsKey(shortEnedName)) {
-                ArrayList<String> methodNames = classNameToMethodNameMap.remove(shortEnedName);
-                methodNames.add(event.error_location.method_name);
-                classNameToMethodNameMap.put(shortEnedName, methodNames);
-            } else {
-                ArrayList<String> methodNames = new ArrayList<>();
-                methodNames.add(event.error_location.method_name);
-                classNameToMethodNameMap.put(shortEnedName, methodNames);
-            }
-        }
     }
 
     // prepares map so no Metrics<Integer> are null which causes sonar to fail a
@@ -70,24 +39,6 @@ public class CountEvents {
         map.put(criticalExceptions, 0);
         return map;
     }
-
-    // This is for the project level view, the total Metric values of the project
-    public HashMap<String, Integer> countAllEventTypes() {
-        HashMap<String, Integer> errorCounts = new HashMap<>();
-        prepareMap(errorCounts);
-        // counts all the relevant errors
-        for (EventResult event : events.events) {
-            if (errorCounts.containsKey(event.type)) {
-                int count = errorCounts.remove(event.type);
-                count++;
-                errorCounts.put(event.type, count);
-            } else {
-                errorCounts.put(event.type, 1);
-            }
-        }
-        return errorCounts;
-    }
-
 
     // classname to methodname to count
     // type happen only counts
