@@ -21,6 +21,7 @@ public class CountEvents {
 
     HashMap<String, Metric<Integer>> typeToMetricMap;
     HashMap<String, ArrayList<String>> classNameToMethodNameMap;
+   
     public final String caughtException = "Caught Exception";
     public final String swallowedException = "Swallowed Exception";
     public final String uncaughtException = "Uncaught Exception";

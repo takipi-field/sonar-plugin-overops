@@ -79,6 +79,8 @@ public class OOSensor implements Sensor {
 
 	public HashMap<String, Integer> exceptions;
 
+	// This is displaying in logs(maven output) so when this sensor runs this gets
+	// displayed
 	@Override
 	public void describe(SensorDescriptor descriptor) {
 		descriptor.name(
@@ -101,13 +103,13 @@ public class OOSensor implements Sensor {
 			return;
 		}
 
-		APICLIENT = (RemoteApiClient) RemoteApiClient.newBuilder().setApiKey(APIKEY)
-				.setHostname(APPHOST).build();
+		APICLIENT = (RemoteApiClient) RemoteApiClient.newBuilder().setApiKey(APIKEY).setHostname(APPHOST).build();
+		//brings in all events based on time range
 		SummarizedView view = ViewUtil.getServiceViewByName(APICLIENT, ENVIDKEY, "All Events");
 		long days = config.getLong(OverOpsProperties.DAYS).orElse(1l);// default 1 day
 		FROM = TODAY.minus(days, ChronoUnit.DAYS);
 
-		//seperate cases if the user does not provide some information
+		// seperate cases if the user does not provide some information
 		if (DEPNAME == null && APPNAME == null) {
 			eventsVolumeRequest = buildEventsVolumeRequest(view);
 		} else if (APPNAME == null) {
@@ -136,12 +138,11 @@ public class OOSensor implements Sensor {
 		LOGGER.info("made it past classErrorCounts Map");
 		setFileContexts(context, classErrorCounts, countEvents);
 		LOGGER.info("Set the file contexts");
-		// getTinyLinkForEvent(eventId, envIdKey, apiClient, app_name);
-		// setMethodHighlights(context, countEvents);
+		// setMethodHighlights(context, countEvents); this does not work
 		createExternalIssuePerEvent(context);
 	}
 
-	public String shortenEventName(EventResult event){
+	public String shortenEventName(EventResult event) {
 		String shortEnedName;
 		if (event.error_location.class_name.contains(".")) {
 			int lastPeriod = event.error_location.class_name.lastIndexOf('.');
@@ -153,35 +154,38 @@ public class OOSensor implements Sensor {
 		return shortEnedName;
 	}
 
-	public String shortenFileName(InputFile file){
+	public String shortenFileName(InputFile file) {
 		return file.filename().substring(0, file.filename().lastIndexOf("."));
 	}
 
-	public void createExternalIssuePerEvent(SensorContext context){
+	public void createExternalIssuePerEvent(SensorContext context) {
 		FileSystem fs = context.fileSystem();
 		Iterable<InputFile> files = fs.inputFiles(fs.predicates().hasType(InputFile.Type.MAIN));
-		for(InputFile file : files){
+		for (InputFile file : files) {
 			int lineCount = 1;
 			String shortFileName = shortenFileName(file);
-			for(EventResult event : eventList.events){
+			for (EventResult event : eventList.events) {
 				String shortClassName = shortenEventName(event);
 				LOGGER.info("Full file name: " + file.filename());
 				LOGGER.info("Full class name: " + event.error_location.class_name);
 				LOGGER.info("Short file name: " + shortFileName);
 				LOGGER.info("Short class name: " + shortClassName);
-				if(shortClassName.equals(shortFileName)){
+				if (shortClassName.equals(shortFileName)) {
 					createIssue(context, file, event, lineCount);
 					lineCount++;
 				}
-			}	
+			}
 		}
 	}
+
 	/*
 	 * This method pulls in the tiny link based on the eventId passed
 	 */
 	private String getTinyLinkForEvent(String eventId) {
 		LOGGER.info("entering call for tinylinks");
-		EventSnapshotRequest request = EventSnapshotRequest.newBuilder().setEventId(eventId).setServiceId(ENVIDKEY).setFrom(TODAY.minus(2l, ChronoUnit.DAYS).toString()).setTo(TODAY.toString()).addApp(APPNAME).addDeployment(DEPNAME).build();
+		EventSnapshotRequest request = EventSnapshotRequest.newBuilder().setEventId(eventId).setServiceId(ENVIDKEY)
+				.setFrom(TODAY.minus(2l, ChronoUnit.DAYS).toString()).setTo(TODAY.toString()).addApp(APPNAME)
+				.addDeployment(DEPNAME).build();
 		Response<EventSnapshotResult> tinyLink = APICLIENT.get(request);
 		LOGGER.info(tinyLink.data.link);
 		return tinyLink.data.link;
@@ -218,66 +222,43 @@ public class OOSensor implements Sensor {
 				.addDeployment(DEPNAME).build();
 	}
 
-
 	/*
 	 * Major Problem 1: what is an offset exactly- seems to be a position inside of
 	 * the file that cannot be highlighted twice Major Problem 2: there can only be
 	 * one highlight per file...
 	 */
-	/*public void setMethodHighlights(SensorContext context, CountEvents eventCount) {
-		eventCount.classToMethodBuilder();
-		FileSystem fs = context.fileSystem();
-		Iterable<InputFile> files = fs.inputFiles(fs.predicates().hasType(InputFile.Type.MAIN));
-		// loop through all MAIN files
-
-		for (InputFile file : files) {
-			NewHighlighting highlight = context.newHighlighting().onFile(file);
-			String shortenedName = file.filename().substring(0, file.filename().indexOf('.'));
-			// if the shortnedName of the file is inside of the classError map
-			if (eventCount.classNameToMethodNameMap.containsKey(shortenedName)) {
-				// loop through all the methods that threw errors inside of this file
-				// highlight.onFile(file).highlight(range, TypeOfText.STRING);
-				LOGGER.info("Found the classname in the map: " + shortenedName);
-				BufferedReader reader;
-				try {
-					reader = new BufferedReader(new InputStreamReader(file.inputStream()));
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					LOGGER.info("Buffered reader in OOSensor.java messed up the Buffered reader aint working");
-					break;
-				}
-				for (String methodName : eventCount.classNameToMethodNameMap.get(shortenedName)) {
-					try {
-						int lineCount = 1; // default is line 1 i think
-						while (reader.ready()) {
-							String line = reader.readLine();
-							 if(line.contains(" " + methodName + "(")){
-							// this line is the one that should be adding the highlights but its not ugh
-							// I am not sure what offset is exactly but that 2nd 0 needs to change to the
-							// end of the statement but it throws an error generally when it is not 0
-							// meaning nothing to highlight
-							highlight.highlight(file.selectLine(lineCount), TypeOfText.CONSTANT);
-							LOGGER.info("line count : " + lineCount);
-							LOGGER.info(line);
-							break;
-							 }
-							 ++lineCount;
-						}
-						lineCount = 0;
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					break;
-				}
-				highlight.save();
-				try {
-					reader.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
-	}*/
+	/*
+	 * public void setMethodHighlights(SensorContext context, CountEvents
+	 * eventCount) { eventCount.classToMethodBuilder(); FileSystem fs =
+	 * context.fileSystem(); Iterable<InputFile> files =
+	 * fs.inputFiles(fs.predicates().hasType(InputFile.Type.MAIN)); // loop through
+	 * all MAIN files
+	 * 
+	 * for (InputFile file : files) { NewHighlighting highlight =
+	 * context.newHighlighting().onFile(file); String shortenedName =
+	 * file.filename().substring(0, file.filename().indexOf('.')); // if the
+	 * shortnedName of the file is inside of the classError map if
+	 * (eventCount.classNameToMethodNameMap.containsKey(shortenedName)) { // loop
+	 * through all the methods that threw errors inside of this file //
+	 * highlight.onFile(file).highlight(range, TypeOfText.STRING);
+	 * LOGGER.info("Found the classname in the map: " + shortenedName);
+	 * BufferedReader reader; try { reader = new BufferedReader(new
+	 * InputStreamReader(file.inputStream())); } catch (IOException e1) {
+	 * e1.printStackTrace(); LOGGER.
+	 * info("Buffered reader in OOSensor.java messed up the Buffered reader aint working"
+	 * ); break; } for (String methodName :
+	 * eventCount.classNameToMethodNameMap.get(shortenedName)) { try { int lineCount
+	 * = 1; // default is line 1 i think while (reader.ready()) { String line =
+	 * reader.readLine(); if(line.contains(" " + methodName + "(")){ // this line is
+	 * the one that should be adding the highlights but its not ugh // I am not sure
+	 * what offset is exactly but that 2nd 0 needs to change to the // end of the
+	 * statement but it throws an error generally when it is not 0 // meaning
+	 * nothing to highlight highlight.highlight(file.selectLine(lineCount),
+	 * TypeOfText.CONSTANT); LOGGER.info("line count : " + lineCount);
+	 * LOGGER.info(line); break; } ++lineCount; } lineCount = 0; } catch
+	 * (IOException e) { e.printStackTrace(); } break; } highlight.save(); try {
+	 * reader.close(); } catch (IOException e1) { e1.printStackTrace(); } } } }
+	 */
 
 	public void setFileContexts(SensorContext context, HashMap<String, HashMap<String, Integer>> classErrorCountMap,
 			CountEvents eventCount) {
@@ -303,7 +284,7 @@ public class OOSensor implements Sensor {
 			}
 		}
 	}
-
+// BNY uses the <version> tag in the pom.xml
 	public String setDeploymentName() {
 		String ret = "";
 		MavenXpp3Reader reader = new MavenXpp3Reader();
