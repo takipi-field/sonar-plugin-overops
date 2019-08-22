@@ -80,8 +80,17 @@ public class OverOpsMetrics implements Metrics {
     .setBestValue(0.0)
     .create();
 
+  public static final Metric<Integer> CriticalExceptionCount = new Metric.Builder("overops_critical_exception", "Critical Exception", Metric.ValueType.INT)
+  .setDescription("Critical Exception Count")
+  .setQualitative(true)
+  .setDirection(Metric.DIRECTION_WORST)
+  .setDomain(OO_DOMAIN)
+  .setBestValue(0.0)
+  .create();
+
+
   @Override
   public List<Metric> getMetrics() {
-    return asList(UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors, CaughtExceptionCount);
+    return asList(UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors, CaughtExceptionCount, CriticalExceptionCount);
   }
 }

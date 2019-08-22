@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import com.takipi.api.client.RemoteApiClient;
+import com.takipi.api.client.request.event.EventSnapshotRequest;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.result.event.EventSnapshotResult;
 import com.takipi.api.client.result.event.EventsResult;
+import com.takipi.api.core.url.UrlClient.Response;
 
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.fs.FileSystem;
@@ -23,6 +27,7 @@ public class CountEvents {
     public final String loggedError = "Logged Error";
     public final String customEvent = "Custom Event";
     public final String httpError = "HTTP Error";
+    public final String criticalExceptions = "Critical Exception";
 
     public CountEvents(EventsResult result) {
         events = result;
@@ -33,10 +38,11 @@ public class CountEvents {
     public void classToMethodBuilder() {
         String shortEnedName;
         for (EventResult event : events.events) {
-            if(event.error_location.class_name.contains(".")){
+            if (event.error_location.class_name.contains(".")) {
                 int lastPeriod = event.error_location.class_name.lastIndexOf('.');
-                shortEnedName = event.error_location.class_name.substring(lastPeriod+1, event.error_location.class_name.length());
-            }else{
+                shortEnedName = event.error_location.class_name.substring(lastPeriod + 1,
+                        event.error_location.class_name.length());
+            } else {
                 shortEnedName = event.error_location.class_name;
             }
             if (classNameToMethodNameMap.containsKey(shortEnedName)) {
@@ -60,6 +66,7 @@ public class CountEvents {
         map.put(loggedError, 0);
         map.put(customEvent, 0);
         map.put(httpError, 0);
+        map.put(criticalExceptions, 0);
         return map;
     }
 
@@ -71,7 +78,8 @@ public class CountEvents {
         for (EventResult event : events.events) {
             if (errorCounts.containsKey(event.type)) {
                 int count = errorCounts.remove(event.type);
-                errorCounts.put(event.type, ++count);
+                count++;
+                errorCounts.put(event.type, count);
             } else {
                 errorCounts.put(event.type, 1);
             }
@@ -79,7 +87,8 @@ public class CountEvents {
         return errorCounts;
     }
 
-    // This method calculates how many times the event with the same class name and
+
+    // classname to methodname to count
     // type happen only counts
     public HashMap<String, HashMap<String, Integer>> countClassErrors() {
         HashMap<String, HashMap<String, Integer>> classErrorCounts = new HashMap<String, HashMap<String, Integer>>();
@@ -87,19 +96,29 @@ public class CountEvents {
             // classes first event in list ex result.error_location.class_name=
             // COM.EMPIRE.SHOPPINGCART.MANAGER.CUSTOMEVENTMANAGER reduced to just classname
             // no extension
-            String eventClassNameShortened = result.error_location.class_name.substring(result.error_location.class_name.lastIndexOf('.') + 1, result.error_location.class_name.length());
+
+            String eventClassNameShortened = "";
+            if (result.error_location.class_name.contains(".")) {
+                eventClassNameShortened = result.error_location.class_name.substring(
+                        result.error_location.class_name.lastIndexOf('.') + 1,
+                        result.error_location.class_name.length());
+            } else {
+                eventClassNameShortened = result.error_location.class_name;
+            }
             if (!classErrorCounts.containsKey(eventClassNameShortened)) {
                 HashMap<String, Integer> errorToCount = new HashMap<>();
                 errorToCount = prepareMap(errorToCount);
                 int count = errorToCount.remove(result.type);
-                errorToCount.put(result.type, ++count);
+                count++;
+                errorToCount.put(result.type, count);
                 classErrorCounts.put(eventClassNameShortened, errorToCount);
             } else {
                 HashMap<String, Integer> errorCount = classErrorCounts.remove(eventClassNameShortened);
                 // iterative variable has the same class as one already found and if it has the
                 // same type of error increment count
                 int count = errorCount.remove(result.type);
-                errorCount.put(result.type, ++count);
+                count++;
+                errorCount.put(result.type, count);
                 classErrorCounts.put(eventClassNameShortened, errorCount);
             }
         }
@@ -115,6 +134,7 @@ public class CountEvents {
         exceptions.put(loggedError, OverOpsMetrics.LogErrorCount);
         exceptions.put(swallowedException, OverOpsMetrics.SwallowedExceptionCount);
         exceptions.put(uncaughtException, OverOpsMetrics.UncaughtExceptionCount);
+        exceptions.put(criticalExceptions, OverOpsMetrics.CriticalExceptionCount);
         return exceptions;
     }
 
