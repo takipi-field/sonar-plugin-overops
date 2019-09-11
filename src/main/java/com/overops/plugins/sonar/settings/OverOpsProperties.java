@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
+import org.sonar.api.config.PropertyDefinition.Builder;
 import org.sonar.api.resources.Qualifiers;
 
 import static java.util.Arrays.asList;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 
 public class OverOpsProperties {
 
+	public static final String SONAR_OVEROPS_VIEWID = "sonar.overops.viewid";
 	public static String ooURL = "sonar.overops.url";
 	public static String apiKEY = "sonar.overops.apikey";
 	public static String ooENVID = "sonar.overops.environmentId";
@@ -47,7 +49,11 @@ public class OverOpsProperties {
 						.subCategory(SUBCATEGORY).onQualifiers(Qualifiers.APP).type(PropertyType.STRING).index(5)
 						.build(),
 				PropertyDefinition.builder(depNAME).name("Deployment Name").category(CATEGORY).subCategory(SUBCATEGORY)
-						.onQualifiers(Qualifiers.APP).type(PropertyType.STRING).index(6).build());
+						.onQualifiers(Qualifiers.APP).type(PropertyType.STRING).index(6).build(),
+
+				PropertyDefinition.builder(SONAR_OVEROPS_VIEWID).name("View")
+						.description("View name").category(CATEGORY).subCategory(SUBCATEGORY)
+						.onQualifiers(Qualifiers.APP).type(PropertyType.STRING).index(7).build());
 
 	}
 
