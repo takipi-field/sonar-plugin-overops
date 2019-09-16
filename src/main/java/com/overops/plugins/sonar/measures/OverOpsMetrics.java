@@ -20,77 +20,78 @@
 package com.overops.plugins.sonar.measures;
 
 import java.util.List;
-import org.sonar.api.measures.CoreMetrics;
+
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
 
 import static java.util.Arrays.asList;
+
 /*
-*Class is strictly for defining Metrics to display, all of the metrics will be accessible for any of the graphs once defined and populated
-*/
+ *Class is strictly for defining Metrics to display, all of the metrics will be accessible for any of the graphs once defined and populated
+ */
 public class OverOpsMetrics implements Metrics {
 
-  public static String OO_DOMAIN = "OverOps Exceptions";
+    public static String OVER_OPS_DOMAIN = "OverOps Exceptions";
 
     public static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
-    .setDescription("Caught Exception Count")
-    .setQualitative(true)
-    .setDirection(Metric.DIRECTION_WORST)
-    .setDomain(OO_DOMAIN)
-    .setBestValue(0.0)
-    .create();
+            .setDescription("Caught Exception Count")
+            .setQualitative(true)
+            .setDirection(Metric.DIRECTION_WORST)
+            .setDomain(OVER_OPS_DOMAIN)
+            .setBestValue(0.0)
+            .create();
 
     public static final Metric<Integer> UncaughtExceptionCount = new Metric.Builder("overops_uncaught_exceptions", "Uncaught Exceptions", Metric.ValueType.INT)
-    .setDescription("Number of Uncaught Exception")
-    .setQualitative(true)
-    .setDirection(Metric.DIRECTION_WORST)
-    .setDomain(OO_DOMAIN)
-    .setBestValue(0.0)
-    .create();
-    
+            .setDescription("Number of Uncaught Exception")
+            .setQualitative(true)
+            .setDirection(Metric.DIRECTION_WORST)
+            .setDomain(OVER_OPS_DOMAIN)
+            .setBestValue(0.0)
+            .create();
+
     public static final Metric<Integer> SwallowedExceptionCount = new Metric.Builder("overops_swallowed_exceptions", "Swallowed Exceptions", Metric.ValueType.INT)
-    .setDescription("Swallowed Exception Count")
-    .setQualitative(true)
-    .setDirection(Metric.DIRECTION_WORST)
-    .setDomain(OO_DOMAIN)
-    .setBestValue(0.0)
-    .create();
+            .setDescription("Swallowed Exception Count")
+            .setQualitative(true)
+            .setDirection(Metric.DIRECTION_WORST)
+            .setDomain(OVER_OPS_DOMAIN)
+            .setBestValue(0.0)
+            .create();
 
     public static final Metric<Integer> LogErrorCount = new Metric.Builder("overops_log_exceptions", "Log Errors", Metric.ValueType.INT)
-    .setDescription("Log Error Count")
-    .setQualitative(true)
-    .setDirection(Metric.DIRECTION_WORST)
-    .setDomain(OO_DOMAIN)
-    .setBestValue(0.0)
-    .create();
+            .setDescription("Log Error Count")
+            .setQualitative(true)
+            .setDirection(Metric.DIRECTION_WORST)
+            .setDomain(OVER_OPS_DOMAIN)
+            .setBestValue(0.0)
+            .create();
 
     public static final Metric<Integer> CustomExceptionCount = new Metric.Builder("overops_custom_errors", "Custom Errors", Metric.ValueType.INT)
-    .setDescription("Custom Error Count")
-    .setQualitative(true)
-    .setDirection(Metric.DIRECTION_WORST)
-    .setDomain(OO_DOMAIN)
-    .setBestValue(0.0)
-    .create();
+            .setDescription("Custom Error Count")
+            .setQualitative(true)
+            .setDirection(Metric.DIRECTION_WORST)
+            .setDomain(OVER_OPS_DOMAIN)
+            .setBestValue(0.0)
+            .create();
 
     public static final Metric<Integer> HTTPErrors = new Metric.Builder("overops_http_errors", "HTTP Errors", Metric.ValueType.INT)
-    .setDescription("HTTP Error Count")
-    .setQualitative(true)
-    .setDirection(Metric.DIRECTION_WORST)
-    .setDomain(OO_DOMAIN)
-    .setBestValue(0.0)
-    .create();
+            .setDescription("HTTP Error Count")
+            .setQualitative(true)
+            .setDirection(Metric.DIRECTION_WORST)
+            .setDomain(OVER_OPS_DOMAIN)
+            .setBestValue(0.0)
+            .create();
 
-  public static final Metric<Integer> CriticalExceptionCount = new Metric.Builder("overops_critical_exception", "Critical Exception", Metric.ValueType.INT)
-  .setDescription("Critical Exception Count")
-  .setQualitative(true)
-  .setDirection(Metric.DIRECTION_WORST)
-  .setDomain(OO_DOMAIN)
-  .setBestValue(0.0)
-  .create();
+    public static final Metric<Integer> CriticalExceptionCount = new Metric.Builder("overops_critical_exception", "Critical Exception", Metric.ValueType.INT)
+            .setDescription("Critical Exception Count")
+            .setQualitative(true)
+            .setDirection(Metric.DIRECTION_WORST)
+            .setDomain(OVER_OPS_DOMAIN)
+            .setBestValue(0.0)
+            .create();
 
 
-  @Override
-  public List<Metric> getMetrics() {
-    return asList(UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors, CaughtExceptionCount, CriticalExceptionCount);
-  }
+    @Override
+    public List<Metric> getMetrics() {
+        return asList(UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors, CaughtExceptionCount, CriticalExceptionCount);
+    }
 }

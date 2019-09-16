@@ -20,7 +20,7 @@
 package com.overops.plugins.sonar;
 
 import com.overops.plugins.sonar.measures.MeasureDefinition;
-import com.overops.plugins.sonar.measures.OOSensor;
+import com.overops.plugins.sonar.measures.OverOpsSensor;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
 
@@ -41,7 +41,7 @@ public class OverOpsPlugin implements Plugin {
 		// tutorial on settings
 		context.addExtensions(OverOpsProperties.getProperties());
 		
-		context.addExtension(OOSensor.class);
+		context.addExtension(OverOpsSensor.class);
 	}
 
 }
