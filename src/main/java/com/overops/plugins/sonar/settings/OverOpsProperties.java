@@ -16,7 +16,7 @@ public class OverOpsProperties {
 	public static final String SONAR_OVEROPS_API_HOST = "sonar.overops.apiHost";
 	public static final String SONAR_OVEROPS_API_KEY = "sonar.overops.apikey";
 	public static final String SONAR_OVEROPS_ENVIRONMENT_ID = "sonar.overops.environmentId";
-	public static final String SONAR_OVEROPS_APP_NAME = "sonar.overops.applicaitonName";
+	public static final String SONAR_OVEROPS_APP_NAME = "sonar.overops.applicationName";
 	public static final String SONAR_OVEROPS_DEP_NAME = "sonar.overops.deploymentName";
 	public static final String SONAR_OVEROPS_SPAN_DAYS = "sonar.overops.spanDays";
 
