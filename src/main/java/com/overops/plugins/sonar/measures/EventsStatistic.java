@@ -1,52 +1,19 @@
 package com.overops.plugins.sonar.measures;
 
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.result.event.EventsResult;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.overops.plugins.sonar.measures.OverOpsSensor.convertInputFileToClassName;
 
 public class EventsStatistic {
-    private EventsResult events;
-    private HashMap<String, Metric<Integer>> typeToMetricMap;
-
-    public final String caughtException = "Caught Exception";
-    public final String swallowedException = "Swallowed Exception";
-    public final String uncaughtException = "Uncaught Exception";
-    public final String loggedError = "Logged Error";
-    public final String customEvent = "Custom Event";
-    public final String httpError = "HTTP Error";
-    public final String criticalExceptions = "Critical Exception";
-
-    private Stat stat = new Stat();
-
-    public EventsStatistic(EventsResult result) {
-        events = result;
-        typeToMetricMap = initTypeToMetricMap();
-    }
-
-    public HashMap<String, Metric<Integer>> initTypeToMetricMap() {
-        HashMap<String, Metric<Integer>> exceptions = new HashMap<>();
-        exceptions.put(caughtException, OverOpsMetrics.CaughtExceptionCount);
-        exceptions.put(customEvent, OverOpsMetrics.CustomExceptionCount);
-        exceptions.put(httpError, OverOpsMetrics.HTTPErrors);
-        exceptions.put(loggedError, OverOpsMetrics.LogErrorCount);
-        exceptions.put(swallowedException, OverOpsMetrics.SwallowedExceptionCount);
-        exceptions.put(uncaughtException, OverOpsMetrics.UncaughtExceptionCount);
-        exceptions.put(criticalExceptions, OverOpsMetrics.CriticalExceptionCount);
-        return exceptions;
-    }
-
     private static final Logger LOGGER = Loggers.get(EventsStatistic.class);
-
-    public Metric<Integer> getMetric(String exceptionType) {
-         return typeToMetricMap.get(exceptionType);
-    }
+    private Stat stat = new Stat();
 
     public void add(InputFile file, EventResult event) {
         String key = convertInputFileToClassName(file);

@@ -18,11 +18,8 @@ public class OverOpsProperties {
 	public static final String SONAR_OVEROPS_ENVIRONMENT_ID = "sonar.overops.environmentId";
 	public static final String SONAR_OVEROPS_APP_NAME = "sonar.overops.applicaitonName";
 	public static final String SONAR_OVEROPS_DEP_NAME = "sonar.overops.deploymentName";
-	public static final String SONAR_OVEROPS_EVENTID = "sonar.overops.eventId";
-	public static final String SONAR_OVEROPS_VERSION_NUM = "sonar.overops.versionNum";
 	public static final String SONAR_OVEROPS_SPAN_DAYS = "sonar.overops.spanDays";
 
-	/* The Settings Panel inside of the administration column */
 	public static List<PropertyDefinition> getProperties() {
 		return Arrays.asList(
 				PropertyDefinition.builder(SONAR_OVEROPS_API_KEY)
@@ -30,6 +27,7 @@ public class OverOpsProperties {
 						.description("OverOps Api Key found in Account")
                         .category(CATEGORY)
                         .subCategory(SUBCATEGORY)
+						.onQualifiers(Qualifiers.PROJECT)
 						.type(PropertyType.PASSWORD)
                         .index(1)
                         .build(),
@@ -40,6 +38,7 @@ public class OverOpsProperties {
 						.defaultValue("https://api.overops.com")
                         .category(CATEGORY)
                         .subCategory(SUBCATEGORY)
+						.onQualifiers(Qualifiers.PROJECT)
 						.type(PropertyType.STRING)
                         .index(2)
                         .build(),
@@ -48,6 +47,7 @@ public class OverOpsProperties {
                         .name("OverOps Environment ID")
                         .category(CATEGORY)
 						.subCategory(SUBCATEGORY)
+						.onQualifiers(Qualifiers.PROJECT)
                         .type(PropertyType.STRING)
                         .index(3)
                         .build(),
@@ -57,6 +57,7 @@ public class OverOpsProperties {
                         .defaultValue("1")
                         .category(CATEGORY)
 						.subCategory(SUBCATEGORY)
+						.onQualifiers(Qualifiers.PROJECT)
                         .type(PropertyType.INTEGER)
                         .index(4)
 						.description("Enter the amount of days to pull back default is 1")
@@ -66,7 +67,7 @@ public class OverOpsProperties {
                         .name("Application Name")
                         .category(CATEGORY)
 						.subCategory(SUBCATEGORY)
-                        .onQualifiers(Qualifiers.APP)
+                        .onQualifiers(Qualifiers.PROJECT)
                         .type(PropertyType.STRING)
                         .index(5)
 						.build(),
@@ -75,7 +76,7 @@ public class OverOpsProperties {
                         .name("Deployment Name")
                         .category(CATEGORY)
                         .subCategory(SUBCATEGORY)
-						.onQualifiers(Qualifiers.APP)
+						.onQualifiers(Qualifiers.PROJECT)
                         .type(PropertyType.STRING)
                         .index(6)
                         .build(),
@@ -85,7 +86,7 @@ public class OverOpsProperties {
 						.description("View name")
                         .category(CATEGORY)
                         .subCategory(SUBCATEGORY)
-						.onQualifiers(Qualifiers.APP)
+						.onQualifiers(Qualifiers.PROJECT)
                         .type(PropertyType.STRING)
                         .index(7)
                         .build());

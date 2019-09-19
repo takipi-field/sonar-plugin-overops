@@ -35,21 +35,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 
-/*
- *This class is responsible for calling anythign relating to pulling OverOps data and aggregating some counts
- *this classes lifecycle is heavily limited so anything brought in that is not saved will be gone before Sonar begins to display data
- *currently saving onto the context.module(). On a file is preferred because it will persist but as of now we dont have line numbers.
- */
-public class OverOpsSensor implements Sensor {
-    // the event type labels
-    public static final String CAUGHT_EXCEPTION = "Caught Exception";
-    public static final String SWALLOWED_EXCEPTION = "Swallowed Exception";
-    public static final String UNCAUGHT_EXCEPTION = "Uncaught Exception";
-    public static final String LOGGED_ERROR = "Logged Error";
-    public static final String CUSTOM_EVENT = "Custom Event";
-    public static final String HTTP_ERROR = "HTTP Error";
-    public static final String CRITICAL_EXCEPTION = "Critical Exception";
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.*;
 
+public class OverOpsSensor implements Sensor {
     private static final Logger LOGGER = Loggers.get(OverOpsSensor.class);
     public static final long DEFAULT_SPAN_DAYS = 1l;
     public static final String DEFAULT_VIEWID = "All Exceptions";
@@ -69,8 +57,6 @@ public class OverOpsSensor implements Sensor {
     public HashMap<String, Integer> exceptions;
     private String viewId;
 
-    // This is displaying in logs(maven output) so when this sensor runs this gets
-    // displayed
     @Override
     public void describe(SensorDescriptor descriptor) {
         descriptor.name(
@@ -161,7 +147,7 @@ public class OverOpsSensor implements Sensor {
 
     public void applyOverOpsEvent(SensorContext context, EventsResult volumeResult) {
         FileSystem fs = context.fileSystem();
-        EventsStatistic eventsStatistic = new EventsStatistic(volumeResult);
+        EventsStatistic eventsStatistic = new EventsStatistic();
 
         Iterable<InputFile> files = fs.inputFiles(fs.predicates().hasType(InputFile.Type.MAIN));
         for (InputFile file : files) {
@@ -178,7 +164,7 @@ public class OverOpsSensor implements Sensor {
         for (EventsStatistic.ClassStat classStat : eventsStatistic.getStatistic()) {
             for (String eventType : classStat.typeToEventStat.keySet()) {
 
-                context.<Integer>newMeasure().forMetric(eventsStatistic.getMetric(eventType)).on(classStat.file)
+                context.<Integer>newMeasure().forMetric(getMetric(eventType)).on(classStat.file)
                         .withValue(classStat.typeToEventStat.get(eventType).total).save();
 
                 LOGGER.info("     On " + classStat.file.filename() +
@@ -240,13 +226,14 @@ public class OverOpsSensor implements Sensor {
                 .severity(Severity.INFO).save();
 
         NewExternalIssue newIssue = context.newExternalIssue();
+        OverOpsMetrics.OverOpsMetric overOpsMetric = getOverOpsMetric(event.type);
         newIssue.engineId(OVER_OPS_ENGINE).ruleId(event.id)
                 .at(newIssue.newLocation().on(file).at(file.selectLine(method_position))
                         .message( issueTitle + ". Click \"See Rule\" for more details")
                 )
-                .severity(getSeverity(event.type))
+                .severity(overOpsMetric.severity)
                 .ruleId(ruleId)
-                .type(getType(event.type)).save();
+                .type(overOpsMetric.ruleType).save();
     }
 
     private String getARCLinkForEvent(String eventId) {
@@ -254,26 +241,6 @@ public class OverOpsSensor implements Sensor {
         DateTime from = today.minusDays((int)daysSpan);
         String arcLink = EventUtil.getEventRecentLink(apiClient, environmentKey, eventId, from, today, Arrays.asList(applicationName), Arrays.asList(), Arrays.asList(deploymentName));
         return arcLink;
-    }
-
-    private RuleType getType(String type) {
-        switch (type) {
-            case LOGGED_ERROR:
-            case CAUGHT_EXCEPTION:
-                return RuleType.CODE_SMELL;
-            default:
-                return RuleType.BUG;
-        }
-    }
-
-    private Severity getSeverity(String type) {
-        switch (type) {
-            case LOGGED_ERROR:
-            case HTTP_ERROR:
-                return Severity.MINOR;
-            default:
-                return Severity.MAJOR;
-        }
     }
 
     public String getDeploymentNameFromPomFile() {
