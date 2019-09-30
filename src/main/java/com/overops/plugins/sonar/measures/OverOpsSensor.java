@@ -15,6 +15,8 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
@@ -30,12 +32,11 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
 import java.io.FileReader;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.*;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getMetric;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsMetric;
 
 public class OverOpsSensor implements Sensor {
     private static final Logger LOGGER = Loggers.get(OverOpsSensor.class);
@@ -49,13 +50,15 @@ public class OverOpsSensor implements Sensor {
     private String apiKey;
     private String deploymentName;
     private String applicationName;
-    private Instant to;
-    private Instant from;
+    private DateTime to;
+    private DateTime from;
+    private DateTimeFormatter formatter;
     private RemoteApiClient apiClient;
     private long daysSpan;
 
     public HashMap<String, Integer> exceptions;
     private String viewId;
+
 
     @Override
     public void describe(SensorDescriptor descriptor) {
@@ -64,7 +67,7 @@ public class OverOpsSensor implements Sensor {
     }
 
     @Override
-    public void execute(SensorContext context) {
+    public void execute(SensorContext context){
         Configuration config = context.config();
         getConfigProperties(config);
 
@@ -113,8 +116,8 @@ public class OverOpsSensor implements Sensor {
     }
 
     private EventsVolumeRequest getVolumeRequest(SummarizedView view) {
-        EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setServiceId(environmentKey.toUpperCase()).setFrom(from.toString())
-                .setTo(to.toString()).setViewId(view.id).setVolumeType(VolumeType.all).setIncludeStacktrace(true);
+        EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setServiceId(environmentKey.toUpperCase()).setFrom(from.toString(formatter))
+                .setTo(to.toString(formatter)).setViewId(view.id).setVolumeType(VolumeType.hits).setIncludeStacktrace(true);
 
         if (StringUtils.isNotEmpty(deploymentName)) builder.addDeployment(deploymentName);
         if (StringUtils.isNotEmpty(applicationName)) builder.addApp(applicationName);
@@ -130,8 +133,10 @@ public class OverOpsSensor implements Sensor {
         applicationName = config.get(OverOpsProperties.SONAR_OVEROPS_APP_NAME).orElse(null);
         daysSpan = config.getLong(OverOpsProperties.SONAR_OVEROPS_SPAN_DAYS).orElse(DEFAULT_SPAN_DAYS);
         viewId = config.get(OverOpsProperties.SONAR_OVEROPS_VIEW_ID).orElse(DEFAULT_VIEWID);
-        to = Instant.now();
-        from = to.minus(daysSpan, ChronoUnit.DAYS);
+
+        to = DateTime.now();
+        from = to.minusDays((int) daysSpan);
+        formatter = ISODateTimeFormat.dateTime().withZoneUTC();
 
         logConfigData();
     }
@@ -196,11 +201,10 @@ public class OverOpsSensor implements Sensor {
         boolean isMethodPresent = file.lines() >= method_position;
         method_position = isMethodPresent ? method_position : 1;
         String arcLink = getARCLinkForEvent(event.id);
-
         NewAdHocRule newAdHocRule = context.newAdHocRule();
-        String issueTitle = "A " + event.name +" has been detected " + lineStat.total + (lineStat.total > 1 ? " times" : "time");
-        String name = "Details for  a " + event.name +" that was detected " + lineStat.total + (lineStat.total > 1 ? " times" : "time");;
-        String ruleId = environmentKey + "." + from.getNano() + "." + lineStat.event.type + "." +lineStat.event.id;
+        String issueTitle = "A " + event.name +" has been detected " + lineStat.total + (lineStat.total > 1 ? " times" : " time");
+        String name = "Details for  a " + event.name +" that was detected " + lineStat.total + (lineStat.total > 1 ? " times" : " time");;
+        String ruleId = environmentKey + "." + from.getMillis() + "." + lineStat.event.type + "." +lineStat.event.id;
 
         TextBuilder textBuilder = new TextBuilder();
         if (!isMethodPresent) {
@@ -209,9 +213,12 @@ public class OverOpsSensor implements Sensor {
                     .add("</div>")
                     .addEnter();
         }
+
+        String nameOfLink = event.name + " detected " + lineStat.total + (lineStat.total > 1 ? " times" : " time");
+
         String description = textBuilder
                 .addBold("Rich details can be found ")
-                .addLink(arcLink, event.name + " detected " + lineStat.total + (lineStat.total > 1 ? " times" : "time"))
+                .addLink(arcLink, nameOfLink)
                 .addEnter()
                 .addBold("Stack trace :")
                 .addEnter()
@@ -237,9 +244,29 @@ public class OverOpsSensor implements Sensor {
     }
 
     private String getARCLinkForEvent(String eventId) {
-        DateTime today = DateTime.now();
-        DateTime from = today.minusDays((int)daysSpan);
-        String arcLink = EventUtil.getEventRecentLink(apiClient, environmentKey, eventId, from, today, Arrays.asList(applicationName), Arrays.asList(), Arrays.asList(deploymentName));
+        String arcLink = null;
+        try { arcLink = EventUtil.getEventRecentLinkDefault(apiClient, environmentKey, eventId, from, to,
+                    Arrays.asList(applicationName), Arrays.asList(), Arrays.asList(deploymentName),
+                    (int) (1440 * daysSpan)
+
+
+        );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (arcLink == null) {
+            DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
+            arcLink = " WE detect null arc EventUtil.getEventRecentLinkDefault( apiClient, \"" +
+                    "\" ,  \"" + environmentKey +
+                    "\" ,  \"" + eventId +
+                    "\" ,  \"" + from.toString(formatter) +
+                    "\" ,  \"" + to.toString(formatter) +
+                    "\" , Arrays.asList(\"" + applicationName +
+                    "\"), Arrays.asList(),  Arrays.asList(\"" + deploymentName + "\")" +
+                    ", " + String.valueOf((int) (1440 * daysSpan)) + " )";
+            LOGGER.info(arcLink);
+        }
+
         return arcLink;
     }
 

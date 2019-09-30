@@ -20,11 +20,9 @@
 package com.overops.plugins.sonar;
 
 import com.overops.plugins.sonar.measures.MeasureDefinition;
-import com.overops.plugins.sonar.measures.OverOpsSensor;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
+import com.overops.plugins.sonar.measures.OverOpsSensor;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
-
-
 import org.sonar.api.Plugin;
 
 public class OverOpsPlugin implements Plugin {
