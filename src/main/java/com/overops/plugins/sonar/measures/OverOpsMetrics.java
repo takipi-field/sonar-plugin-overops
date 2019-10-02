@@ -30,9 +30,9 @@ import static java.util.Arrays.asList;
 
 public class OverOpsMetrics implements Metrics {
 
-    public static String OVER_OPS_DOMAIN = "OverOps Exceptions";
+    private static String OVER_OPS_DOMAIN = "OverOps Events";
 
-    public static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
+    private static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
             .setDescription("Caught Exception Count")
             .setQualitative(true)
             .setDirection(Metric.DIRECTION_WORST)
@@ -40,7 +40,7 @@ public class OverOpsMetrics implements Metrics {
             .setBestValue(0.0)
             .create();
 
-    public static final Metric<Integer> UncaughtExceptionCount = new Metric.Builder("overops_uncaught_exceptions", "Uncaught Exceptions", Metric.ValueType.INT)
+    private static final Metric<Integer> UncaughtExceptionCount = new Metric.Builder("overops_uncaught_exceptions", "Uncaught Exceptions", Metric.ValueType.INT)
             .setDescription("Number of Uncaught Exception")
             .setQualitative(true)
             .setDirection(Metric.DIRECTION_WORST)
@@ -48,7 +48,7 @@ public class OverOpsMetrics implements Metrics {
             .setBestValue(0.0)
             .create();
 
-    public static final Metric<Integer> SwallowedExceptionCount = new Metric.Builder("overops_swallowed_exceptions", "Swallowed Exceptions", Metric.ValueType.INT)
+    private static final Metric<Integer> SwallowedExceptionCount = new Metric.Builder("overops_swallowed_exceptions", "Swallowed Exceptions", Metric.ValueType.INT)
             .setDescription("Swallowed Exception Count")
             .setQualitative(true)
             .setDirection(Metric.DIRECTION_WORST)
@@ -56,7 +56,7 @@ public class OverOpsMetrics implements Metrics {
             .setBestValue(0.0)
             .create();
 
-    public static final Metric<Integer> LogErrorCount = new Metric.Builder("overops_log_exceptions", "Log Errors", Metric.ValueType.INT)
+    private static final Metric<Integer> LogErrorCount = new Metric.Builder("overops_log_exceptions", "Log Errors", Metric.ValueType.INT)
             .setDescription("Log Error Count")
             .setQualitative(true)
             .setDirection(Metric.DIRECTION_WORST)
@@ -64,7 +64,7 @@ public class OverOpsMetrics implements Metrics {
             .setBestValue(0.0)
             .create();
 
-    public static final Metric<Integer> CustomExceptionCount = new Metric.Builder("overops_custom_errors", "Custom Errors", Metric.ValueType.INT)
+    private static final Metric<Integer> CustomExceptionCount = new Metric.Builder("overops_custom_errors", "Custom Errors", Metric.ValueType.INT)
             .setDescription("Custom Error Count")
             .setQualitative(true)
             .setDirection(Metric.DIRECTION_WORST)
@@ -72,7 +72,7 @@ public class OverOpsMetrics implements Metrics {
             .setBestValue(0.0)
             .create();
 
-    public static final Metric<Integer> HTTPErrors = new Metric.Builder("overops_http_errors", "HTTP Errors", Metric.ValueType.INT)
+    private static final Metric<Integer> HTTPErrors = new Metric.Builder("overops_http_errors", "HTTP Errors", Metric.ValueType.INT)
             .setDescription("HTTP Error Count")
             .setQualitative(true)
             .setDirection(Metric.DIRECTION_WORST)
@@ -80,8 +80,24 @@ public class OverOpsMetrics implements Metrics {
             .setBestValue(0.0)
             .create();
 
-    public static final Metric<Integer> CriticalExceptionCount = new Metric.Builder("overops_critical_exception", "Critical Exception", Metric.ValueType.INT)
+    private static final Metric<Integer> CriticalExceptionCount = new Metric.Builder("overops_critical_exception", "Critical Exceptions", Metric.ValueType.INT)
             .setDescription("Critical Exception Count")
+            .setQualitative(true)
+            .setDirection(Metric.DIRECTION_WORST)
+            .setDomain(OVER_OPS_DOMAIN)
+            .setBestValue(0.0)
+            .create();
+
+    private static final Metric<Integer> LoggedWarningCount = new Metric.Builder("overops_logged_warning", "Logged Warnings", Metric.ValueType.INT)
+            .setDescription("Logged Warning Count")
+            .setQualitative(true)
+            .setDirection(Metric.DIRECTION_WORST)
+            .setDomain(OVER_OPS_DOMAIN)
+            .setBestValue(0.0)
+            .create();
+
+    private static final Metric<Integer> TimerCount = new Metric.Builder("overops_timer", "Timer", Metric.ValueType.INT)
+            .setDescription("Timer Count")
             .setQualitative(true)
             .setDirection(Metric.DIRECTION_WORST)
             .setDomain(OVER_OPS_DOMAIN)
@@ -102,7 +118,11 @@ public class OverOpsMetrics implements Metrics {
         HTTP_ERROR("HTTP Error", HTTPErrors,
                 RuleType.BUG, Severity.MINOR),
         CRITICAL_EXCEPTION("Critical Exception", CriticalExceptionCount,
-                RuleType.BUG, Severity.MAJOR);
+                RuleType.BUG, Severity.MAJOR),
+        LOGGED_WARNING("Logged Warning", LoggedWarningCount,
+                RuleType.VULNERABILITY, Severity.MAJOR),
+        TIMER("Timer", TimerCount,
+                RuleType.VULNERABILITY, Severity.MAJOR);
 
         public final String overOpsType;
         public final Metric metric;
@@ -146,7 +166,9 @@ public class OverOpsMetrics implements Metrics {
     }
 
     public static List<Metric> getMetricsList() {
-        return asList(UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors, CaughtExceptionCount, CriticalExceptionCount);
+        return asList(UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount,
+                CustomExceptionCount, HTTPErrors, CaughtExceptionCount,
+                CriticalExceptionCount, LoggedWarningCount, TimerCount);
     }
 
 }
