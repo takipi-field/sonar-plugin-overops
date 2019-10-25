@@ -9,17 +9,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.overops.plugins.sonar.measures.OverOpsSensor.convertInputFileToClassName;
-
 public class EventsStatistic {
     private static final Logger LOGGER = Loggers.get(EventsStatistic.class);
     private Stat stat = new Stat();
 
-    public void add(InputFile file, EventResult event) {
-        String key = convertInputFileToClassName(file);
+    public void add(EventResult event) {
+        String key = event.error_location.class_name;
         if (stat.get(key) == null) {
             LOGGER.info("      New stat for  " + key);
-            stat.put(key, new ClassStat(file, event));
+            stat.put(key, new ClassStat(event));
         } else {
             stat.update(key, event);
         }
@@ -34,18 +32,18 @@ public class EventsStatistic {
         public void update(String key, EventResult event) {
             ClassStat classStat = get(key);
             classStat.increment(event);
-            LOGGER.info("           Update  on " + classStat.file.filename() +
+            LOGGER.info("           Update  on " + classStat.fileName +
                     "  type [ " + event.type +
                     " ]  times  = " + classStat.typeToEventStat.get(event.type).total);
         }
     }
 
     public static class ClassStat {
-        public InputFile file;
+        public String fileName;
         public Map<String, EventInClassStat> typeToEventStat;
 
-        public ClassStat(InputFile file, EventResult event) {
-            this.file = file;
+        public ClassStat(EventResult event) {
+            this.fileName = event.error_location.class_name;
             typeToEventStat = new HashMap<>();
             typeToEventStat.put(event.type, new EventInClassStat(event));
         }
@@ -82,7 +80,7 @@ public class EventsStatistic {
 
     public static class LineStat {
         public int total;
-        EventResult event;
+        public EventResult event;
 
         public LineStat(EventResult event) {
             total = 1;

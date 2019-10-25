@@ -21,6 +21,7 @@ package com.overops.plugins.sonar.measures;
 
 import java.util.List;
 
+import com.overops.plugins.sonar.rules.checks.DefaultChecks;
 import org.sonar.api.batch.rule.Severity;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
@@ -30,7 +31,7 @@ import static java.util.Arrays.asList;
 
 public class OverOpsMetrics implements Metrics {
 
-    public static String OVER_OPS_DOMAIN = "OverOps Exceptions";
+    public static String OVER_OPS_DOMAIN = DefaultChecks.REPOSITORY_KEY;//"OverOps Exceptions";
 
     public static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
             .setDescription("Caught Exception Count")
@@ -90,13 +91,13 @@ public class OverOpsMetrics implements Metrics {
 
     public enum OverOpsMetric {
         CAUGHT_EXCEPTION("Caught Exception", CaughtExceptionCount,
-                RuleType.CODE_SMELL, Severity.MAJOR),
+                RuleType.BUG, Severity.MAJOR),
         SWALLOWED_EXCEPTION("Swallowed Exception", SwallowedExceptionCount,
                 RuleType.BUG, Severity.MAJOR),
         UNCAUGHT_EXCEPTION("Uncaught Exception", UncaughtExceptionCount,
                 RuleType.BUG, Severity.MAJOR),
         LOGGED_ERROR("Logged Error", LogErrorCount,
-                RuleType.CODE_SMELL, Severity.MINOR),
+                RuleType.BUG, Severity.MINOR),
         CUSTOM_EVENT("Custom Event", CustomExceptionCount,
                 RuleType.BUG, Severity.MAJOR),
         HTTP_ERROR("HTTP Error", HTTPErrors,

@@ -1,0 +1,13 @@
+{
+  "title": "CaughtException title",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "over-ops", "oo-caught-exception"
+  ],
+  "defaultSeverity": "Minor"
+}

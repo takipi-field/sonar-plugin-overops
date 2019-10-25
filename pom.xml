@@ -16,9 +16,16 @@
 		<sonar.apiVersion>7.9.1</sonar.apiVersion>
 		<jdk.min.version>1.8</jdk.min.version>
 		<sonar.sources>src/main/java,src/main/js</sonar.sources>
+		<sonar.java.plugin.version>4.2</sonar.java.plugin.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.sonarsource.java</groupId>
+			<artifactId>java-frontend</artifactId>
+			<version>${sonar.java.plugin.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.sonarsource.sonarqube</groupId>
 			<artifactId>sonar-plugin-api</artifactId>

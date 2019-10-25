@@ -20,6 +20,8 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
+import org.sonar.api.batch.rule.ActiveRule;
+import org.sonar.api.batch.rule.ActiveRules;
 import org.sonar.api.batch.rule.Severity;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -33,9 +35,9 @@ import org.sonar.api.utils.log.Loggers;
 
 import java.io.FileReader;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getMetric;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsMetric;
 
 public class OverOpsSensor implements Sensor {
@@ -155,32 +157,32 @@ public class OverOpsSensor implements Sensor {
         EventsStatistic eventsStatistic = new EventsStatistic();
 
         Iterable<InputFile> files = fs.inputFiles(fs.predicates().hasType(InputFile.Type.MAIN));
-        for (InputFile file : files) {
-
-            for (EventResult event : volumeResult.events) {
-                String fileClassName = convertInputFileToClassName(file);
-
-                if (fileClassName.indexOf(event.error_location.class_name) != -1) {
-                    eventsStatistic.add(file, event);
-                }
-            }
-        }
+//        for (InputFile file : files) {
+//
+//            for (EventResult event : volumeResult.events) {
+//                String fileClassName = convertInputFileToClassName(file);
+//
+//                if (fileClassName.indexOf(event.error_location.class_name) != -1) {
+//                    eventsStatistic.add(file, event);
+//                }
+//            }
+//        }
 
         for (EventsStatistic.ClassStat classStat : eventsStatistic.getStatistic()) {
             for (String eventType : classStat.typeToEventStat.keySet()) {
 
-                context.<Integer>newMeasure().forMetric(getMetric(eventType)).on(classStat.file)
-                        .withValue(classStat.typeToEventStat.get(eventType).total).save();
+//                context.<Integer>newMeasure().forMetric(getMetric(eventType)).on(classStat.file)
+//                        .withValue(classStat.typeToEventStat.get(eventType).total).save();
 
-                LOGGER.info("     On " + classStat.file.filename() +
-                        "  was OO [ " + eventType +
-                        " ]  times  = " + classStat.typeToEventStat.get(eventType).total);
+//                LOGGER.info("     On " + classStat.fileName +
+//                        "  was OO [ " + eventType +
+//                        " ]  times  = " + classStat.typeToEventStat.get(eventType).total);
 
                 EventsStatistic.EventInClassStat eventInClassStat = classStat.typeToEventStat.get(eventType);
-                for (int lineNumber : eventInClassStat.lineToLineStat.keySet()){
-                    attachExternalOverOpsIssue(context, classStat.file, eventInClassStat.lineToLineStat.get(lineNumber));
-                    LOGGER.info("       add Issue  [ " + eventType +
-                            " ]  on  = " + lineNumber);
+                for (int ignored : eventInClassStat.lineToLineStat.keySet()){
+                    //attachExternalOverOpsIssue(context, classStat.fileName, eventInClassStat.lineToLineStat.get(lineNumber));
+//                    LOGGER.info("       add Issue  [ " + eventType +
+//                            " ]  on  = " + lineNumber);
                 }
             }
         }
@@ -196,12 +198,13 @@ public class OverOpsSensor implements Sensor {
     }
 
     public void attachExternalOverOpsIssue(SensorContext context, InputFile file, EventsStatistic.LineStat lineStat) {
+
         EventResult event = lineStat.event;
         int method_position = event.error_location.method_position + 1;
         boolean isMethodPresent = file.lines() >= method_position;
         method_position = isMethodPresent ? method_position : 1;
         String arcLink = getARCLinkForEvent(event.id);
-        NewAdHocRule newAdHocRule = context.newAdHocRule();
+
         String issueTitle = "A " + event.name +" has been detected " + lineStat.total + (lineStat.total > 1 ? " times" : " time");
         String name = "Details for  a " + event.name +" that was detected " + lineStat.total + (lineStat.total > 1 ? " times" : " time");;
         String ruleId = environmentKey + "." + from.getMillis() + "." + lineStat.event.type + "." +lineStat.event.id;
@@ -225,6 +228,12 @@ public class OverOpsSensor implements Sensor {
                 .addHighlightedQuote(new TextBuilder().addArray(event.stack_frames, " at ").build())
                 .build();
 
+        NewAdHocRule newAdHocRule = context.newAdHocRule();
+        ActiveRules activeRules = context.activeRules();
+        Collection<ActiveRule> all = activeRules.findAll();
+        for (ActiveRule activeRule : all){
+            //LOGGER.error("activeRule " + activeRule.internalKey() + " " + activeRule.language() + " " + activeRule.params());
+        }
         newAdHocRule.description(description)
                 .engineId(OVER_OPS_ENGINE)
                 .name(name)
@@ -232,9 +241,9 @@ public class OverOpsSensor implements Sensor {
                 .type(RuleType.BUG)
                 .severity(Severity.INFO).save();
 
-        NewExternalIssue newIssue = context.newExternalIssue();
         OverOpsMetrics.OverOpsMetric overOpsMetric = getOverOpsMetric(event.type);
-        newIssue.engineId(OVER_OPS_ENGINE).ruleId(event.id)
+        NewExternalIssue newIssue = context.newExternalIssue();
+        newIssue.engineId(OVER_OPS_ENGINE)
                 .at(newIssue.newLocation().on(file).at(file.selectLine(method_position))
                         .message( issueTitle + ". Click \"See Rule\" for more details")
                 )
@@ -255,7 +264,6 @@ public class OverOpsSensor implements Sensor {
             e.printStackTrace();
         }
         if (arcLink == null) {
-            DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
             arcLink = " WE detect null arc EventUtil.getEventRecentLinkDefault( apiClient, \"" +
                     "\" ,  \"" + environmentKey +
                     "\" ,  \"" + eventId +
