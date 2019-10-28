@@ -1,7 +1,7 @@
 package com.overops.plugins.sonar.rules;
 
 import com.google.gson.Gson;
-import com.overops.plugins.sonar.rules.checks.DefaultChecks;
+import com.overops.plugins.sonar.rules.checks.OverOpsChecks;
 import com.overops.plugins.sonar.rules.checks.OverOpsCaughtExceptionCheck;
 import com.overops.plugins.sonar.rules.checks.OverOpsUncaughtExceptionCheck;
 import org.apache.commons.lang.StringUtils;
@@ -36,7 +36,7 @@ public class RuleDefinitionImplementation implements RulesDefinition, CheckRegis
     @Override
     public void register(RegistrarContext registrarContext) {
         LOGGER.info("Adding register ");
-        registrarContext.registerClassesForRepository(DefaultChecks.REPOSITORY_KEY,
+        registrarContext.registerClassesForRepository(OverOpsChecks.REPOSITORY_KEY,
             Arrays.asList(OverOpsCaughtExceptionCheck.class, OverOpsUncaughtExceptionCheck.class), Collections.EMPTY_LIST);
     }
 
@@ -44,9 +44,9 @@ public class RuleDefinitionImplementation implements RulesDefinition, CheckRegis
     @Override
     public void define(Context context) {
         LOGGER.info("Adding custom OverOps rules");
-        NewRepository repository = context.createRepository(DefaultChecks.REPOSITORY_KEY, JAVA_LANGUAGE).setName("OverOps analyzer");
+        NewRepository repository = context.createRepository(OverOpsChecks.REPOSITORY_KEY, JAVA_LANGUAGE).setName("OverOps analyzer");
         //test(repository);
-        for (Class<? extends JavaCheck> check : DefaultChecks.getChecks()) {
+        for (Class<? extends JavaCheck> check : OverOpsChecks.getChecks()) {
             new RulesDefinitionAnnotationLoader().load(repository, new Class[]{check});
             newRule(check, repository);
         }

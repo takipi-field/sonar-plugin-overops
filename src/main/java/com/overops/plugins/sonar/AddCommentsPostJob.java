@@ -5,6 +5,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.overops.plugins.sonar.measures.EventsStatistic;
+import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.rest.*;
 import com.overops.plugins.sonar.util.SimpleUrlClient;
 import com.overops.plugins.sonar.util.TextBuilder;
@@ -13,6 +14,7 @@ import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.event.EventUtil;
 import com.takipi.api.core.url.UrlClient;
 import com.takipi.common.util.Pair;
+import org.codehaus.plexus.util.StringUtils;
 import org.sonar.api.batch.postjob.PostJob;
 import org.sonar.api.batch.postjob.PostJobContext;
 import org.sonar.api.batch.postjob.PostJobDescriptor;
@@ -22,9 +24,7 @@ import org.sonar.api.utils.log.Loggers;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,20 +54,23 @@ public class AddCommentsPostJob implements PostJob {
             }
         }
 
-        String severityType = "BLOCKER";
-        Pattern exceptionPattern = Pattern.compile("^CaughtException\\((.*?)\\)");
-        String ruleType = "OverOps-Rules:CaughtException";
-        SQIssuesResponse sqIssuesResponse = addCommentsToIssuesPerRule(exceptionPattern, ruleType, severityType);
-        log.error("post job  response total " + sqIssuesResponse.total);
+        OverOpsMetrics.OverOpsMetric[] values = OverOpsMetrics.OverOpsMetric.values();
+        for (OverOpsMetrics.OverOpsMetric metric : values) {
+            addCommentsToIssuesPerRule(metric);
+        }
 
-        String severityType2 = "BLOCKER";
-        Pattern exceptionPattern2 = Pattern.compile("^UncaughtException\\((.*?)\\)");
-        String ruleType2 = "OverOps-Rules:UncaughtException";
-        SQIssuesResponse sqIssuesResponse2 = addCommentsToIssuesPerRule(exceptionPattern2, ruleType2, severityType2);
-        log.error("post job  response total " + sqIssuesResponse2.total);
     }
 
-    private SQIssuesResponse addCommentsToIssuesPerRule(Pattern exceptionPattern, String ruleType, String severityType) {
+
+    private void addCommentsToIssuesPerRule(OverOpsMetrics.OverOpsMetric metric) {
+        Pattern exceptionPattern = Pattern.compile("^"+ metric.patterName+"\\((.*?)\\)");
+        String ruleType = metric.ruleKey;
+        String severityType = metric.severity.toString().toUpperCase();
+        //TODO remove this, all patterns should be filled
+        if (StringUtils.isEmpty(metric.patterName)) {
+            log.error("Rule should not be empty, metric will be postponed " + metric.overOpsType);
+            return;
+        }
 
         log.error("");
         log.error(" =============================================   ");
@@ -96,7 +99,6 @@ public class AddCommentsPostJob implements PostJob {
         log.error("");
         log.error(" =============================================   ");
         log.error("");
-        return sqIssuesResponse;
     }
 
     private boolean isOverOpsCommentAdded(SQIssue sqIssue, EventResult eventResult, String severityType) {

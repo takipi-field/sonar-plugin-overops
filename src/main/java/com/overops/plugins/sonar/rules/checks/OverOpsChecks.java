@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-public class DefaultChecks {
+public class OverOpsChecks {
 
     private static final Collection<Class<? extends JavaCheck>> defaultChecks = new ArrayList<Class<? extends JavaCheck>>();
 
@@ -34,4 +34,5 @@ public class DefaultChecks {
     private static Class<?>[] getClassArray(final @Nonnull Collection<Class<? extends JavaCheck>> checks) {
         return checks.toArray(new Class[checks.size()]);
     }
+
 }

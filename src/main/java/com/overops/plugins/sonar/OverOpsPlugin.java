@@ -21,8 +21,6 @@ package com.overops.plugins.sonar;
 
 import com.overops.plugins.sonar.measures.EventsStatistic;
 import com.overops.plugins.sonar.measures.MeasureDefinition;
-import com.overops.plugins.sonar.measures.OverOpsMetrics;
-import com.overops.plugins.sonar.measures.OverOpsSensor;
 import com.overops.plugins.sonar.rules.RuleDefinitionImplementation;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
 import com.takipi.api.client.RemoteApiClient;
@@ -40,25 +38,18 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.sonar.api.Plugin;
-import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
 import java.io.FileReader;
 import java.util.HashMap;
-import java.util.regex.Pattern;
-
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getMetric;
 
 public class OverOpsPlugin implements Plugin {
 	private static final Logger LOGGER = Loggers.get(OverOpsPlugin.class);
 	public static final long DEFAULT_SPAN_DAYS = 1l;
 	public static final String DEFAULT_VIEWID = "All Exceptions";
 	public static final String DEFAULT_OVER_OPS_API_HOST = "https://api.overops.com";
-	public static final String OVER_OPS_ENGINE = "OverOps Plugin";
 	public static String SONAR_HOST_URL;
 
 	public static String environmentKey;
@@ -71,15 +62,19 @@ public class OverOpsPlugin implements Plugin {
 	public static DateTimeFormatter formatter;
 	public static RemoteApiClient apiClient;
 	public static long daysSpan;
-
-	public HashMap<String, Integer> exceptions;
-	private String viewId;
 	public static EventsResult volumeResult;
 	public static EventsStatistic eventsStatistic;
 
+	public HashMap<String, Integer> exceptions;
+	private String viewId;
+
 	@Override
 	public void define(Context context) {
-		getOverOpsDataAndCrerateStatistic(context);
+		if (getOverOpsDataAndCreateStatistic(context) == false) {
+			//TODO think if we need to stop declaration of possible issues
+			return;
+		}
+
 
 		context.addExtension(RuleDefinitionImplementation.class);
 
@@ -87,27 +82,29 @@ public class OverOpsPlugin implements Plugin {
 		context.addExtension(MeasureDefinition.class);
 
 		context.addExtensions(OverOpsProperties.getProperties());
-		context.addExtension(OverOpsSensor.class);
 		context.addExtension(AddCommentsPostJob.class);
-
 	}
 
-	private void getOverOpsDataAndCrerateStatistic(Context context) {
+	private boolean getOverOpsDataAndCreateStatistic(Context context) {
 		Configuration config = context.getBootConfiguration();
 		getConfigProperties(config);
 
-		validateConfigData();
+		if (validateConfigData() == false) {
+			return false;
+		}
 
 		apiClient = (RemoteApiClient) RemoteApiClient.newBuilder().setApiKey(apiKey).setHostname(appHost).build();
 		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, environmentKey, viewId);
 		if (view == null) {
-			throw new IllegalStateException(
-					"Failed getting OverOps View, please check viewId or environmentKey.");
+			LOGGER.error("Failed getting OverOps View, please check viewId or environmentKey.");
+			return false;
 		}
 
 		UrlClient.Response<EventsResult> volumeResponse = getVolumeResponse(view);
 
-		validateVolumeResponse(volumeResponse);
+		if (validateVolumeResponse(volumeResponse) == false) {
+			return false;
+		}
 
 		volumeResult = volumeResponse.data;
 
@@ -115,6 +112,8 @@ public class OverOpsPlugin implements Plugin {
 		for (EventResult event : volumeResult.events) {
 			eventsStatistic.add(event);
 		}
+
+		return true;
 	}
 
 
@@ -141,14 +140,16 @@ public class OverOpsPlugin implements Plugin {
 		logConfigData();
 	}
 
-	private void validateConfigData() {
+	private boolean validateConfigData() {
 		if (StringUtils.isEmpty(apiKey) ||
 				StringUtils.isEmpty(environmentKey) ||
 				StringUtils.isEmpty(appHost) ||
 				StringUtils.isEmpty(viewId)) {
-			throw new IllegalStateException(
-					"Failed to process OverOps sensor one of [apiKey, environmentKey, appHost, viewId] properties is empty. Please check project OverOps configuration.");
+			LOGGER.error("Failed to process OverOps sensor one of [apiKey, environmentKey, appHost, viewId] properties is empty. Please check project OverOps configuration.");
+			return false;
 		}
+
+		return true;
 	}
 
 	private EventsVolumeRequest getVolumeRequest(SummarizedView view) {
@@ -162,12 +163,12 @@ public class OverOpsPlugin implements Plugin {
 	}
 
 	private void logConfigData() {
-		LOGGER.info("environmentKey :" + environmentKey);
-		LOGGER.info("appHost :" + appHost);
-		LOGGER.info("deploymentName :" + deploymentName);
-		LOGGER.info("applicationName :" + applicationName);
-		LOGGER.info("daysSpan :" + daysSpan);
-		LOGGER.info("viewId :" + viewId);
+		LOGGER.info("in plugin start environmentKey :" + environmentKey);
+		LOGGER.info("in plugin start appHost :" + appHost);
+		LOGGER.info("in plugin start deploymentName :" + deploymentName);
+		LOGGER.info("in plugin start applicationName :" + applicationName);
+		LOGGER.info("in plugin start daysSpan :" + daysSpan);
+		LOGGER.info("in plugin start viewId :" + viewId);
 	}
 
 	public String getDeploymentNameFromPomFile() {
@@ -184,13 +185,14 @@ public class OverOpsPlugin implements Plugin {
 		return result;
 	}
 
-	private void validateVolumeResponse(UrlClient.Response<EventsResult> eventsResponse) {
-		//TODO refactore it error should be thrown if bad response
+	private boolean validateVolumeResponse(UrlClient.Response<EventsResult> eventsResponse) {
 		if (eventsResponse.data.events == null) {
-			throw new IllegalStateException(
-					"Failed getting OverOps events, please check Application Name or Deployment Name.");
+			LOGGER.error("Failed getting OverOps events, please check Application Name or Deployment Name.");
+			return false;
 		} else if (eventsResponse.isBadResponse()) {
-			throw new IllegalStateException("Bad API Response " + appHost + " " + deploymentName + " " + applicationName);
+			LOGGER.error("Bad API Response " + appHost + " " + deploymentName + " " + applicationName);
+			return false;
 		}
+		return true;
 	}
 }

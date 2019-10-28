@@ -19,19 +19,19 @@
  */
 package com.overops.plugins.sonar.measures;
 
-import java.util.List;
-
-import com.overops.plugins.sonar.rules.checks.DefaultChecks;
+import com.overops.plugins.sonar.rules.checks.OverOpsChecks;
 import org.sonar.api.batch.rule.Severity;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
 import org.sonar.api.rules.RuleType;
 
+import java.util.List;
+
 import static java.util.Arrays.asList;
 
 public class OverOpsMetrics implements Metrics {
 
-    public static String OVER_OPS_DOMAIN = DefaultChecks.REPOSITORY_KEY;//"OverOps Exceptions";
+    public static String OVER_OPS_DOMAIN = OverOpsChecks.REPOSITORY_KEY;//"OverOps Exceptions";
 
     public static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
             .setDescription("Caught Exception Count")
@@ -91,33 +91,40 @@ public class OverOpsMetrics implements Metrics {
 
     public enum OverOpsMetric {
         CAUGHT_EXCEPTION("Caught Exception", CaughtExceptionCount,
-                RuleType.BUG, Severity.MAJOR),
+                RuleType.BUG, Severity.MAJOR, "CaughtException", "OverOps-Rules:CaughtException"),
         SWALLOWED_EXCEPTION("Swallowed Exception", SwallowedExceptionCount,
-                RuleType.BUG, Severity.MAJOR),
+                RuleType.BUG, Severity.MAJOR,"", "OverOps-Rules:"),
         UNCAUGHT_EXCEPTION("Uncaught Exception", UncaughtExceptionCount,
-                RuleType.BUG, Severity.MAJOR),
+                RuleType.BUG, Severity.MAJOR, "UncaughtException", "OverOps-Rules:UncaughtException"),
         LOGGED_ERROR("Logged Error", LogErrorCount,
-                RuleType.BUG, Severity.MINOR),
+                RuleType.BUG, Severity.MINOR, "", "OverOps-Rules:"),
         CUSTOM_EVENT("Custom Event", CustomExceptionCount,
-                RuleType.BUG, Severity.MAJOR),
+                RuleType.BUG, Severity.MAJOR, "", "OverOps-Rules:"),
         HTTP_ERROR("HTTP Error", HTTPErrors,
-                RuleType.BUG, Severity.MINOR),
+                RuleType.BUG, Severity.MINOR, "", "OverOps-Rules:"),
         CRITICAL_EXCEPTION("Critical Exception", CriticalExceptionCount,
-                RuleType.BUG, Severity.MAJOR);
+                RuleType.BUG, Severity.MAJOR,"", "OverOps-Rules:");
 
         public final String overOpsType;
         public final Metric metric;
         public final RuleType ruleType;
         public final Severity severity;
+        //TODO add next properties to issues defenitions
+        public final String patterName;
+        public final String ruleKey;
 
         OverOpsMetric(String overOpsType,
                       Metric metric,
                       RuleType ruleType,
-                      Severity severity) {
+                      Severity severity,
+                      String patterName,
+                      String ruleKey) {
             this.overOpsType = overOpsType;
             this.metric = metric;
             this.ruleType = ruleType;
             this.severity = severity;
+            this.patterName = patterName;
+            this.ruleKey = ruleKey;
         }
 
         public static Metric getMetric(String overOpsType) {
