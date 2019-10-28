@@ -2,9 +2,11 @@ package com.overops.plugins.sonar.rules.checks;
 
 import com.overops.plugins.sonar.OverOpsPlugin;
 import com.overops.plugins.sonar.measures.EventsStatistic;
+import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.takipi.api.client.result.event.EventResult;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
+import org.sonar.plugins.java.api.JavaCheck;
 import org.sonar.plugins.java.api.JavaFileScanner;
 import org.sonar.plugins.java.api.JavaFileScannerContext;
 import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
@@ -18,23 +20,28 @@ public abstract class OverOpsBaseException extends BaseTreeVisitor implements Ja
     private static final Logger log = Loggers.get(OverOpsBaseException.class);
     private JavaFileScannerContext context;
     private File file;
-    protected String ooExceptionType = "";
-    protected String issueMessagePrefix = "";
+    protected OverOpsMetrics.OverOpsMetric metric;
 
     @Override
     public void scanFile(final @Nonnull JavaFileScannerContext ctx) {
+        if (OverOpsPlugin.eventsStatistic == null) {
+            return;
+        }
+
         context = ctx;
         file = context.getFile();
         String filePathJavaStyle = file.getAbsolutePath().replaceAll("/", ".");
-        log.info(issueMessagePrefix + "  filePathJavaStyle " + filePathJavaStyle);
         List<EventsStatistic.ClassStat> statForThisFile = OverOpsPlugin.eventsStatistic.getStatistic()
                 .stream()
                 .filter(classStat -> filePathJavaStyle.indexOf(classStat.fileName) != -1)
-                .filter(classStat -> classStat.typeToEventStat.keySet().contains(ooExceptionType))
+                .filter(classStat -> {
+                    log.info(metric.overOpsType + " is in " +  classStat.typeToEventStat.keySet() + "  " + classStat.typeToEventStat.keySet().contains(metric.overOpsType));
+                    return classStat.typeToEventStat.keySet().contains(metric.overOpsType);
+                })
                 .collect(Collectors.toList());
 
         for (EventsStatistic.ClassStat classStat : statForThisFile) {
-            EventsStatistic.EventInClassStat eventInClassStat = classStat.typeToEventStat.get(ooExceptionType);
+            EventsStatistic.EventInClassStat eventInClassStat = classStat.typeToEventStat.get(metric.overOpsType);
             for (int lineNumber : eventInClassStat.lineToLineStat.keySet()) {
                 reportIssue(eventInClassStat.lineToLineStat.get(lineNumber));
             }
@@ -50,7 +57,7 @@ public abstract class OverOpsBaseException extends BaseTreeVisitor implements Ja
         method_position = isMethodPresent ? method_position : 1;
 
         StringBuilder stringBuilder = new StringBuilder();
-        String issueTitle = stringBuilder.append(issueMessagePrefix).append("(").append(event.id).append(") has been detected ")
+        String issueTitle = stringBuilder.append(metric.patterName).append("(").append(event.id).append(") has been detected ")
                 .append(lineStat.total).append(lineStat.total > 1 ? " times" : " time").toString();
 
         //TODO line number fix

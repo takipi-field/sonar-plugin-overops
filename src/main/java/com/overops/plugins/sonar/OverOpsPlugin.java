@@ -21,6 +21,7 @@ package com.overops.plugins.sonar;
 
 import com.overops.plugins.sonar.measures.EventsStatistic;
 import com.overops.plugins.sonar.measures.MeasureDefinition;
+import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.rules.RuleDefinitionImplementation;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
 import com.takipi.api.client.RemoteApiClient;
@@ -70,17 +71,12 @@ public class OverOpsPlugin implements Plugin {
 
 	@Override
 	public void define(Context context) {
-		if (getOverOpsDataAndCreateStatistic(context) == false) {
-			//TODO think if we need to stop declaration of possible issues
-			return;
-		}
-
+		getOverOpsDataAndCreateStatistic(context);
 
 		context.addExtension(RuleDefinitionImplementation.class);
 
-		//TODO find how add registered measure context.addExtensions(OverOpsMetrics.class, MeasureDefinition.class);
-		context.addExtension(MeasureDefinition.class);
-
+		context.addExtensions(OverOpsMetrics.class, MeasureDefinition.class);
+		//context.addExtension(MeasureDefinition.class);
 		context.addExtensions(OverOpsProperties.getProperties());
 		context.addExtension(AddCommentsPostJob.class);
 	}
