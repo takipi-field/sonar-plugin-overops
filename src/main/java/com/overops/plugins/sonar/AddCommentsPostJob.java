@@ -64,8 +64,10 @@ public class AddCommentsPostJob implements PostJob {
 
     private void addCommentsToIssuesPerRule(OverOpsMetrics.OverOpsMetric metric) {
         Pattern exceptionPattern = Pattern.compile("^"+ metric.patterName+"\\((.*?)\\)");
-        String ruleType = metric.ruleKey;
+        String ruleType = metric.ruleFullKey;
         String severityType = metric.severity.toString().toUpperCase();
+
+
         //TODO remove this, all patterns should be filled
         if (StringUtils.isEmpty(metric.patterName)) {
             log.error("Rule should not be empty, metric will be postponed " + metric.overOpsType);
@@ -75,13 +77,35 @@ public class AddCommentsPostJob implements PostJob {
         log.error("");
         log.error(" =============================================   ");
         log.error("addCommentsToIssuesPerRule  " + exceptionPattern.toString());
+
         SQSimpleRequest issuesPerRuleRequest = SQSimpleRequest.newBuilder()
                 .setUrl(SONAR_HOST_URL + "/api/issues/search")
                 .addQueryParam("rules", ruleType)
                 .build();
         UrlClient.Response<String> stringResponse = SimpleUrlClient.newBuilder().build().get(issuesPerRuleRequest);
+
+        log.info("");
+        log.info("____________________________________________________");
+        log.info("");
+        log.info("");
+        log.info(stringResponse.data);
+
+        log.info("");
+        log.info("");
+        log.info("____________________________________________________");
+        log.info("");
+
         SQIssuesResponse sqIssuesResponse = GSON.fromJson(stringResponse.data, SQIssuesResponse.class);
+        log.info("sqIssuesResponse.issues count " + (sqIssuesResponse.issues != null ? String.valueOf(sqIssuesResponse.issues.size()) : "Empty"));
         for (SQIssue sqIssue :sqIssuesResponse.issues) {
+            log.info("         " + sqIssue.status + "   key   " + sqIssue.key);
+        }
+        for (SQIssue sqIssue :sqIssuesResponse.issues) {
+
+            if ((sqIssue.status == null) ||
+                    (sqIssue.status.indexOf("OPEN") == -1)) {
+                continue;
+            }
             Matcher matcher = exceptionPattern.matcher(sqIssue.message);
             boolean matched = matcher.find();
             log.error("pattern match message " + matched);

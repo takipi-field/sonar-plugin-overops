@@ -32,8 +32,6 @@ import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.util.validation.ValidationUtil;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -43,14 +41,14 @@ import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
-import java.io.FileReader;
 import java.util.HashMap;
 
 public class OverOpsPlugin implements Plugin {
 	private static final Logger LOGGER = Loggers.get(OverOpsPlugin.class);
-	public static final long DEFAULT_SPAN_DAYS = 1l;
+	public static final long DEFAULT_SPAN_DAYS = 1L;
 	public static final String DEFAULT_VIEWID = "All Exceptions";
 	public static final String DEFAULT_OVER_OPS_API_HOST = "https://api.overops.com";
+	public static final String SONAR_HOST_PROPERTY = "sonar.host.url";
 	public static String SONAR_HOST_URL;
 
 	public static String environmentKey;
@@ -74,9 +72,7 @@ public class OverOpsPlugin implements Plugin {
 		getOverOpsDataAndCreateStatistic(context);
 
 		context.addExtension(RuleDefinitionImplementation.class);
-
 		context.addExtensions(OverOpsMetrics.class, MeasureDefinition.class);
-		//context.addExtension(MeasureDefinition.class);
 		context.addExtensions(OverOpsProperties.getProperties());
 		context.addExtension(AddCommentsPostJob.class);
 	}
@@ -85,7 +81,7 @@ public class OverOpsPlugin implements Plugin {
 		Configuration config = context.getBootConfiguration();
 		getConfigProperties(config);
 
-		if (validateConfigData() == false) {
+		if (!validateConfigData()) {
 			return false;
 		}
 
@@ -98,7 +94,7 @@ public class OverOpsPlugin implements Plugin {
 
 		UrlClient.Response<EventsResult> volumeResponse = getVolumeResponse(view);
 
-		if (validateVolumeResponse(volumeResponse) == false) {
+		if (!validateVolumeResponse(volumeResponse)) {
 			return false;
 		}
 
@@ -114,17 +110,16 @@ public class OverOpsPlugin implements Plugin {
 
 
 	private UrlClient.Response<EventsResult> getVolumeResponse(SummarizedView view) {
-		LOGGER.info("passed into  getVolumeResponse view " + view);
 		EventsVolumeRequest eventsVolumeRequest = getVolumeRequest(view);
 		return apiClient.get(eventsVolumeRequest);
 	}
 
 	private void getConfigProperties(Configuration config) {
-		SONAR_HOST_URL = config.get("sonar.host.url").orElse("No host found");
+		SONAR_HOST_URL = config.get(SONAR_HOST_PROPERTY).orElse("No host found");
 		environmentKey = config.get(OverOpsProperties.SONAR_OVEROPS_ENVIRONMENT_ID).orElse(null);
 		appHost = config.get(OverOpsProperties.SONAR_OVEROPS_API_HOST).orElse(DEFAULT_OVER_OPS_API_HOST);
 		apiKey = config.get(OverOpsProperties.SONAR_OVEROPS_API_KEY).orElse(null);
-		deploymentName = config.get(OverOpsProperties.SONAR_OVEROPS_DEP_NAME).orElse(getDeploymentNameFromPomFile());
+		deploymentName = config.get(OverOpsProperties.SONAR_OVEROPS_DEP_NAME).orElse(null);
 		applicationName = config.get(OverOpsProperties.SONAR_OVEROPS_APP_NAME).orElse(null);
 		daysSpan = config.getLong(OverOpsProperties.SONAR_OVEROPS_SPAN_DAYS).orElse(DEFAULT_SPAN_DAYS);
 		viewId = config.get(OverOpsProperties.SONAR_OVEROPS_VIEW_ID).orElse(DEFAULT_VIEWID);
@@ -159,26 +154,12 @@ public class OverOpsPlugin implements Plugin {
 	}
 
 	private void logConfigData() {
-		LOGGER.info("in plugin start environmentKey :" + environmentKey);
-		LOGGER.info("in plugin start appHost :" + appHost);
-		LOGGER.info("in plugin start deploymentName :" + deploymentName);
-		LOGGER.info("in plugin start applicationName :" + applicationName);
-		LOGGER.info("in plugin start daysSpan :" + daysSpan);
-		LOGGER.info("in plugin start viewId :" + viewId);
-	}
-
-	public String getDeploymentNameFromPomFile() {
-		String result = "";
-		MavenXpp3Reader reader = new MavenXpp3Reader();
-		try {
-			Model model = reader.read(new FileReader("pom.xml"));
-			result = model.getVersion();
-		} catch (Exception e) {
-			LOGGER.error("Couldn't get DeploymentName from pom.xml version tag.");
-			e.printStackTrace();
-		}
-
-		return result;
+		LOGGER.info("environmentKey :" + environmentKey);
+		LOGGER.info("appHost :" + appHost);
+		LOGGER.info("deploymentName :" + deploymentName);
+		LOGGER.info("applicationName :" + applicationName);
+		LOGGER.info("daysSpan :" + daysSpan);
+		LOGGER.info("viewId :" + viewId);
 	}
 
 	private boolean validateVolumeResponse(UrlClient.Response<EventsResult> eventsResponse) {
