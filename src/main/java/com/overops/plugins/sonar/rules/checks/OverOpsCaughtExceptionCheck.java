@@ -6,7 +6,7 @@ import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.CA
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.Constants.CAUGHT_EXCEPTION_RULE_KEY;
 
 @Rule(key = CAUGHT_EXCEPTION_RULE_KEY)
-public class OverOpsCaughtExceptionCheck extends OverOpsBaseException {
+public class OverOpsCaughtExceptionCheck extends OverOpsBaseExceptionCheck {
     public OverOpsCaughtExceptionCheck() {
         this.metric = CAUGHT_EXCEPTION;
     }

@@ -6,7 +6,7 @@ import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.Co
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.UNCAUGHT_EXCEPTION;
 
 @Rule(key = UNCAUGHT_EXCEPTION_RULE_KEY)
-public class OverOpsUncaughtExceptionCheck extends OverOpsBaseException {
+public class OverOpsUncaughtExceptionCheck extends OverOpsBaseExceptionCheck {
     public OverOpsUncaughtExceptionCheck() {
         this.metric = UNCAUGHT_EXCEPTION;
     }

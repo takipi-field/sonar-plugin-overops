@@ -19,6 +19,8 @@ public class OverOpsProperties {
 	public static final String SONAR_OVEROPS_APP_NAME = "sonar.overops.applicationName";
 	public static final String SONAR_OVEROPS_DEP_NAME = "sonar.overops.deploymentName";
 	public static final String SONAR_OVEROPS_SPAN_DAYS = "sonar.overops.spanDays";
+	public static final String SONAR_OVEROPS_USER_NAME = "sonar.overops.userName";
+	public static final String SONAR_OVEROPS_USER_PASSWORD = "sonar.overops.userPassword";
 
 	public static List<PropertyDefinition> getProperties() {
 		return Arrays.asList(
@@ -89,7 +91,28 @@ public class OverOpsProperties {
 						.onQualifiers(Qualifiers.PROJECT)
                         .type(PropertyType.STRING)
                         .index(7)
-                        .build());
+                        .build(),
+
+				PropertyDefinition.builder(SONAR_OVEROPS_USER_NAME)
+						.name("User name")
+						.description("User name, which has rights to add/delete/comment issues")
+						.category(CATEGORY)
+						.subCategory(SUBCATEGORY)
+						.onQualifiers(Qualifiers.PROJECT)
+						.type(PropertyType.STRING)
+						.defaultValue("admin")
+						.index(8)
+						.build(),
+				PropertyDefinition.builder(SONAR_OVEROPS_USER_PASSWORD)
+						.name("User password")
+						.description("User password, which has rights to add/delete/comment issues")
+						.category(CATEGORY)
+						.subCategory(SUBCATEGORY)
+						.onQualifiers(Qualifiers.PROJECT)
+						.type(PropertyType.STRING)
+						.defaultValue("admin")
+						.index(9)
+						.build());
 
 	}
 }

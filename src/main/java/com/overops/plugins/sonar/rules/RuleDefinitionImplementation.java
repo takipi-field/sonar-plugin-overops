@@ -2,12 +2,9 @@ package com.overops.plugins.sonar.rules;
 
 import com.google.gson.Gson;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
-import com.overops.plugins.sonar.rules.checks.OverOpsCaughtExceptionCheck;
 import com.overops.plugins.sonar.rules.checks.OverOpsChecks;
-import com.overops.plugins.sonar.rules.checks.OverOpsUncaughtExceptionCheck;
 import org.apache.commons.lang.StringUtils;
 import org.sonar.api.rule.RuleStatus;
-import org.sonar.api.server.debt.DebtRemediationFunction;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
 import org.sonar.api.utils.AnnotationUtils;
@@ -19,7 +16,6 @@ import org.sonar.plugins.java.api.JavaCheck;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
@@ -28,20 +24,14 @@ public class RuleDefinitionImplementation implements RulesDefinition, CheckRegis
     private static final String RESOURCE_BASE_PATH = "/org/sonar/l10n/rules";
     private static final String OVER_OPS_REPOSITORY_NAME = "OverOps analyzer";
     private static final String JAVA_LANGUAGE = "java";
-    private final Gson gson = new Gson();
-
 
     @Override
     public void register(RegistrarContext registrarContext) {
-        LOGGER.info("Registering OverOps rules");
-        registrarContext.registerClassesForRepository(OverOpsChecks.REPOSITORY_KEY,
-            Arrays.asList(OverOpsCaughtExceptionCheck.class, OverOpsUncaughtExceptionCheck.class), Collections.EMPTY_LIST);
+        registrarContext.registerClassesForRepository(OverOpsChecks.REPOSITORY_KEY, OverOpsChecks.getChecks(), Collections.EMPTY_LIST);
     }
-
 
     @Override
     public void define(Context context) {
-        LOGGER.info("Adding custom OverOps rules");
         NewRepository repository = context.createRepository(OverOpsChecks.REPOSITORY_KEY, JAVA_LANGUAGE).setName(OVER_OPS_REPOSITORY_NAME);
         for (Class<? extends JavaCheck> check : OverOpsChecks.getChecks()) {
             new RulesDefinitionAnnotationLoader().load(repository, new Class[]{check});
@@ -107,34 +97,5 @@ public class RuleDefinitionImplementation implements RulesDefinition, CheckRegis
         }
 
         return null;
-    }
-
-    private static class RuleMetaDada {
-        String title;
-        String status;
-
-        Remediation remediation;
-
-        String type;
-        String[] tags;
-        String defaultSeverity;
-    }
-
-    private static class Remediation {
-        String func;
-        String constantCost;
-        String linearDesc;
-        String linearOffset;
-        String linearFactor;
-
-        public DebtRemediationFunction remediationFunction(DebtRemediationFunctions drf) {
-            if (func.startsWith("Constant")) {
-                return drf.constantPerIssue(constantCost.replace("mn", "min"));
-            }
-            if ("Linear".equals(func)) {
-                return drf.linear(linearFactor.replace("mn", "min"));
-            }
-            return drf.linearWithOffset(linearFactor.replace("mn", "min"), linearOffset.replace("mn", "min"));
-        }
     }
 }

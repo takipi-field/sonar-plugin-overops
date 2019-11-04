@@ -6,6 +6,4 @@ import java.util.List;
 public class SQIssuesResponse implements ApiResult {
     public int total;
     public List<SQIssue> issues;
-
-
 }

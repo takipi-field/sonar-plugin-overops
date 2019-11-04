@@ -25,12 +25,16 @@ import org.sonar.api.measures.Metrics;
 import org.sonar.api.rules.RuleType;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.overops.plugins.sonar.rules.checks.OverOpsChecks.OVEROPS_ROOT_TAG;
 import static com.overops.plugins.sonar.rules.checks.OverOpsChecks.REPOSITORY_KEY;
 import static java.util.Arrays.asList;
 
 public class OverOpsMetrics implements Metrics {
+    public static final String MESSAGE_PATTERN_PREFIX = " has been detected [ID-";
+    public static final String MESSAGE_PATTERN_SUFFIX = "]";
+    public static final Pattern EXCEPTION_PATTERN = Pattern.compile(" has been detected \\[ID-(.*?)\\]");
     public static String OVER_OPS_DOMAIN = REPOSITORY_KEY;
 
     public static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
@@ -91,39 +95,31 @@ public class OverOpsMetrics implements Metrics {
 
     public enum OverOpsMetric {
         CAUGHT_EXCEPTION("Caught Exception", CaughtExceptionCount,
-                RuleType.BUG, Severity.MAJOR,
-                "CaughtException", Constants.CAUGHT_EXCEPTION_RULE_KEY,
+                RuleType.BUG, Severity.MAJOR, Constants.CAUGHT_EXCEPTION_RULE_KEY,
                 "-caught-exception", "Caught Exception rule"),
         SWALLOWED_EXCEPTION("Swallowed Exception", SwallowedExceptionCount,
-                RuleType.BUG, Severity.MAJOR,
-                "", Constants.SWALLOWED_EXCEPTION_RULE_KEY,
-                "", ""),
+                RuleType.BUG, Severity.MAJOR, Constants.SWALLOWED_EXCEPTION_RULE_KEY,
+                "-swallowed-exception", "Swallowed Exception rule"),
         UNCAUGHT_EXCEPTION("Uncaught Exception", UncaughtExceptionCount,
-                RuleType.BUG, Severity.MAJOR,
-                "UncaughtException", Constants.UNCAUGHT_EXCEPTION_RULE_KEY,
+                RuleType.BUG, Severity.MAJOR, Constants.UNCAUGHT_EXCEPTION_RULE_KEY,
                 "-uncaught-exception", "Uncaught Exception rule"),
         LOGGED_ERROR("Logged Error", LogErrorCount,
-                RuleType.BUG, Severity.MINOR,
-                "", Constants.LOGGED_ERROR_RULE_KEY,
-                "", ""),
+                RuleType.BUG, Severity.MINOR, Constants.LOGGED_ERROR_RULE_KEY,
+                "-logged-error", "Logged Error rule"),
         CUSTOM_EVENT("Custom Event", CustomExceptionCount,
-                RuleType.BUG, Severity.MAJOR,
-                "", Constants.CUSTOM_EVENT_RULE_KEY,
-                "", ""),
+                RuleType.BUG, Severity.MAJOR, Constants.CUSTOM_EVENT_RULE_KEY,
+                "-custom-event", "Custom Event rule"),
         HTTP_ERROR("HTTP Error", HTTPErrors,
-                RuleType.BUG, Severity.MINOR,
-                "", Constants.HTTP_ERROR_RULE_KEY,
-                "", ""),
+                RuleType.BUG, Severity.MINOR, Constants.HTTP_ERROR_RULE_KEY,
+                "-http-error", "HTTP Error rule"),
         CRITICAL_EXCEPTION("Critical Exception", CriticalExceptionCount,
-                RuleType.BUG, Severity.MAJOR,
-                "", Constants.CRITICAL_EXCEPTION_RULE_KEY,
-                "", "");
+                RuleType.BUG, Severity.MAJOR, Constants.CRITICAL_EXCEPTION_RULE_KEY,
+                "-critical-exception", "Critical Exception rule");
 
         public final String overOpsType;
         public final Metric metric;
         public final RuleType ruleType;
         public final Severity severity;
-        public final String patterName;
         public final String ruleKey;
         public final String ruleFullKey;
         public final String[] ruleTags;
@@ -133,7 +129,6 @@ public class OverOpsMetrics implements Metrics {
                       Metric metric,
                       RuleType ruleType,
                       Severity severity,
-                      String patterName,
                       String ruleKey,
                       String ruleTagEnding,
                       String ruleTitle) {
@@ -141,7 +136,6 @@ public class OverOpsMetrics implements Metrics {
             this.metric = metric;
             this.ruleType = ruleType;
             this.severity = severity;
-            this.patterName = patterName;
             this.ruleKey = ruleKey;
             this.ruleFullKey = REPOSITORY_KEY + ":" + ruleKey;
             this.ruleTags = new String[]{OVEROPS_ROOT_TAG, OVEROPS_ROOT_TAG + ruleTagEnding};
@@ -184,7 +178,7 @@ public class OverOpsMetrics implements Metrics {
             public static final String UNCAUGHT_EXCEPTION_RULE_KEY = "UncaughtException";
             public static final String LOGGED_ERROR_RULE_KEY = "LoggedError";
             public static final String CUSTOM_EVENT_RULE_KEY = "CustomEvent";
-            public static final String HTTP_ERROR_RULE_KEY = "HTTP Error";
+            public static final String HTTP_ERROR_RULE_KEY = "HTTPError";
             public static final String CRITICAL_EXCEPTION_RULE_KEY = "CriticalException";
         }
     }

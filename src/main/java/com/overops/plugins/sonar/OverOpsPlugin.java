@@ -19,11 +19,12 @@
  */
 package com.overops.plugins.sonar;
 
-import com.overops.plugins.sonar.measures.EventsStatistic;
+import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
 import com.overops.plugins.sonar.measures.MeasureDefinition;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.rules.RuleDefinitionImplementation;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
@@ -50,6 +51,7 @@ public class OverOpsPlugin implements Plugin {
 	public static final String DEFAULT_OVER_OPS_API_HOST = "https://api.overops.com";
 	public static final String SONAR_HOST_PROPERTY = "sonar.host.url";
 	public static String SONAR_HOST_URL;
+	public static String AUTH_DATA;
 
 	public static String environmentKey;
 	public static String appHost;
@@ -62,7 +64,7 @@ public class OverOpsPlugin implements Plugin {
 	public static RemoteApiClient apiClient;
 	public static long daysSpan;
 	public static EventsResult volumeResult;
-	public static EventsStatistic eventsStatistic;
+	public static OverOpsEventsStatistic overOpsEventsStatistic;
 
 	public HashMap<String, Integer> exceptions;
 	private String viewId;
@@ -78,6 +80,12 @@ public class OverOpsPlugin implements Plugin {
 	}
 
 	private boolean getOverOpsDataAndCreateStatistic(Context context) {
+		if (overOpsEventsStatistic != null) {
+			return true;
+		}
+
+		overOpsEventsStatistic = new OverOpsEventsStatistic();
+
 		Configuration config = context.getBootConfiguration();
 		getConfigProperties(config);
 
@@ -100,9 +108,8 @@ public class OverOpsPlugin implements Plugin {
 
 		volumeResult = volumeResponse.data;
 
-		eventsStatistic = new EventsStatistic();
 		for (EventResult event : volumeResult.events) {
-			eventsStatistic.add(event);
+			overOpsEventsStatistic.add(event);
 		}
 
 		return true;
@@ -123,6 +130,12 @@ public class OverOpsPlugin implements Plugin {
 		applicationName = config.get(OverOpsProperties.SONAR_OVEROPS_APP_NAME).orElse(null);
 		daysSpan = config.getLong(OverOpsProperties.SONAR_OVEROPS_SPAN_DAYS).orElse(DEFAULT_SPAN_DAYS);
 		viewId = config.get(OverOpsProperties.SONAR_OVEROPS_VIEW_ID).orElse(DEFAULT_VIEWID);
+
+		String userName = config.get(OverOpsProperties.SONAR_OVEROPS_USER_NAME).orElse("admin");
+		String userPassword = config.get(OverOpsProperties.SONAR_OVEROPS_USER_PASSWORD).orElse("admin");
+		AUTH_DATA = Base64.encode(new StringBuilder()
+				.append(userName).append(":").append(userPassword)
+				.toString().getBytes());
 
 		to = DateTime.now();
 		from = to.minusDays((int) daysSpan);

@@ -15,24 +15,16 @@ public class OverOpsChecks {
     public static final String OVEROPS_ROOT_TAG = "overops";
 
     static {
-        initChecks(defaultChecks);
-    }
-
-    private static void initChecks(final @Nonnull Collection<Class<? extends JavaCheck>> checks) {
-        checks.add(OverOpsCaughtExceptionCheck.class);
-        checks.add(OverOpsUncaughtExceptionCheck.class);
+        defaultChecks.add(OverOpsCaughtExceptionCheck.class);
+        defaultChecks.add(OverOpsUncaughtExceptionCheck.class);
+        defaultChecks.add(OverOpsCustomEventCheck.class);
+        defaultChecks.add(OverOpsCriticalExceptionCheck.class);
+        defaultChecks.add(OverOpsHTTPErrorCheck.class);
+        defaultChecks.add(OverOpsLoggedErrorCheck.class);
+        defaultChecks.add(OverOpsSwallowedExceptionCheck.class);
     }
 
     public static Collection<Class<? extends JavaCheck>> getChecks() {
         return Collections.unmodifiableCollection(defaultChecks);
     }
-
-    static Class<?>[] getChecksAsArray() {
-        return getClassArray(getChecks());
-    }
-
-    private static Class<?>[] getClassArray(final @Nonnull Collection<Class<? extends JavaCheck>> checks) {
-        return checks.toArray(new Class[checks.size()]);
-    }
-
 }
