@@ -1,5 +1,6 @@
 package com.overops.plugins.sonar;
 
+import com.google.common.io.Files;
 import com.google.common.net.HttpHeaders;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -14,23 +15,40 @@ import com.takipi.api.client.util.event.EventUtil;
 import com.takipi.api.core.url.UrlClient;
 import com.takipi.common.util.Pair;
 import org.codehaus.plexus.util.StringUtils;
+import org.sonar.api.CoreProperties;
+import org.sonar.api.batch.AnalysisMode;
+import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.postjob.PostJob;
 import org.sonar.api.batch.postjob.PostJobContext;
 import org.sonar.api.batch.postjob.PostJobDescriptor;
+import org.sonar.api.config.Settings;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
+import org.sonarqube.ws.Ce;
+import org.sonarqube.ws.MediaTypes;
+import org.sonarqube.ws.client.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.overops.plugins.sonar.OverOpsPlugin.*;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.*;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.EXCEPTION_PATTERN;
 
 public class AddCommentsPostJob implements PostJob {
+
+    private static final Logger LOGGER = Loggers.get(AddCommentsPostJob.class);
+    private final FileSystem fileSystem;
+    private final Settings settings;
+
     private static final Gson GSON;
 
     static {
@@ -39,17 +57,28 @@ public class AddCommentsPostJob implements PostJob {
 
     private static final Logger log = Loggers.get(AddCommentsPostJob.class);
 
+    public AddCommentsPostJob(FileSystem fileSystem, Settings settings) {
+        this.fileSystem = fileSystem;
+        this.settings = settings;
+    }
+
     @Override
     public void describe(PostJobDescriptor postJobDescriptor) {
     }
 
+
     @Override
     public void execute(PostJobContext postJobContext) {
+        if (overOpsEventsStatistic == null || overOpsEventsStatistic.getStatistic().size() == 0) {
+            LOGGER.info("No OverOps issues for post job");
+            return;
+        }
+
         waitForSonarQubeCreatIssuesInDb();
 
         Collection<OverOpsEventsStatistic.ClassStat> statistic = overOpsEventsStatistic.getStatistic();
         for (OverOpsEventsStatistic.ClassStat classStat : statistic) {
-            log.info("    " +classStat.fileName);
+            log.info("    " + classStat.fileName);
             for (String exName : classStat.typeToEventStat.keySet()) {
                 log.info("           " + exName);
             }
@@ -61,13 +90,64 @@ public class AddCommentsPostJob implements PostJob {
         }
     }
 
-    private void waitForSonarQubeCreatIssuesInDb() {
-        //This is an empirical workaround to be in phase when all created by OverOps plugin issues were available through WEB API
+    private Properties loadReportTaskProps() {
+        File reportTaskFile = new File(fileSystem.workDir(), "report-task.txt");
+        Properties reportTaskProps = new Properties();
+
         try {
-            Thread.sleep(60 * 1000);
-        } catch (InterruptedException e) {
+            reportTaskProps.load(Files.newReader(reportTaskFile, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            LOGGER.info("Unable to load properties from file " + reportTaskFile, e);
+        }
+
+        return reportTaskProps;
+    }
+
+    private void waitForSonarQubeCreatIssuesInDb() {
+        try {
+            Properties reportTaskProps = loadReportTaskProps();
+            HttpConnector httpConnector =
+                    HttpConnector.newBuilder()
+                            .url(reportTaskProps.getProperty("serverUrl"))
+                            .credentials(
+                                    settings.getString(CoreProperties.LOGIN),
+                                    settings.getString(CoreProperties.PASSWORD))
+                            .build();
+
+            WsClient wsClient = WsClientFactories.getDefault().newClient(httpConnector);
+            String ceTaskId = reportTaskProps.getProperty("ceTaskId");
+            WsRequest ceTaskRequest =
+                    new GetRequest("api/ce/task").setParam("id", ceTaskId).setMediaType(MediaTypes.PROTOBUF);
+
+            tryGetReport(wsClient, ceTaskRequest, 1000, 1000);
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean tryGetReport(WsClient wsClient, WsRequest ceTaskRequest, int queryMaxAttempts, int queryInterval) {
+        for (int attempts = 0; attempts < queryMaxAttempts; attempts++) {
+            WsResponse wsResponse = wsClient.wsConnector().call(ceTaskRequest);
+            try {
+                Ce.TaskResponse taskResponse = Ce.TaskResponse.parseFrom(wsResponse.contentStream());
+                Ce.TaskStatus taskStatus = taskResponse.getTask().getStatus();
+
+                switch (taskStatus) {
+                    case IN_PROGRESS:
+                    case PENDING:
+                        LOGGER.info("Waiting for report processing to complete...");
+                        Thread.sleep(queryInterval);
+                        break;
+                    case SUCCESS:
+                        return true;
+                    default:
+                        LOGGER.info("Report processing did not complete successfully: " + taskStatus);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 
 
@@ -87,7 +167,7 @@ public class AddCommentsPostJob implements PostJob {
         UrlClient.Response<String> stringResponse = SimpleUrlClient.newBuilder().build().get(issuesPerRuleRequest);
 
         SQIssuesResponse sqIssuesResponse = GSON.fromJson(stringResponse.data, SQIssuesResponse.class);
-        for (SQIssue sqIssue :sqIssuesResponse.issues) {
+        for (SQIssue sqIssue : sqIssuesResponse.issues) {
             if ((sqIssue.status == null) ||
                     (sqIssue.status.indexOf("OPEN") == -1)) {
                 continue;
@@ -150,7 +230,7 @@ public class AddCommentsPostJob implements PostJob {
                     .addQueryParam("text", URLEncoder.encode(description, StandardCharsets.UTF_8.toString()))
                     .build();
             SimpleUrlClient.newBuilder()
-                    .setAuth(Pair.of(HttpHeaders.AUTHORIZATION,"Basic " + AUTH_DATA))
+                    .setAuth(Pair.of(HttpHeaders.AUTHORIZATION, "Basic " + AUTH_DATA))
                     .build().post(addComment);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -161,7 +241,7 @@ public class AddCommentsPostJob implements PostJob {
         String stackTrace = new TextBuilder().addArray(eventResult.stack_frames, "> at ").build();
 
         return "*Drill down into* " +
-                "[Event Analysis]("+ getARCLinkForEvent(issueEventId) + ")" + "\n" +
+                "[Event Analysis](" + getARCLinkForEvent(issueEventId) + ")" + "\n" +
                 "*Stack trace:*\n" +
                 stackTrace;
     }
@@ -173,23 +253,22 @@ public class AddCommentsPostJob implements PostJob {
 
     private String getARCLinkForEvent(String eventId) {
         String arcLink = null;
-        try { arcLink = EventUtil.getEventRecentLinkDefault(apiClient, environmentKey, eventId, from, to,
-                Arrays.asList(applicationName), Arrays.asList(), Arrays.asList(deploymentName),
-                (int) (1440 * daysSpan)
-
-
-        );
+        try {
+            arcLink = EventUtil.getEventRecentLinkDefault(apiClient, environmentKey, eventId, from, to,
+                    Arrays.asList(applicationName), Arrays.asList(), Arrays.asList(deploymentName),
+                    (int) (1440 * daysSpan)
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
         if (arcLink == null) {
-            arcLink = " WE detect null arc EventUtil.getEventRecentLinkDefault( apiClient, \"" +
-                    "\" ,  \"" + environmentKey +
+            arcLink = "EventUtil.getEventRecentLinkDefault( apiClient," +
+                    "  \"" + environmentKey +
                     "\" ,  \"" + eventId +
                     "\" ,  \"" + from.toString(formatter) +
                     "\" ,  \"" + to.toString(formatter) +
-                    "\" , Arrays.asList(\"" + applicationName +
-                    "\"), Arrays.asList(),  Arrays.asList(\"" + deploymentName + "\")" +
+                    "\" , (\"" + applicationName +
+                    "\"), (), (\"" + deploymentName + "\")" +
                     ", " + String.valueOf((int) (1440 * daysSpan)) + " )";
             log.info(arcLink);
         }

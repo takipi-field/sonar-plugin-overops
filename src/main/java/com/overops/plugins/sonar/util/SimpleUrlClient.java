@@ -25,7 +25,7 @@ public class SimpleUrlClient extends UrlClient {
             String postData = request.postData();
             byte[] data = (Strings.isNullOrEmpty(postData) ? null : postData.getBytes(ApiConstants.UTF8_ENCODING));
 
-            return post(request.urlPath(), auth, data, request.contentType(),
+            return post(request.urlPath(), data, request.contentType(),
                     request.queryParams());
         } catch (Exception e) {
             logger.error("Api url client POST {} failed.", request.getClass().getName(), e);
@@ -33,9 +33,18 @@ public class SimpleUrlClient extends UrlClient {
         }
     }
 
+    @Override
+    protected HttpURLConnection getConnection(String targetUrl, String contentType, String[] params) throws Exception {
+        HttpURLConnection connection = super.getConnection(targetUrl, contentType, params);
+        if (auth != null) {
+            connection.setRequestProperty(auth.getFirst(), auth.getSecond());
+        }
+        return connection;
+    }
+
     public <T extends ApiResult> Response<String> get(ApiPostRequest<T> request) {
         try {
-            return get(request.urlPath(), auth, request.contentType(),
+            return get(request.urlPath(), request.contentType(),
                     request.queryParams());
         } catch (Exception e) {
             logger.error("Api url client POST {} failed.", request.getClass().getName(), e);

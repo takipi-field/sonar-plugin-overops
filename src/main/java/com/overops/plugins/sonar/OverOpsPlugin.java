@@ -42,6 +42,8 @@ import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class OverOpsPlugin implements Plugin {
@@ -109,6 +111,11 @@ public class OverOpsPlugin implements Plugin {
 		volumeResult = volumeResponse.data;
 
 		for (EventResult event : volumeResult.events) {
+			LOGGER.info("");
+			LOGGER.info("                      ~~~~~~~~                    ");
+				LOGGER.info(event.id + " " +event.type +  "  " + event.error_location.prettified_name);
+			LOGGER.info("                      ~~~~~~~~                    ");
+			LOGGER.info("");
 			overOpsEventsStatistic.add(event);
 		}
 
@@ -118,6 +125,20 @@ public class OverOpsPlugin implements Plugin {
 
 	private UrlClient.Response<EventsResult> getVolumeResponse(SummarizedView view) {
 		EventsVolumeRequest eventsVolumeRequest = getVolumeRequest(view);
+		LOGGER.info("");
+		LOGGER.info("                      ~~~~~~~~                    ");
+		LOGGER.info(eventsVolumeRequest.urlPath());
+		try {
+		    StringBuilder stringBuilder = new StringBuilder("?");
+		    for (String p : eventsVolumeRequest.queryParams()) {
+		        stringBuilder.append("&").append(p);
+            }
+			LOGGER.info(stringBuilder.toString());
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		LOGGER.info("                      ~~~~~~~~                    ");
+		LOGGER.info("");
 		return apiClient.get(eventsVolumeRequest);
 	}
 

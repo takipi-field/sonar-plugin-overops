@@ -1,17 +1,21 @@
 package com.overops.plugins.sonar.measures;
 
 import com.takipi.api.client.result.event.EventResult;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class OverOpsEventsStatistic {
+    private static final Logger LOGGER = Loggers.get(OverOpsEventsStatistic.class);
     private Stat stat = new Stat();
 
     public void add(EventResult event) {
         String key = event.error_location.class_name;
         if (stat.get(key) == null) {
+            LOGGER.info("      New stat for  " + key);
             stat.put(key, new ClassStat(event));
         } else {
             stat.update(key, event);
@@ -27,6 +31,9 @@ public class OverOpsEventsStatistic {
         public void update(String key, EventResult event) {
             ClassStat classStat = get(key);
             classStat.increment(event);
+            LOGGER.info("           Update  on " + classStat.fileName +
+                    "  type [ " + event.type +
+                    " ]  times  = " + classStat.typeToEventStat.get(event.type).total);
         }
     }
 

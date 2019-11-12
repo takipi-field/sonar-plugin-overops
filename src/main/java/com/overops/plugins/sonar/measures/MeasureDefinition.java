@@ -1,9 +1,12 @@
 package com.overops.plugins.sonar.measures;
 
+import com.overops.plugins.sonar.OverOpsPlugin;
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
 import org.sonar.api.measures.Metric;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +17,8 @@ import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.ge
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.getMetricsList;
 
 public class MeasureDefinition implements MeasureComputer {
+    private static final Logger log = Loggers.get(MeasureDefinition.class);
+
     @Override
     public MeasureComputerDefinition define(MeasureComputerDefinitionContext def) {
         List<String> collect = getMetricsList().stream().map(metric -> metric.key()).collect(Collectors.toList());
@@ -29,12 +34,18 @@ public class MeasureDefinition implements MeasureComputer {
             String filePathJavaStyle = context.getComponent().getKey().replaceAll("/", ".");
             overOpsEventsStatistic.getStatistic()
                     .stream()
-                    .filter(classStat -> filePathJavaStyle.indexOf(classStat.fileName) != -1)
+                    .filter(classStat -> {
+                        System.out.println("");
+                        System.out.println("component that scan path " + filePathJavaStyle);
+                        System.out.println("classStat.fileName " + classStat.fileName);
+                        return filePathJavaStyle.indexOf(classStat.fileName) != -1;})
                     .collect(Collectors.toList())
                     .forEach(classStat -> classStat.typeToEventStat.forEach((type, eventInClassStat) -> {
                                 Metric metric = getMetric(type);
+                                System.out.println("        event type " + type + "  found " + (metric != null));
                                 if (metric != null) {
-                                    context.addMeasure(metric.getKey(), eventInClassStat.total);
+                                    //If in the same line we had several times event occurs we count it once
+                                    context.addMeasure(metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
                                 }
                             })
                     );
