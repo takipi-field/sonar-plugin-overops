@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class OverOpsEventsStatistic {
     private static final Logger LOGGER = Loggers.get(OverOpsEventsStatistic.class);
+    private OverOpsQualityGateStat overOpsQualityGateStat;
     private Stat stat = new Stat();
 
     public void add(EventResult event) {
@@ -20,6 +21,10 @@ public class OverOpsEventsStatistic {
         } else {
             stat.update(key, event);
         }
+    }
+
+    public void setOverOpsQualityGateStat(OverOpsQualityGateStat overOpsQualityGateStat) {
+        this.overOpsQualityGateStat = overOpsQualityGateStat;
     }
 
     public Collection<ClassStat> getStatistic() {

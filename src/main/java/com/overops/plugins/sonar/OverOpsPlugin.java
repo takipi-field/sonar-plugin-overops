@@ -22,29 +22,34 @@ package com.overops.plugins.sonar;
 import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
 import com.overops.plugins.sonar.measures.MeasureDefinition;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
+import com.overops.plugins.sonar.measures.OverOpsQualityGateStat;
 import com.overops.plugins.sonar.rules.RuleDefinitionImplementation;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
+import com.takipi.api.client.functions.input.ReliabilityReportInput;
+import com.takipi.api.client.functions.output.ReliabilityReport;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.util.validation.ValidationUtil;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient;
+import com.takipi.common.util.TimeUtil;
 import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.sonar.api.CoreProperties;
 import org.sonar.api.Plugin;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import static com.overops.plugins.sonar.settings.OverOpsProperties.*;
 
@@ -71,7 +76,7 @@ public class OverOpsPlugin implements Plugin {
 	public static OverOpsEventsStatistic overOpsEventsStatistic;
 
 	public HashMap<String, Integer> exceptions;
-	public static String viewId;
+	public static String viewName;
 	public static String newErrorGate;
 	public static String resurfacedErrorGate;
 	public static String criticalErrorTypes;
@@ -111,7 +116,7 @@ public class OverOpsPlugin implements Plugin {
 		}
 
 		apiClient = (RemoteApiClient) RemoteApiClient.newBuilder().setApiKey(apiKey).setHostname(appHost).build();
-		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewId);
+		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewName);
 		if (view == null) {
 			LOGGER.error("Failed getting OverOps View, please check viewId or environmentKey.");
 			return false;
@@ -125,7 +130,9 @@ public class OverOpsPlugin implements Plugin {
 
 		volumeResult = volumeResponse.data;
 
-		for (EventResult event : volumeResult.events) {
+        overOpsEventsStatistic.setOverOpsQualityGateStat(new OverOpsQualityGateStat(getRelialabilityReport()));
+
+        for (EventResult event : volumeResult.events) {
 			LOGGER.info("");
 			LOGGER.info("                      ~~~~~~~~                    ");
 				LOGGER.info(event.id + " " +event.type +  "  " + event.error_location.prettified_name);
@@ -137,8 +144,21 @@ public class OverOpsPlugin implements Plugin {
 		return true;
 	}
 
+    private ReliabilityReport getRelialabilityReport() {
+        ReliabilityReportInput reportInput = new ReliabilityReportInput();
+        reportInput.timeFilter = TimeUtil.getLastWindowTimeFilter(TimeUnit.MINUTES.toMillis(daysSpan));
+        reportInput.environments = serviceId;
+        reportInput.view = viewName;
+        reportInput.outputDrillDownSeries = true;
+        reportInput.applications = applicationName;
+        reportInput.deployments = deploymentName;
+        reportInput.mode = ReliabilityReportInput.DEFAULT_REPORT;
 
-	private UrlClient.Response<EventsResult> getVolumeResponse(SummarizedView view) {
+        return ReliabilityReport.execute(apiClient, reportInput);
+    }
+
+
+    private UrlClient.Response<EventsResult> getVolumeResponse(SummarizedView view) {
 		EventsVolumeRequest eventsVolumeRequest = getVolumeRequest(view);
 		LOGGER.info("");
 		LOGGER.info("                      ~~~~~~~~                    ");
@@ -165,7 +185,7 @@ public class OverOpsPlugin implements Plugin {
 		deploymentName = config.get(OverOpsProperties.SONAR_OVEROPS_DEP_NAME).orElse(null);
 		applicationName = config.get(OverOpsProperties.SONAR_OVEROPS_APP_NAME).orElse(null);
 		daysSpan = config.getLong(OverOpsProperties.SONAR_OVEROPS_SPAN_DAYS).orElse(DEFAULT_SPAN_DAYS);
-		viewId = config.get(OverOpsProperties.SONAR_OVEROPS_VIEW_ID).orElse(DEFAULT_VIEWID);
+		viewName = config.get(OverOpsProperties.SONAR_OVEROPS_VIEW_ID).orElse(DEFAULT_VIEWID);
 		newErrorGate = config.get(SONAR_OVEROPS_NEW_ERROR_GATE)
 				.orElse(NEW_ERRORS_GATE_DEFAULT);
 		resurfacedErrorGate = config.get(SONAR_OVEROPS_RESURFACED_ERROR_GATE)
@@ -206,7 +226,7 @@ public class OverOpsPlugin implements Plugin {
 		if (StringUtils.isEmpty(apiKey) ||
 				StringUtils.isEmpty(serviceId) ||
 				StringUtils.isEmpty(appHost) ||
-				StringUtils.isEmpty(viewId)) {
+				StringUtils.isEmpty(viewName)) {
 			LOGGER.error("Failed to process OverOps sensor one of [apiKey, environmentKey, appHost, viewId] properties is empty. Please check project OverOps configuration.");
 			return false;
 		}
@@ -230,7 +250,7 @@ public class OverOpsPlugin implements Plugin {
 		LOGGER.info("deploymentName :" + deploymentName);
 		LOGGER.info("applicationName :" + applicationName);
 		LOGGER.info("daysSpan :" + daysSpan);
-		LOGGER.info("viewId :" + viewId);
+		LOGGER.info("viewId :" + viewName);
 		LOGGER.info("newErrorGate :" + newErrorGate);
 		LOGGER.info("resurfacedErrorGate :" + resurfacedErrorGate);
 		LOGGER.info("criticalErrorTypes :" + criticalErrorTypes);

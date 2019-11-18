@@ -8,6 +8,7 @@ import com.takipi.api.client.functions.output.EventRow;
 import com.takipi.api.client.functions.output.RegressionRow;
 import com.takipi.api.client.functions.output.ReliabilityReport;
 import com.takipi.api.client.functions.output.ReliabilityReportRow;
+import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.util.regression.RegressionInput;
@@ -39,7 +40,7 @@ public class OOResearch {
         String application = "App1";
         String view = "View1";
         String deployment = "Dep1";
-        int daysSpan = 2;
+        int daysSpan = 7;
         int time_span = 24 * 60 * daysSpan;
         DateTime to = DateTime.now();
         DateTime from = to.minusDays((int) daysSpan);
@@ -61,9 +62,19 @@ public class OOResearch {
                 .setTo(to.toString(formatter)).setViewId(summarizedView.id)
                 .addApp(application)
                 .addDeployment(deployment)
-                .setVolumeType(ValidationUtil.VolumeType.hits)
+                .setVolumeType(ValidationUtil.VolumeType.all)
                 .setIncludeStacktrace(true)
                 .build();
+
+        EventsRequest allEventsRequest = EventsRequest.newBuilder().setServiceId(serviceId).setFrom(from.toString(formatter))
+                .setTo(to.toString(formatter)).setViewId(summarizedView.id)
+                .addApp(application)
+                .addDeployment(deployment)
+                .setIncludeStacktrace(true)
+                .build();
+        UrlClient.Response<EventsResult> alleEventsResult = apiClient.get(allEventsRequest);
+
+
 
         ReliabilityReport reliabilityReport = ReliabilityReport.execute(apiClient, reportInput);
 
@@ -88,21 +99,28 @@ public class OOResearch {
         System.out.println(" ------------------------------------- ");
         System.out.println(" Volume events");
         System.out.println("  ");
-        if (eventsResultResponse.data != null) {
+        if (eventsResultResponse.data != null && eventsResultResponse.data.events != null) {
             eventsResultResponse.data.events.forEach( event -> {
-                System.out.println("  " + event.id + " in " + event.error_location);
+                System.out.println("  " + event.id + " in " + event.error_location + "  labels " + event.labels);
                 eventIdSetFromVolume.add(event.id);
             });
         }
 
-        eventIdSetFromReport.removeAll(eventIdSetFromVolume);
-        System.out.println(" ------------------------------------- ");
-        System.out.println(" ------------------------------------- ");
-        System.out.println(" Report event ids minus volume, should be empty ");
-        System.out.println("  ");
-        eventIdSetFromReport.forEach(id -> {
-            System.out.println(" id " + id);
+        Set<String> intersection = new HashSet<>();
+        eventIdSetFromReport.stream().forEach(id-> {
+            if(eventIdSetFromVolume.contains(id)){
+                intersection.add(id);
+            }
         });
+        eventIdSetFromReport.removeAll(eventIdSetFromVolume);
+//        System.out.println(" ------------------------------------- ");
+//        System.out.println(" ------------------------------------- ");
+//        System.out.println(" Report event ids minus volume, should be empty ");
+//        System.out.println("  ");
+//
+//        eventIdSetFromReport.forEach(id -> {
+//            System.out.print("{ id:" + id + " } , ");
+//        });
     }
 
     private static void printResurfacedErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
@@ -113,8 +131,9 @@ public class OOResearch {
         for (EventRow row : rrItem.errors) {
             if((row.labels != null) &&
                     (row.labels.indexOf("Resurfaced") != -1))
-            System.out.println("  " + row.id + " in " + row.error_location);
+            System.out.print("{ id:" + row.id + " , error_location: " + row.error_location + " } , ");
         }
+        System.out.println("  ");
     }
 
     private static void printCriticalErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
@@ -123,8 +142,9 @@ public class OOResearch {
         System.out.println(" Critical events ");
         System.out.println("  ");
         for (EventRow row : rrItem.failures) {
-            System.out.println("  " + row.id + " in " + row.error_location);
+            System.out.print("{ id:" + row.id + " , error_location: " + row.error_location + " } , ");
         }
+        System.out.println("  ");
     }
 
     private static void printIncreasingErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
@@ -132,8 +152,9 @@ public class OOResearch {
         System.out.println(" Increasing events ");
         System.out.println("  ");
         for (RegressionRow row : rrItem.geIncErrors(true, true)) {
-            System.out.println("  " + row.id + " in " + row.error_location);
+            System.out.print("{ id:" + row.id + " , error_location: " + row.error_location + " } , ");
         }
+        System.out.println("  ");
     }
 
     private static void printNewErrors(Set<String> eventIdSetFromReport, ReliabilityReport.ReliabilityReportItem rrItem) {
@@ -141,10 +162,17 @@ public class OOResearch {
         System.out.println(" ------------------------------------- ");
         System.out.println(" New events ");
         System.out.println("  ");
+        int i = 1;
         for (RegressionRow row : rrItem.getNewErrors(true, true)) {
-            System.out.println("  " + row.id + " in " + row.error_location);
+
+            System.out.print("{ id:" + row.id + " , error_location: " + row.error_location + " } , ");
             eventIdSetFromReport.add(row.id);
+            if (i % 4 == 0) {
+                System.out.println("  ");
+            }
+            i++;
         }
+        System.out.println("  ");
     }
 
     private static RegressionInput getRegressionInput() {
@@ -154,7 +182,7 @@ public class OOResearch {
                 RegressionUtil.getDeploymentsActiveWindow(apiClient, OverOpsPlugin.serviceId, deployments);
 
         regressionInput.serviceId = OverOpsPlugin.serviceId;
-        regressionInput.viewId = OverOpsPlugin.viewId;
+        regressionInput.viewId = OverOpsPlugin.viewName;
         regressionInput.activeWindowStart = deploymentsActiveWindow.getFirst();
         //TODO do we need fill if yes then how? regressionInput.activeTimespan;
         //TODO do we need fill if yes then how? regressionInput.baselineTimespan;
