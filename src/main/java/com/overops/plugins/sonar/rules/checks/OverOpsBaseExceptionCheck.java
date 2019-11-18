@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.overops.plugins.sonar.OverOpsPlugin.environmentKey;
+import static com.overops.plugins.sonar.OverOpsPlugin.serviceId;
 import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
 
 public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implements JavaFileScanner {
@@ -66,7 +66,7 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
         log.info("event.error_location.original_line_number " + event.error_location.original_line_number);
         log.info(" file lines : " + fileCount + "    overops line " + method_position + " is inside " + (isMethodPresent? " YES " : " NO ") + file.getPath());
 
-        String url = "https://api.overops.com/api/v1/services/"+ environmentKey+"/events/" + event.id;
+        String url = "https://api.overops.com/api/v1/services/"+ serviceId +"/events/" + event.id;
         log.info("url " + url);
         String issueTitle = getIssueTitle(lineStat);
 

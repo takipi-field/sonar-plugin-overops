@@ -4,24 +4,28 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.functions.input.ReliabilityReportInput;
+import com.takipi.api.client.functions.output.EventRow;
 import com.takipi.api.client.functions.output.RegressionRow;
 import com.takipi.api.client.functions.output.ReliabilityReport;
 import com.takipi.api.client.functions.output.ReliabilityReportRow;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.result.event.EventsResult;
+import com.takipi.api.client.util.regression.RegressionInput;
+import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.validation.ValidationUtil;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient;
+import com.takipi.common.util.Pair;
 import com.takipi.common.util.TimeUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import java.net.HttpURLConnection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static com.overops.plugins.sonar.OverOpsPlugin.apiClient;
 
 public class OOResearch {
     public static void main(String[] args) {
@@ -49,6 +53,7 @@ public class OOResearch {
         reportInput.applications = application;
         reportInput.deployments = deployment;
         reportInput.mode = ReliabilityReportInput.DEFAULT_REPORT;
+        //reportInput.regressionInput = getRegressionInput();
 
         SummarizedView summarizedView = ViewUtil.getServiceViewByName(apiClient, serviceId, view);
 
@@ -69,21 +74,11 @@ public class OOResearch {
             ReliabilityReportRow.Header rrHeader = entry.getKey();
             ReliabilityReport.ReliabilityReportItem rrItem = entry.getValue();
 
-            System.out.println("  ");
-            System.out.println(" ------------------------------------- ");
-            System.out.println(" New events ");
-            System.out.println("  ");
-            for (RegressionRow row : rrItem.getNewErrors(true, true)) {
-                System.out.println("  " + row.id + " in " + row.error_location);
-                eventIdSetFromReport.add(row.id);
-            }
-            System.out.println(" ------------------------------------- ");
-            System.out.println(" ------------------------------------- ");
-            System.out.println(" Increasing events ");
-            System.out.println("  ");
-            for (RegressionRow row : rrItem.geIncErrors(true, true)) {
-                System.out.println("  " + row.id + " in " + row.error_location);
-            }
+            printNewErrors(eventIdSetFromReport, rrItem);
+            printIncreasingErrors(rrItem);
+            printCriticalErrors(rrItem);
+            printResurfacedErrors(rrItem);
+
             System.out.println(" ------------------------------------- ");
             System.out.println("  ");
         }
@@ -108,5 +103,74 @@ public class OOResearch {
         eventIdSetFromReport.forEach(id -> {
             System.out.println(" id " + id);
         });
+    }
+
+    private static void printResurfacedErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
+        System.out.println("  ");
+        System.out.println(" ------------------------------------- ");
+        System.out.println(" Resurfaced events ");
+        System.out.println("  ");
+        for (EventRow row : rrItem.errors) {
+            if((row.labels != null) &&
+                    (row.labels.indexOf("Resurfaced") != -1))
+            System.out.println("  " + row.id + " in " + row.error_location);
+        }
+    }
+
+    private static void printCriticalErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
+        System.out.println("  ");
+        System.out.println(" ------------------------------------- ");
+        System.out.println(" Critical events ");
+        System.out.println("  ");
+        for (EventRow row : rrItem.failures) {
+            System.out.println("  " + row.id + " in " + row.error_location);
+        }
+    }
+
+    private static void printIncreasingErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
+        System.out.println(" ------------------------------------- ");
+        System.out.println(" Increasing events ");
+        System.out.println("  ");
+        for (RegressionRow row : rrItem.geIncErrors(true, true)) {
+            System.out.println("  " + row.id + " in " + row.error_location);
+        }
+    }
+
+    private static void printNewErrors(Set<String> eventIdSetFromReport, ReliabilityReport.ReliabilityReportItem rrItem) {
+        System.out.println("  ");
+        System.out.println(" ------------------------------------- ");
+        System.out.println(" New events ");
+        System.out.println("  ");
+        for (RegressionRow row : rrItem.getNewErrors(true, true)) {
+            System.out.println("  " + row.id + " in " + row.error_location);
+            eventIdSetFromReport.add(row.id);
+        }
+    }
+
+    private static RegressionInput getRegressionInput() {
+        RegressionInput regressionInput = new RegressionInput();
+        List<String> deployments = Arrays.asList(OverOpsPlugin.deploymentName);
+        Pair<DateTime, DateTime> deploymentsActiveWindow =
+                RegressionUtil.getDeploymentsActiveWindow(apiClient, OverOpsPlugin.serviceId, deployments);
+
+        regressionInput.serviceId = OverOpsPlugin.serviceId;
+        regressionInput.viewId = OverOpsPlugin.viewId;
+        regressionInput.activeWindowStart = deploymentsActiveWindow.getFirst();
+        //TODO do we need fill if yes then how? regressionInput.activeTimespan;
+        //TODO do we need fill if yes then how? regressionInput.baselineTimespan;
+        //TODO do we need fill if yes then how? regressionInput.baselineTime;
+        //TODO do we need fill if yes then how? regressionInput.minVolumeThreshold;
+        //TODO do we need fill if yes then how? regressionInput.minErrorRateThreshold;
+        //TODO do we need fill if yes then how? regressionInput.regressionDelta;
+        //TODO do we need fill if yes then how? regressionInput.criticalRegressionDelta;
+        regressionInput.applySeasonality = "true".equalsIgnoreCase(OverOpsPlugin.increasingErrorGateApplySeasonality);
+        regressionInput.criticalExceptionTypes = Arrays.asList(OverOpsPlugin.criticalErrorTypes.split(","));
+        //TODO do we need fill if yes then how? regressionInput.typeThresholdsMap;
+        regressionInput.applictations = Arrays.asList(OverOpsPlugin.applicationName);
+        regressionInput.deployments = deployments;
+        //TODO do we need fill? regressionInput.servers
+        //TODO do we need fill? regressionInput.events;
+        //TODO do we need fill? regressionInput.baselineGraph;
+        return regressionInput;
     }
 }

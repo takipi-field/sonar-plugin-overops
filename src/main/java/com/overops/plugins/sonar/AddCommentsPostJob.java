@@ -16,7 +16,6 @@ import com.takipi.api.core.url.UrlClient;
 import com.takipi.common.util.Pair;
 import org.codehaus.plexus.util.StringUtils;
 import org.sonar.api.CoreProperties;
-import org.sonar.api.batch.AnalysisMode;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.postjob.PostJob;
 import org.sonar.api.batch.postjob.PostJobContext;
@@ -254,7 +253,7 @@ public class AddCommentsPostJob implements PostJob {
     private String getARCLinkForEvent(String eventId) {
         String arcLink = null;
         try {
-            arcLink = EventUtil.getEventRecentLinkDefault(apiClient, environmentKey, eventId, from, to,
+            arcLink = EventUtil.getEventRecentLinkDefault(apiClient, serviceId, eventId, from, to,
                     Arrays.asList(applicationName), Arrays.asList(), Arrays.asList(deploymentName),
                     (int) (1440 * daysSpan)
             );
@@ -263,7 +262,7 @@ public class AddCommentsPostJob implements PostJob {
         }
         if (arcLink == null) {
             arcLink = "EventUtil.getEventRecentLinkDefault( apiClient," +
-                    "  \"" + environmentKey +
+                    "  \"" + serviceId +
                     "\" ,  \"" + eventId +
                     "\" ,  \"" + from.toString(formatter) +
                     "\" ,  \"" + to.toString(formatter) +
