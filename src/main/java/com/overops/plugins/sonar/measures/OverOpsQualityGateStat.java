@@ -11,10 +11,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class OverOpsQualityGateStat {
-    public static final String NEW_ERRORS_QUALITY_GATE = "New";
-    public static final String CRITICAL_ERROR_QUALITY_GATE = "Critical";
-    public static final String RESURFACED_ERROR_QUALITY_GATE = "Resurfaced";
-    public static final String INCREASING_ERRORS_QUALITY_GATE = "Increasing";
+    public static final String NEW_QG_MARKER = "New";
+    public static final String CRITICAL_QG_MARKER = "Critical";
+    public static final String RESURFACED_QG_MARKER = "Resurfaced";
+    public static final String INCREASING_QG_MARKER = "Increasing";
 
     public Set<String> newEventsIds = new HashSet<>();
     public Set<String> resurfacedEventsIds = new HashSet<>();
@@ -75,16 +75,20 @@ public class OverOpsQualityGateStat {
     public Set<String> getQualityGates(String  id) {
         Set<String> result = new TreeSet<>();
         if (newEventsIds.contains(id)) {
-            result.add(NEW_ERRORS_QUALITY_GATE);
+            result.add(NEW_QG_MARKER);
         }
         if (resurfacedEventsIds.contains(id)) {
-            result.add(RESURFACED_ERROR_QUALITY_GATE);
+            result.add(RESURFACED_QG_MARKER);
         }
         if (criticalEventsIds.contains(id)) {
-            result.add(CRITICAL_ERROR_QUALITY_GATE);
+            result.add(CRITICAL_QG_MARKER);
         }
         if (increasingEventsIds.contains(id)) {
-            result.add(INCREASING_ERRORS_QUALITY_GATE);
+            result.add(INCREASING_QG_MARKER);
+        }
+
+        if (result.size()==0) {
+            result.add("NO_QUALITY_GATE_IT_SHOULD_BE_VERIFIED");
         }
 
         return result;

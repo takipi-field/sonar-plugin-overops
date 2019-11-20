@@ -38,62 +38,6 @@ public class OverOpsMetrics implements Metrics {
     public static final Pattern EXCEPTION_PATTERN = Pattern.compile(" has been detected \\[ID-(.*?)\\]");
     public static String OVER_OPS_DOMAIN = "OverOps Quality Gates";
 
-    public static final Metric<Integer> CaughtExceptionCount = new Metric.Builder("overops_caught_exception", "Caught Exceptions", Metric.ValueType.INT)
-            .setDescription("Caught Exception Count")
-            .setQualitative(true)
-            .setDirection(Metric.DIRECTION_WORST)
-            .setDomain(OVER_OPS_DOMAIN)
-            .setBestValue(0.0)
-            .create();
-
-    public static final Metric<Integer> UncaughtExceptionCount = new Metric.Builder("overops_uncaught_exceptions", "Uncaught Exceptions", Metric.ValueType.INT)
-            .setDescription("Number of Uncaught Exception")
-            .setQualitative(true)
-            .setDirection(Metric.DIRECTION_WORST)
-            .setDomain(OVER_OPS_DOMAIN)
-            .setBestValue(0.0)
-            .create();
-
-    public static final Metric<Integer> SwallowedExceptionCount = new Metric.Builder("overops_swallowed_exceptions", "Swallowed Exceptions", Metric.ValueType.INT)
-            .setDescription("Swallowed Exception Count")
-            .setQualitative(true)
-            .setDirection(Metric.DIRECTION_WORST)
-            .setDomain(OVER_OPS_DOMAIN)
-            .setBestValue(0.0)
-            .create();
-
-    public static final Metric<Integer> LogErrorCount = new Metric.Builder("overops_log_exceptions", "Log Errors", Metric.ValueType.INT)
-            .setDescription("Log Error Count")
-            .setQualitative(true)
-            .setDirection(Metric.DIRECTION_WORST)
-            .setDomain(OVER_OPS_DOMAIN)
-            .setBestValue(0.0)
-            .create();
-
-    public static final Metric<Integer> CustomExceptionCount = new Metric.Builder("overops_custom_errors", "Custom Errors", Metric.ValueType.INT)
-            .setDescription("Custom Error Count")
-            .setQualitative(true)
-            .setDirection(Metric.DIRECTION_WORST)
-            .setDomain(OVER_OPS_DOMAIN)
-            .setBestValue(0.0)
-            .create();
-
-    public static final Metric<Integer> HTTPErrors = new Metric.Builder("overops_http_errors", "HTTP Errors", Metric.ValueType.INT)
-            .setDescription("HTTP Error Count")
-            .setQualitative(true)
-            .setDirection(Metric.DIRECTION_WORST)
-            .setDomain(OVER_OPS_DOMAIN)
-            .setBestValue(0.0)
-            .create();
-
-    public static final Metric<Integer> CriticalExceptionCount = new Metric.Builder("overops_critical_exception", "Critical Exception", Metric.ValueType.INT)
-            .setDescription("Critical Exception Count")
-            .setQualitative(true)
-            .setDirection(Metric.DIRECTION_WORST)
-            .setDomain(OVER_OPS_DOMAIN)
-            .setBestValue(0.0)
-            .create();
-
     public static final Metric<Integer> NewQualityGateCount = new Metric.Builder("overops_new_quality_gate", "New Exceptions", Metric.ValueType.INT)
             .setDescription("New Exceptions")
             .setQualitative(true)
@@ -127,39 +71,22 @@ public class OverOpsMetrics implements Metrics {
             .create();
 
     public enum OverOpsMetric {
-        CAUGHT_EXCEPTION("Caught Exception", CaughtExceptionCount,
-                RuleType.BUG, Severity.MAJOR, Constants.CAUGHT_EXCEPTION_RULE_KEY,
-                "-caught-exception", "Caught Exception rule", new String[]{"notgate"}),
-        SWALLOWED_EXCEPTION("Swallowed Exception", SwallowedExceptionCount,
-                RuleType.BUG, Severity.MAJOR, Constants.SWALLOWED_EXCEPTION_RULE_KEY,
-                "-swallowed-exception", "Swallowed Exception rule", new String[]{"notgate"}),
-        UNCAUGHT_EXCEPTION("Uncaught Exception", UncaughtExceptionCount,
-                RuleType.BUG, Severity.MAJOR, Constants.UNCAUGHT_EXCEPTION_RULE_KEY,
-                "-uncaught-exception", "Uncaught Exception rule", new String[]{"notgate"}),
-        LOGGED_ERROR("Logged Error", LogErrorCount,
-                RuleType.BUG, Severity.MINOR, Constants.LOGGED_ERROR_RULE_KEY,
-                "-logged-error", "Logged Error rule", new String[]{"notgate"}),
-        CUSTOM_EVENT("Custom Event", CustomExceptionCount,
-                RuleType.BUG, Severity.MAJOR, Constants.CUSTOM_EVENT_RULE_KEY,
-                "-custom-event", "Custom Event rule", new String[]{"notgate"}),
-        HTTP_ERROR("HTTP Error", HTTPErrors,
-                RuleType.BUG, Severity.MINOR, Constants.HTTP_ERROR_RULE_KEY,
-                "-http-error", "HTTP Error rule", new String[]{"notgate"}),
-        CRITICAL_EXCEPTION("Critical Exception", CriticalExceptionCount,
-                RuleType.BUG, Severity.MAJOR, Constants.CRITICAL_EXCEPTION_RULE_KEY,
-                "-critical-exception", "Critical Exception rule", new String[]{"notgate"}),
-        NEW_QUALITY_GATE("NEW_QUALITY_GATE", NewQualityGateCount,
-                RuleType.VULNERABILITY, Severity.MAJOR, Constants.NEW_QUALITY_GATE_KEY,
-                "-new", "NEW QUALITY GATE", new String[]{NEW_ERRORS_QUALITY_GATE}),
-        CRITICAL_QUALITY_GATE("CRITICAL_QUALITY_GATE", CriticalQualityGateCount,
-                RuleType.VULNERABILITY, Severity.MAJOR, Constants.CRITICAL_QUALITY_GATE,
-                "-critical", "CRITICAL QUALITY GATE", new String[]{CRITICAL_ERROR_QUALITY_GATE}),
-        RESURFACED_QUALITY_GATE("RESURFACED_QUALITY_GATE", ResurfacedQualityGateCount,
-                RuleType.VULNERABILITY, Severity.MAJOR, Constants.RESURFACED_QUALITY_GATE_KEY,
-                "-resurfaced", "RESURFACED QUALITY GATE", new String[]{RESURFACED_ERROR_QUALITY_GATE}),
-        INCREASING_QUALITY_GATE("INCREASING_QUALITY_GATE", IncreasingQualityGateCount,
-                RuleType.VULNERABILITY, Severity.MAJOR, Constants.INCREASING_QUALITY_GATE_KEY,
-                "-increasing", "INCREASING QUALITY GATE", new String[]{INCREASING_ERRORS_QUALITY_GATE});
+        NEW_QG_METRIC("NEW_QG", NewQualityGateCount,
+                RuleType.VULNERABILITY, Severity.MAJOR, Constants.NEW_QG_KEY,
+                "-new", "NEW QUALITY GATE", new String[]{NEW_QG_MARKER}),
+        CRITICAL_QG_METRIC("CRITICAL_QG", CriticalQualityGateCount,
+                RuleType.VULNERABILITY, Severity.MAJOR, Constants.CRITICAL_QG_KEY,
+                "-critical", "CRITICAL QUALITY GATE", new String[]{CRITICAL_QG_MARKER}),
+        RESURFACED_QG_METRIC("RESURFACED_QG", ResurfacedQualityGateCount,
+                RuleType.VULNERABILITY, Severity.MAJOR, Constants.RESURFACED_QG_KEY,
+                "-resurfaced", "RESURFACED QUALITY GATE", new String[]{RESURFACED_QG_MARKER}),
+        INCREASING_QG_METRIC("INCREASING_QG", IncreasingQualityGateCount,
+                RuleType.VULNERABILITY, Severity.MAJOR, Constants.INCREASING_QG_KEY,
+                "-increasing", "INCREASING QUALITY GATE", new String[]{INCREASING_QG_MARKER}),
+        NEW_CRITICAL_QG_METRIC("NEW_CRITICAL_QG", IncreasingQualityGateCount,
+                RuleType.VULNERABILITY, Severity.MAJOR, Constants.NEW_CRITICAL_QG_KEY,
+                new String[]{"-new", "-critical"}, "NEW AND CRITICAL QUALITY GATE",
+                new String[]{NEW_QG_MARKER, CRITICAL_QG_MARKER});
 
         public final String overOpsType;
         public final Metric metric;
@@ -170,6 +97,7 @@ public class OverOpsMetrics implements Metrics {
         public String[] ruleTags;
         public final String ruleTitle;
         public final Set<String> qualityGate;
+        public final String qualityGateKey;
 
         OverOpsMetric(String overOpsType,
                       Metric metric,
@@ -207,6 +135,7 @@ public class OverOpsMetrics implements Metrics {
             this.ruleFullKey = REPOSITORY_KEY + ":" + ruleKey;
             this.ruleTitle = ruleTitle;
             this.qualityGate = new TreeSet<>(Arrays.asList(qualityGateArray));
+            this.qualityGateKey = getKey(qualityGate);
         }
 
         public static Metric getMetric(String overOpsType) {
@@ -219,11 +148,21 @@ public class OverOpsMetrics implements Metrics {
             return null;
         }
 
+
         public static Metric getMetricByQualityGate(String qualityGateKey) {
             for (OverOpsMetric overOpsMetric : values()) {
-                String key = String.join(".", overOpsMetric.qualityGate);
-                if (key.equals(qualityGateKey)) {
+                if (overOpsMetric.qualityGateKey.equals(qualityGateKey)) {
                     return overOpsMetric.metric;
+                }
+            }
+
+            return null;
+        }
+
+        public static OverOpsMetric getOverOpsByQualityGate(String qualityGateKey) {
+            for (OverOpsMetric overOpsMetric : values()) {
+                if (overOpsMetric.qualityGateKey.equals(qualityGateKey)) {
+                    return overOpsMetric;
                 }
             }
 
@@ -250,18 +189,16 @@ public class OverOpsMetrics implements Metrics {
             return null;
         }
 
+        public boolean isCombo() {
+            return qualityGate.size() > 1;
+        }
+
         public static class Constants {
-            public static final String CAUGHT_EXCEPTION_RULE_KEY = "CaughtException";
-            public static final String SWALLOWED_EXCEPTION_RULE_KEY = "SwallowedException";
-            public static final String UNCAUGHT_EXCEPTION_RULE_KEY = "UncaughtException";
-            public static final String LOGGED_ERROR_RULE_KEY = "LoggedError";
-            public static final String CUSTOM_EVENT_RULE_KEY = "CustomEvent";
-            public static final String HTTP_ERROR_RULE_KEY = "HTTPError";
-            public static final String CRITICAL_EXCEPTION_RULE_KEY = "CriticalException";
-            public static final String NEW_QUALITY_GATE_KEY = "NewQualityGate";
-            public static final String CRITICAL_QUALITY_GATE = "CriticalQualityGate";
-            public static final String RESURFACED_QUALITY_GATE_KEY = "ResurfacedQualityGate";
-            public static final String INCREASING_QUALITY_GATE_KEY = "IncreasingQualityGate";
+            public static final String NEW_QG_KEY = "NewQualityGate";
+            public static final String CRITICAL_QG_KEY = "CriticalQualityGate";
+            public static final String RESURFACED_QG_KEY = "ResurfacedQualityGate";
+            public static final String INCREASING_QG_KEY = "IncreasingQualityGate";
+            public static final String NEW_CRITICAL_QG_KEY = "NewCriticalQualityGate";
         }
     }
 
@@ -271,9 +208,6 @@ public class OverOpsMetrics implements Metrics {
     }
 
     public static List<Metric> getMetricsList() {
-        //return asList(UncaughtExceptionCount, SwallowedExceptionCount, LogErrorCount, CustomExceptionCount, HTTPErrors, CaughtExceptionCount, CriticalExceptionCount, NewQualityGateCount);
-        return asList(NewQualityGateCount, IncreasingQualityGateCount, ResurfacedQualityGateCount, CriticalExceptionCount);
-
+        return asList(NewQualityGateCount, IncreasingQualityGateCount, ResurfacedQualityGateCount, CriticalQualityGateCount);
     }
-
 }

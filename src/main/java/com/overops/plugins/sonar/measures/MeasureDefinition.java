@@ -13,6 +13,7 @@ import java.util.stream.StreamSupport;
 
 import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getMetricByQualityGate;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsByQualityGate;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.getMetricsList;
 
 public class MeasureDefinition implements MeasureComputer {
@@ -40,11 +41,20 @@ public class MeasureDefinition implements MeasureComputer {
                         return filePathJavaStyle.indexOf(classStat.fileName) != -1;})
                     .collect(Collectors.toList())
                     .forEach(classStat -> classStat.qualityGateToEventStat.forEach((qualityGate, eventInClassStat) -> {
-                                Metric metric = getMetricByQualityGate(qualityGate);
-                                System.out.println("        qualityGate [" + qualityGate + "]  metric for it found " + (metric != null));
-                                if (metric != null) {
+                                OverOpsMetrics.OverOpsMetric overOpsMetric = getOverOpsByQualityGate(qualityGate);
+                                System.out.println("        qualityGate [" + qualityGate + "]  overOpsMetric for it found " + (overOpsMetric != null));
+                                if (overOpsMetric != null) {
                                     //If in the same line we had several times event occurs we count it once
-                                    context.addMeasure(metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
+                                    if (overOpsMetric.isCombo()) {
+                                        for (String gate :overOpsMetric.qualityGate){
+                                            Metric metric = getMetricByQualityGate(gate);
+                                            if (metric != null) {
+                                                context.addMeasure(metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
+                                            }
+                                        }
+                                    } else {
+                                        context.addMeasure(overOpsMetric.metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
+                                    }
                                 }
                             })
                     );

@@ -2,7 +2,6 @@ package com.overops.plugins.sonar.rules.checks;
 
 import org.sonar.plugins.java.api.JavaCheck;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,14 +14,13 @@ public class OverOpsChecks {
     public static final String OVEROPS_ROOT_TAG = "overops";
 
     static {
-//        defaultChecks.add(OverOpsCaughtExceptionCheck.class);
-//        defaultChecks.add(OverOpsUncaughtExceptionCheck.class);
-//        defaultChecks.add(OverOpsCustomEventCheck.class);
-//        defaultChecks.add(OverOpsCriticalExceptionCheck.class);
-//        defaultChecks.add(OverOpsHTTPErrorCheck.class);
-//        defaultChecks.add(OverOpsLoggedErrorCheck.class);
-//        defaultChecks.add(OverOpsSwallowedExceptionCheck.class);
         defaultChecks.add(OverOpsNewQualityGateCheck.class);
+        defaultChecks.add(OverOpsCriticalQualityGateCheck.class);
+        defaultChecks.add(OverOpsResurfacedQualityGateCheck.class);
+        defaultChecks.add(OverOpsIncreasingQualityGateCheck.class);
+
+        //Combo
+        defaultChecks.add(OverOpsNewCriticalQualityGateCheck.class);
     }
 
     public static Collection<Class<? extends JavaCheck>> getChecks() {

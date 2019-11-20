@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.getKey;
+
 public class OverOpsEventsStatistic {
     private static final Logger LOGGER = Loggers.get(OverOpsEventsStatistic.class);
     private OverOpsQualityGateStat overOpsQualityGateStat;
@@ -18,7 +20,7 @@ public class OverOpsEventsStatistic {
         StatEvent statEvent = new StatEvent(event, overOpsQualityGateStat.getQualityGates(event.id));
         String key = statEvent.getClassName();
         if (stat.get(key) == null) {
-            LOGGER.info("      New stat for  " + key);
+            LOGGER.info("      New stat for  " + key + "   qualityGate :" + statEvent.qualityGatesKey);
             stat.put(key, new ClassStat(statEvent));
         } else {
             stat.update(key, statEvent);
@@ -40,7 +42,8 @@ public class OverOpsEventsStatistic {
             classStat.increment(statEvent);
             LOGGER.info("           Update  on " + classStat.fileName +
                     "  type [ " + statEvent.getType() +
-                    " ]  times  = " + classStat.qualityGateToEventStat.get(statEvent.qualityGatesKey).total);
+                    " ]  times  = " + classStat.qualityGateToEventStat.get(statEvent.qualityGatesKey).total
+                    + "   qualityGate :" + statEvent.qualityGatesKey);
         }
     }
 
@@ -111,7 +114,7 @@ public class OverOpsEventsStatistic {
         public StatEvent(EventResult eventResult, Set<String> qualityGates) {
             this.eventResult = eventResult;
             this.qualityGates = qualityGates;
-            this.qualityGatesKey = String.join(".", qualityGates);
+            this.qualityGatesKey = getKey(qualityGates);
         }
 
         public String getType() {
