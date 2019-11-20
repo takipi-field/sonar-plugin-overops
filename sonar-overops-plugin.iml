@@ -30,13 +30,17 @@
     <orderEntry type="library" name="Maven: org.codehaus.plexus:plexus-container-default:1.0-alpha-9-stable-1" level="project" />
     <orderEntry type="library" name="Maven: classworlds:classworlds:1.1-alpha-2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.sonarsource.sonarqube:sonar-plugin-api:7.9.1" level="project" />
+    <orderEntry type="library" name="Maven: org.sonarsource.sonarqube:sonar-ws:7.9.1" level="project" />
+    <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:3.7.0" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp:3.14.2" level="project" />
+    <orderEntry type="library" name="Maven: com.squareup.okio:okio:1.17.2" level="project" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
-    <orderEntry type="library" name="Maven: com.takipi:api-client:2.29.0" level="project" />
+    <orderEntry type="library" name="Maven: com.takipi:api-client:2.30.0" level="project" />
     <orderEntry type="library" name="Maven: joda-time:joda-time:2.8.2" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.5" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
-    <orderEntry type="library" name="Maven: com.takipi:api-client-util:2.23.0" level="project" />
+    <orderEntry type="library" name="Maven: com.takipi:api-client-util:2.30.0" level="project" />
     <orderEntry type="library" name="Maven: org.ocpsoft.prettytime:prettytime:4.0.2.Final" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.5" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.sonarsource.sonarqube:sonar-testing-harness:7.9.1" level="project" />

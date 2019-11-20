@@ -78,7 +78,7 @@ public class AddCommentsPostJob implements PostJob {
         Collection<OverOpsEventsStatistic.ClassStat> statistic = overOpsEventsStatistic.getStatistic();
         for (OverOpsEventsStatistic.ClassStat classStat : statistic) {
             log.info("    " + classStat.fileName);
-            for (String exName : classStat.typeToEventStat.keySet()) {
+            for (String exName : classStat.qualityGateToEventStat.keySet()) {
                 log.info("           " + exName);
             }
         }

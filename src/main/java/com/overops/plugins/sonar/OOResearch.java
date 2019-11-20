@@ -3,6 +3,7 @@ package com.overops.plugins.sonar;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
+import com.takipi.api.client.functions.input.EventFilterInput;
 import com.takipi.api.client.functions.input.ReliabilityReportInput;
 import com.takipi.api.client.functions.output.EventRow;
 import com.takipi.api.client.functions.output.RegressionRow;
@@ -13,6 +14,7 @@ import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil;
+import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.validation.ValidationUtil;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient;
@@ -54,7 +56,7 @@ public class OOResearch {
         reportInput.applications = application;
         reportInput.deployments = deployment;
         reportInput.mode = ReliabilityReportInput.DEFAULT_REPORT;
-        //reportInput.regressionInput = getRegressionInput();
+        reportInput.regressionInput = getRegressionInput();
 
         SummarizedView summarizedView = ViewUtil.getServiceViewByName(apiClient, serviceId, view);
 
@@ -183,22 +185,107 @@ public class OOResearch {
 
         regressionInput.serviceId = OverOpsPlugin.serviceId;
         regressionInput.viewId = OverOpsPlugin.viewName;
-        regressionInput.activeWindowStart = deploymentsActiveWindow.getFirst();
-        //TODO do we need fill if yes then how? regressionInput.activeTimespan;
-        //TODO do we need fill if yes then how? regressionInput.baselineTimespan;
-        //TODO do we need fill if yes then how? regressionInput.baselineTime;
-        //TODO do we need fill if yes then how? regressionInput.minVolumeThreshold;
-        //TODO do we need fill if yes then how? regressionInput.minErrorRateThreshold;
-        //TODO do we need fill if yes then how? regressionInput.regressionDelta;
-        //TODO do we need fill if yes then how? regressionInput.criticalRegressionDelta;
-        regressionInput.applySeasonality = "true".equalsIgnoreCase(OverOpsPlugin.increasingErrorGateApplySeasonality);
-        regressionInput.criticalExceptionTypes = Arrays.asList(OverOpsPlugin.criticalErrorTypes.split(","));
-        //TODO do we need fill if yes then how? regressionInput.typeThresholdsMap;
         regressionInput.applictations = Arrays.asList(OverOpsPlugin.applicationName);
         regressionInput.deployments = deployments;
+        regressionInput.activeWindowStart = deploymentsActiveWindow.getFirst();
+        regressionInput.applySeasonality = "true".equalsIgnoreCase(OverOpsPlugin.increasingErrorGateApplySeasonality);
+        regressionInput.criticalExceptionTypes = Arrays.asList(OverOpsPlugin.criticalErrorTypes.split(","));
+        regressionInput.activeTimespan = (int)TimeUnit.MILLISECONDS
+                .toMinutes(deploymentsActiveWindow.getSecond().getMillis() - deploymentsActiveWindow.getFirst().getMillis());
+
+        //TODO do we need fill if yes then how? regressionInput.baselineTimespan;
+        //TODO do we need fill if yes then how? regressionInput.baselineTime;
+        //TODO from previous  how to get it
+        //regressionInput.minVolumeThreshold;
+        //TODO from previous  how to get it
+        //regressionInput.minErrorRateThreshold;
+        //TODO do we need fill if yes then how? regressionInput.regressionDelta;
+        //TODO do we need fill if yes then how? regressionInput.criticalRegressionDelta;
+
+        //TODO do we need fill if yes then how? regressionInput.typeThresholdsMap;
+
         //TODO do we need fill? regressionInput.servers
         //TODO do we need fill? regressionInput.events;
         //TODO do we need fill? regressionInput.baselineGraph;
         return regressionInput;
     }
+
+//    public Pair<RegressionInput, RegressionUtil.RegressionWindow> getRegressionInput(String serviceId, String viewId,
+//                                                                                     EventFilterInput input, RegressionUtil.RegressionWindow window,
+//                                                                                     Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
+//
+//        RegressionSettings regressionSettings;// = getRegressionSettings(serviceId);
+//
+//        RegressionInput regressionInput = new RegressionInput();
+//
+//        RegressionInput existingInput;
+//
+////        if (input instanceof RegressionsInput) {
+////            existingInput = ((RegressionsInput)input).regressionInput;
+////        } else {
+////            existingInput = null;
+////        }
+//
+//        if (existingInput != null) {
+//
+//            regressionInput.criticalExceptionTypes = existingInput.criticalExceptionTypes;
+//            regressionInput.minVolumeThreshold = existingInput.minVolumeThreshold;
+//            regressionInput.minErrorRateThreshold = existingInput.minErrorRateThreshold;
+//            regressionInput.typeThresholdsMap = existingInput.typeThresholdsMap;
+//
+//            if (!newOnly) {
+//                regressionInput.regressionDelta = existingInput.regressionDelta;
+//                regressionInput.criticalRegressionDelta = existingInput.criticalRegressionDelta;
+//                regressionInput.applySeasonality = existingInput.applySeasonality;
+//            }
+//        } else {
+//
+//            Collection<String> criticalExceptionTypes = regressionSettings.getCriticalExceptionTypes();
+//
+//            regressionInput.criticalExceptionTypes = criticalExceptionTypes;
+//            regressionInput.minVolumeThreshold = regressionSettings.error_min_volume_threshold;
+//            regressionInput.minErrorRateThreshold = regressionSettings.error_min_rate_threshold;
+//
+//            if (!newOnly) {
+//                regressionInput.regressionDelta = regressionSettings.error_regression_delta;
+//                regressionInput.criticalRegressionDelta = regressionSettings.error_critical_regression_delta;
+//                regressionInput.applySeasonality = regressionSettings.apply_seasonality;
+//            }
+//        }
+//
+//        regressionInput.activeTimespan = (int)TimeUnit.MILLISECONDS
+//                .toMinutes(timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis());
+//
+//        if ((CollectionUtil.safeIsEmpty(regressionInput.deployments))) {
+//            regressionInput.activeWindowStart = timeSpan.getFirst();
+//        }
+//
+//        regressionInput.baselineTimespan = regressionSettings.min_baseline_timespan;
+//
+//        RegressionWindow regressionWindow;
+//        if (window == null) {
+//            regressionWindow = ApiCache.getRegressionWindow(apiClient, regressionInput);
+//        } else {
+//            regressionWindow = window;
+//        }
+//
+//        if ((!CollectionUtil.safeIsEmpty(regressionInput.deployments))
+//                && (!regressionWindow.deploymentFound)) {
+//            return null;
+//        }
+//
+//        int expandedBaselineTimespan = expandBaselineTimespan(regressionSettings.baseline_timespan_factor,
+//                regressionSettings.min_baseline_timespan,
+//                regressionWindow);
+//
+//        regressionInput.activeWindowStart = regressionWindow.activeWindowStart;
+//        regressionInput.activeTimespan = regressionWindow.activeTimespan;
+//        regressionInput.baselineTimespan = expandedBaselineTimespan;
+//
+//        regressionInput.applictations = getApplications(serviceId, input, true, false);
+//        regressionInput.servers = getServers(serviceId, input);
+//
+//        return Pair.of(regressionInput, regressionWindow);
+//
+//    }
 }

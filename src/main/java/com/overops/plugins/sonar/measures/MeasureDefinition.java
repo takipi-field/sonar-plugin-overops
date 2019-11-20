@@ -1,6 +1,5 @@
 package com.overops.plugins.sonar.measures;
 
-import com.overops.plugins.sonar.OverOpsPlugin;
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
@@ -13,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getMetric;
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getMetricByQualityGate;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.getMetricsList;
 
 public class MeasureDefinition implements MeasureComputer {
@@ -40,9 +39,9 @@ public class MeasureDefinition implements MeasureComputer {
                         System.out.println("classStat.fileName " + classStat.fileName);
                         return filePathJavaStyle.indexOf(classStat.fileName) != -1;})
                     .collect(Collectors.toList())
-                    .forEach(classStat -> classStat.typeToEventStat.forEach((type, eventInClassStat) -> {
-                                Metric metric = getMetric(type);
-                                System.out.println("        event type " + type + "  found " + (metric != null));
+                    .forEach(classStat -> classStat.qualityGateToEventStat.forEach((qualityGate, eventInClassStat) -> {
+                                Metric metric = getMetricByQualityGate(qualityGate);
+                                System.out.println("        qualityGate [" + qualityGate + "]  metric for it found " + (metric != null));
                                 if (metric != null) {
                                     //If in the same line we had several times event occurs we count it once
                                     context.addMeasure(metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());

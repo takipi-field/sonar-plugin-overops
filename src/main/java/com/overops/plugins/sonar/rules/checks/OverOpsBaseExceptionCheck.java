@@ -36,18 +36,19 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
 
         context = ctx;
         file = context.getFile();
+        String qualityGateKey = String.join(".", metric.qualityGate);
         String filePathJavaStyle = file.getAbsolutePath().replaceAll("/", ".");
         List<OverOpsEventsStatistic.ClassStat> statForThisFile = overOpsEventsStatistic.getStatistic()
                 .stream()
                 .filter(classStat -> filePathJavaStyle.indexOf(classStat.fileName) != -1)
                 .filter(classStat -> {
-                    log.info(metric.overOpsType + " is in " +  classStat.typeToEventStat.keySet() + "  " + classStat.typeToEventStat.keySet().contains(metric.overOpsType));
-                    return classStat.typeToEventStat.keySet().contains(metric.overOpsType);
+                    log.info( " [" + qualityGateKey + "] is in " + String.join("/",classStat.qualityGateToEventStat.keySet()) + "  " + classStat.qualityGateToEventStat.keySet().contains(qualityGateKey));
+                    return classStat.qualityGateToEventStat.keySet().contains(qualityGateKey);
                 })
                 .collect(Collectors.toList());
 
         for (OverOpsEventsStatistic.ClassStat classStat : statForThisFile) {
-            OverOpsEventsStatistic.EventInClassStat eventInClassStat = classStat.typeToEventStat.get(metric.overOpsType);
+            OverOpsEventsStatistic.EventInClassStat eventInClassStat = classStat.qualityGateToEventStat.get(qualityGateKey);
             for (int lineNumber : eventInClassStat.lineToLineStat.keySet()) {
                 reportIssue(eventInClassStat.lineToLineStat.get(lineNumber));
             }
@@ -57,7 +58,7 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
     }
 
     public void reportIssue(OverOpsEventsStatistic.LineStat lineStat) {
-        EventResult event = lineStat.event;
+        EventResult event = lineStat.event.eventResult;
         int method_position = event.error_location.original_line_number + 1;
         long fileCount = getFileCount();
         boolean isMethodPresent = fileCount >= method_position;
@@ -74,10 +75,14 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
     }
 
     private String getIssueTitle(OverOpsEventsStatistic.LineStat lineStat) {
+        EventResult event = lineStat.event.eventResult;
+        String qualityGateKey = String.join(" and ", metric.qualityGate);
         StringBuilder stringBuilder = new StringBuilder();
-        return stringBuilder.append(lineStat.event.summary)
+        return stringBuilder.append(qualityGateKey)
+                .append(" ")
+                .append(event.summary)
                 .append(OverOpsMetrics.MESSAGE_PATTERN_PREFIX)
-                .append(lineStat.event.id)
+                .append(event.id)
                 .append(OverOpsMetrics.MESSAGE_PATTERN_SUFFIX)
                 .toString();
     }
