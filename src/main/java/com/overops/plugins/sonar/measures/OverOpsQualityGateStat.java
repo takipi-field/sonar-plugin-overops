@@ -5,10 +5,7 @@ import com.takipi.api.client.functions.output.RegressionRow;
 import com.takipi.api.client.functions.output.ReliabilityReport;
 import com.takipi.api.client.functions.output.ReliabilityReportRow;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class OverOpsQualityGateStat {
     public static final String NEW_QG_MARKER = "New";
@@ -16,10 +13,10 @@ public class OverOpsQualityGateStat {
     public static final String RESURFACED_QG_MARKER = "Resurfaced";
     public static final String INCREASING_QG_MARKER = "Increasing";
 
-    public Set<String> newEventsIds = new HashSet<>();
-    public Set<String> resurfacedEventsIds = new HashSet<>();
-    public Set<String> criticalEventsIds = new HashSet<>();
-    public Set<String> increasingEventsIds = new HashSet<>();
+    public Map<String, RegressionRow> newEventsIds = new HashMap();
+    public Map<String, EventRow> resurfacedEventsIds = new HashMap<>();
+    public Map<String, EventRow> criticalEventsIds = new HashMap<>();
+    public Map<String, RegressionRow> increasingEventsIds = new HashMap<>();
 
     public OverOpsQualityGateStat(ReliabilityReport reliabilityReport) {
         if (reliabilityReport == null || reliabilityReport.items == null) {
@@ -39,13 +36,13 @@ public class OverOpsQualityGateStat {
         for (EventRow row : rrItem.errors) {
             if((row.labels != null) &&
                     (row.labels.indexOf("Resurfaced") != -1)) {
-                resurfacedEventsIds.add(row.id);
+                resurfacedEventsIds.put(row.id, row);
             }
         }
         for (EventRow row : rrItem.failures) {
             if((row.labels != null) &&
                     (row.labels.indexOf("Resurfaced") != -1)) {
-                resurfacedEventsIds.add(row.id);
+                resurfacedEventsIds.put(row.id, row);
             }
         }
     }
@@ -56,34 +53,34 @@ public class OverOpsQualityGateStat {
 
     private void addCriticalErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
         for (EventRow row : rrItem.failures) {
-            criticalEventsIds.add(row.id );
+            criticalEventsIds.put(row.id, row);
         }
     }
 
     private void addIncreasingErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
         for (RegressionRow row : rrItem.geIncErrors(true, true)) {
-            increasingEventsIds.add(row.id);
+            increasingEventsIds.put(row.id, row);
         }
     }
 
     private void addNewErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
         for (RegressionRow row : rrItem.getNewErrors(true, true)) {
-            newEventsIds.add(row.id);
+            newEventsIds.put(row.id, row);
         }
     }
 
     public Set<String> getQualityGates(String  id) {
         Set<String> result = new TreeSet<>();
-        if (newEventsIds.contains(id)) {
+        if (newEventsIds.keySet().contains(id)) {
             result.add(NEW_QG_MARKER);
         }
-        if (resurfacedEventsIds.contains(id)) {
+        if (resurfacedEventsIds.keySet().contains(id)) {
             result.add(RESURFACED_QG_MARKER);
         }
-        if (criticalEventsIds.contains(id)) {
+        if (criticalEventsIds.keySet().contains(id)) {
             result.add(CRITICAL_QG_MARKER);
         }
-        if (increasingEventsIds.contains(id)) {
+        if (increasingEventsIds.keySet().contains(id)) {
             result.add(INCREASING_QG_MARKER);
         }
 

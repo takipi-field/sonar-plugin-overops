@@ -40,18 +40,26 @@ public class MeasureDefinition implements MeasureComputer {
                         System.out.println("classStat.fileName " + classStat.fileName);
                         return filePathJavaStyle.indexOf(classStat.fileName) != -1;})
                     .collect(Collectors.toList())
-                    .forEach(classStat -> classStat.qualityGateToEventStat.forEach((qualityGate, eventInClassStat) -> {
-                                OverOpsMetrics.OverOpsMetric overOpsMetric = getOverOpsByQualityGate(qualityGate);
-                                System.out.println("        qualityGate [" + qualityGate + "]  overOpsMetric for it found " + (overOpsMetric != null));
+                    .forEach(classStat -> classStat.reportableQualityGateToEventStat.forEach((qualityGateKey, eventInClassStat) -> {
+                                OverOpsMetrics.OverOpsMetric overOpsMetric = getOverOpsByQualityGate(qualityGateKey);
+                                System.out.println("        qualityGateKey [" + qualityGateKey + "]  overOpsMetric for it found " + (overOpsMetric != null));
                                 if (overOpsMetric != null) {
                                     //If in the same line we had several times event occurs we count it once
                                     if (overOpsMetric.isCombo()) {
-                                        for (String gate :overOpsMetric.qualityGate){
-                                            Metric metric = getMetricByQualityGate(gate);
-                                            if (metric != null) {
-                                                context.addMeasure(metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
+                                        System.out.println(" >>>>>>  Combo detected       qualityGateKey [" + qualityGateKey + "]  overOpsMetric for it found " + (overOpsMetric != null));
+                                        try {
+                                            for (String gate :overOpsMetric.qualityGate){
+                                                Metric metric = getMetricByQualityGate(gate);
+                                                System.out.println(" >>>>>> gate : " + gate + " metric != null " +(metric != null) );
+                                                if (metric != null) {
+                                                    System.out.println(" >>>>>> gate : metric key " + metric.getKey());
+                                                    context.addMeasure(metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
+                                                }
                                             }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
                                         }
+
                                     } else {
                                         context.addMeasure(overOpsMetric.metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
                                     }

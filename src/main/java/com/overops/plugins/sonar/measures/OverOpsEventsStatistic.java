@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsByQualityGate;
 import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.getKey;
 
 public class OverOpsEventsStatistic {
@@ -31,6 +32,10 @@ public class OverOpsEventsStatistic {
         this.overOpsQualityGateStat = overOpsQualityGateStat;
     }
 
+    public OverOpsQualityGateStat getOverOpsQualityGateStat() {
+        return overOpsQualityGateStat;
+    }
+
     public Collection<ClassStat> getStatistic() {
         return stat.values();
     }
@@ -50,11 +55,14 @@ public class OverOpsEventsStatistic {
     public static class ClassStat {
         public String fileName;
         public Map<String, EventInClassStat> qualityGateToEventStat;
+        public Map<String, EventInClassStat> reportableQualityGateToEventStat;
 
         public ClassStat(StatEvent statEvent) {
             this.fileName = statEvent.getClassName();
             qualityGateToEventStat = new HashMap<>();
+            reportableQualityGateToEventStat = new HashMap<>();
             qualityGateToEventStat.put(statEvent.qualityGatesKey, new EventInClassStat(statEvent));
+            updateReportableQualityGateToEventStat(statEvent);
         }
 
         public void increment(StatEvent statEvent) {
@@ -63,6 +71,33 @@ public class OverOpsEventsStatistic {
                 qualityGateToEventStat.put(statEvent.qualityGatesKey, new EventInClassStat(statEvent));
             } else {
                 eventInClassStat.update(statEvent);
+            }
+            updateReportableQualityGateToEventStat(statEvent);
+        }
+
+        private void updateReportableQualityGateToEventStat(StatEvent statEvent) {
+            String qualityGateKey = statEvent.qualityGatesKey;
+            OverOpsMetrics.OverOpsMetric overOpsMetric = getOverOpsByQualityGate(qualityGateKey);
+            if (overOpsMetric != null) {
+                if (overOpsMetric.isCombo()) {
+                    for (String gate : overOpsMetric.qualityGate) {
+                        OverOpsMetrics.OverOpsMetric reportableOverOpsMetric = getOverOpsByQualityGate(gate);
+                        if (reportableOverOpsMetric != null) {
+                            putReportableQualityGateData(reportableOverOpsMetric.qualityGateKey, statEvent);
+                        }
+                    }
+                } else {
+                    putReportableQualityGateData(qualityGateKey, statEvent);
+                }
+            }
+        }
+
+        private void putReportableQualityGateData(String qualityGateKey, StatEvent statEvent) {
+            EventInClassStat resultEventInClassStat = reportableQualityGateToEventStat.get(qualityGateKey);
+            if (resultEventInClassStat != null) {
+                resultEventInClassStat.update(statEvent);
+            } else {
+                reportableQualityGateToEventStat.put(qualityGateKey, new EventInClassStat(statEvent));
             }
         }
     }

@@ -2,6 +2,7 @@ package com.overops.plugins.sonar.rules.checks;
 
 import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
+import com.takipi.api.client.functions.output.RegressionRow;
 import com.takipi.api.client.result.event.EventResult;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -12,6 +13,8 @@ import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static com.overops.plugins.sonar.OverOpsPlugin.serviceId;
 import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
+import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.INCREASING_QG_MARKER;
 
 public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implements JavaFileScanner {
     private static final Logger log = Loggers.get(OverOpsBaseExceptionCheck.class);
@@ -88,10 +92,16 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
         EventResult event = lineStat.event.eventResult;
         String qualityGateKey = String.join(" and ", metric.qualityGate);
         StringBuilder stringBuilder = new StringBuilder();
+        String messagePrefix = OverOpsMetrics.MESSAGE_PATTERN_PREFIX;
+        if (lineStat.event.qualityGates.contains(INCREASING_QG_MARKER)) {
+            RegressionRow regressionRow = overOpsEventsStatistic.getOverOpsQualityGateStat().increasingEventsIds.get(event.id);
+            int percents = (int)(regressionRow.reg_delta * 100);
+            messagePrefix = "has been occurring " + String.valueOf(percents) + "% more [ID-";
+        }
         return stringBuilder.append(qualityGateKey)
                 .append(" ")
                 .append(event.summary)
-                .append(OverOpsMetrics.MESSAGE_PATTERN_PREFIX)
+                .append(messagePrefix)
                 .append(event.id)
                 .append(OverOpsMetrics.MESSAGE_PATTERN_SUFFIX)
                 .toString();

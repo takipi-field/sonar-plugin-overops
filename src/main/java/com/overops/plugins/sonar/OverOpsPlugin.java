@@ -29,7 +29,9 @@ import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.functions.input.ReliabilityReportInput;
+import com.takipi.api.client.functions.output.RegressionRow;
 import com.takipi.api.client.functions.output.ReliabilityReport;
+import com.takipi.api.client.functions.output.Series;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsResult;
@@ -47,6 +49,7 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -138,7 +141,7 @@ public class OverOpsPlugin implements Plugin {
 			LOGGER.info("");
 			overOpsEventsStatistic.add(event);
 			LOGGER.info("");
-			LOGGER.info("==================================================");
+			LOGGER.info("==============================================================");
 		}
 
 		return true;
@@ -149,7 +152,40 @@ public class OverOpsPlugin implements Plugin {
 		addIncreasing(volumeResult, overOpsQualityGateStat, (EventResult) original.clone());
 		addResurfaced(volumeResult, overOpsQualityGateStat, (EventResult) original.clone());
 		addCritical(volumeResult, overOpsQualityGateStat, (EventResult) original.clone());
-		//addNewAndCritical(volumeResult, overOpsQualityGateStat, (EventResult) original.clone());
+		addNewAndCritical(volumeResult, overOpsQualityGateStat, (EventResult) original.clone());
+		addNewAndResurfaced(volumeResult, overOpsQualityGateStat, (EventResult) original.clone());
+		addIncreasingAndCritical(volumeResult, overOpsQualityGateStat, (EventResult) original.clone());
+		addResurfacedAndCritical(volumeResult, overOpsQualityGateStat, (EventResult) original.clone());
+	}
+
+	private void addResurfacedAndCritical(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
+		clone.id = String.valueOf(idRef++);
+		decorateResurfaced(clone, overOpsQualityGateStat);
+		decorateCritical(clone, overOpsQualityGateStat);
+		clone.error_location.prettified_name = " [Resurfaced and Critical gate exception on some method]";
+		clone.error_location.original_line_number += 6;
+		clone.error_location.method_position += 6;
+		volumeResult.events.add(clone);
+	}
+
+	private void addIncreasingAndCritical(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
+		clone.id = String.valueOf(idRef++);
+		decorateIncreasing(clone, overOpsQualityGateStat);
+		decorateCritical(clone, overOpsQualityGateStat);
+		clone.error_location.prettified_name = " [Increasing and Critical gate exception on some method]";
+		clone.error_location.original_line_number += 6;
+		clone.error_location.method_position += 6;
+		volumeResult.events.add(clone);
+	}
+
+	private void addNewAndResurfaced(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
+		clone.id = String.valueOf(idRef++);
+		decorateNew(clone, overOpsQualityGateStat);
+		decorateResurfaced(clone, overOpsQualityGateStat);
+		clone.error_location.prettified_name = " [Resurfaced and Critical gate exception on some method]";
+		clone.error_location.original_line_number += 5;
+		clone.error_location.method_position += 5;
+		volumeResult.events.add(clone);
 	}
 
 	private void addNewAndCritical(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
@@ -157,6 +193,8 @@ public class OverOpsPlugin implements Plugin {
 		decorateNew(clone, overOpsQualityGateStat);
 		decorateCritical(clone, overOpsQualityGateStat);
 		clone.error_location.prettified_name = " [New and Critical gate exception on some method]";
+		clone.error_location.original_line_number += 4;
+		clone.error_location.method_position += 4;
 		volumeResult.events.add(clone);
 	}
 
@@ -182,22 +220,27 @@ public class OverOpsPlugin implements Plugin {
 
 	private void decorateNew(EventResult clone, OverOpsQualityGateStat overOpsQualityGateStat) {
 		clone.error_location.prettified_name = " [New gate exception on some method]";
-		overOpsQualityGateStat.newEventsIds.add(clone.id);
+		overOpsQualityGateStat.newEventsIds.put(clone.id, null);
 	}
 
 	private void decorateIncreasing(EventResult clone, OverOpsQualityGateStat overOpsQualityGateStat) {
 		clone.error_location.prettified_name = " [Increasing gate exception on some method]";
-		overOpsQualityGateStat.increasingEventsIds.add(clone.id);
+		Series<RegressionRow> series = new Series<>();
+		series.columns = new ArrayList<>();
+		RegressionRow regressionRow = new RegressionRow(series, 1);
+		regressionRow.reg_delta = 1.569d;
+
+		overOpsQualityGateStat.increasingEventsIds.put(clone.id, regressionRow);
 	}
 
 	private void decorateResurfaced(EventResult clone, OverOpsQualityGateStat overOpsQualityGateStat) {
 		clone.error_location.prettified_name = " [Resurfaced gate exception on some method]";
-		overOpsQualityGateStat.resurfacedEventsIds.add(clone.id);
+		overOpsQualityGateStat.resurfacedEventsIds.put(clone.id, null);
 	}
 
 	private void decorateCritical(EventResult clone, OverOpsQualityGateStat overOpsQualityGateStat) {
 		clone.error_location.prettified_name = " [Critical gate exception on some method]";
-		overOpsQualityGateStat.criticalEventsIds.add(clone.id);
+		overOpsQualityGateStat.criticalEventsIds.put(clone.id, null);
 	}
 
 	private ReliabilityReport getRelialabilityReport() {

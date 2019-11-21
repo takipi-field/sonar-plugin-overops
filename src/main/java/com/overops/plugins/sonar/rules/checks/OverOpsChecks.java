@@ -21,6 +21,9 @@ public class OverOpsChecks {
 
         //Combo
         defaultChecks.add(OverOpsNewCriticalQualityGateCheck.class);
+        defaultChecks.add(OverOpsNewResurfacedQualityGateCheck.class);
+        defaultChecks.add(OverOpsResurfacedCriticalQualityGateCheck.class);
+        defaultChecks.add(OverOpsIncreasingCriticalQualityGateCheck.class);
     }
 
     public static Collection<Class<? extends JavaCheck>> getChecks() {

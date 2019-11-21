@@ -35,7 +35,7 @@ import static java.util.Arrays.asList;
 public class OverOpsMetrics implements Metrics {
     public static final String MESSAGE_PATTERN_PREFIX = " has been detected [ID-";
     public static final String MESSAGE_PATTERN_SUFFIX = "]";
-    public static final Pattern EXCEPTION_PATTERN = Pattern.compile(" has been detected \\[ID-(.*?)\\]");
+    public static final Pattern EXCEPTION_PATTERN = Pattern.compile(" \\[ID-(.*?)\\]");
     public static String OVER_OPS_DOMAIN = "OverOps Quality Gates";
 
     public static final Metric<Integer> NewQualityGateCount = new Metric.Builder("overops_new_quality_gate", "New Exceptions", Metric.ValueType.INT)
@@ -83,10 +83,22 @@ public class OverOpsMetrics implements Metrics {
         INCREASING_QG_METRIC("INCREASING_QG", IncreasingQualityGateCount,
                 RuleType.VULNERABILITY, Severity.MAJOR, Constants.INCREASING_QG_KEY,
                 "-increasing", "INCREASING QUALITY GATE", new String[]{INCREASING_QG_MARKER}),
-        NEW_CRITICAL_QG_METRIC("NEW_CRITICAL_QG", IncreasingQualityGateCount,
+        NEW_CRITICAL_QG_METRIC("NEW_CRITICAL_QG", null,
                 RuleType.VULNERABILITY, Severity.MAJOR, Constants.NEW_CRITICAL_QG_KEY,
                 new String[]{"-new", "-critical"}, "NEW AND CRITICAL QUALITY GATE",
-                new String[]{NEW_QG_MARKER, CRITICAL_QG_MARKER});
+                new String[]{NEW_QG_MARKER, CRITICAL_QG_MARKER}),
+        NEW_RESURFACED_QG_METRIC("NEW_RESURFACED_QG", null,
+                RuleType.VULNERABILITY, Severity.MAJOR, Constants.NEW_RESURFACED_QG_KEY,
+                new String[]{"-new", "-resurfaced"}, "NEW AND RESURFACED QUALITY GATE",
+                new String[]{NEW_QG_MARKER, RESURFACED_QG_MARKER}),
+        RESURFACED_CRITICAL_QG_METRIC("RESURFACED_CRITICAL_QG", null,
+                RuleType.VULNERABILITY, Severity.MAJOR, Constants.RESURFACED_CRITICAL_QG_KEY,
+                new String[]{"-resurfaced", "-critical"}, "RESURFACED AND CRITICAL QUALITY GATE",
+                new String[]{RESURFACED_QG_MARKER, CRITICAL_QG_MARKER}),
+        INCREASING_CRITICAL_QG_METRIC("INCREASING_CRITICAL_QG", null,
+                RuleType.VULNERABILITY, Severity.MAJOR, Constants.INCREASING_CRITICAL_QG_KEY,
+                new String[]{"-increasing", "-critical"}, "INCREASING AND CRITICAL QUALITY GATE",
+                new String[]{INCREASING_QG_MARKER, CRITICAL_QG_MARKER});
 
         public final String overOpsType;
         public final Metric metric;
@@ -199,6 +211,9 @@ public class OverOpsMetrics implements Metrics {
             public static final String RESURFACED_QG_KEY = "ResurfacedQualityGate";
             public static final String INCREASING_QG_KEY = "IncreasingQualityGate";
             public static final String NEW_CRITICAL_QG_KEY = "NewCriticalQualityGate";
+            public static final String NEW_RESURFACED_QG_KEY = "NewResurfacedQualityGate";
+            public static final String RESURFACED_CRITICAL_QG_KEY = "ResurfacedCriticalQualityGate";
+            public static final String INCREASING_CRITICAL_QG_KEY = "IncreasingCriticalQualityGate";
         }
     }
 
