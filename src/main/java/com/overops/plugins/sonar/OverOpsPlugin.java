@@ -50,7 +50,6 @@ import org.sonar.api.utils.log.Loggers;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -132,8 +131,8 @@ public class OverOpsPlugin implements Plugin {
 		}
 
 		volumeResult = volumeResponse.data;
-		OverOpsQualityGateStat overOpsQualityGateStat = new OverOpsQualityGateStat(getRelialabilityReport());
-		addAdditionalEvents(volumeResult, overOpsQualityGateStat);
+		OverOpsQualityGateStat overOpsQualityGateStat = new OverOpsQualityGateStat(getReliabilityReport());
+		//addAdditionalEvents(volumeResult, overOpsQualityGateStat);
 		overOpsEventsStatistic.setOverOpsQualityGateStat(overOpsQualityGateStat);
 
         for (EventResult event : volumeResult.events) {
@@ -243,7 +242,7 @@ public class OverOpsPlugin implements Plugin {
 		overOpsQualityGateStat.criticalEventsIds.put(clone.id, null);
 	}
 
-	private ReliabilityReport getRelialabilityReport() {
+	private ReliabilityReport getReliabilityReport() {
         ReliabilityReportInput reportInput = new ReliabilityReportInput();
         reportInput.timeFilter = TimeUtil.getLastWindowTimeFilter(TimeUnit.MINUTES.toMillis(daysSpan));
         reportInput.environments = serviceId;
@@ -253,26 +252,27 @@ public class OverOpsPlugin implements Plugin {
         reportInput.deployments = deploymentName;
         reportInput.mode = ReliabilityReportInput.DEFAULT_REPORT;
 
+
         return ReliabilityReport.execute(apiClient, reportInput);
     }
 
 
     private UrlClient.Response<EventsResult> getVolumeResponse(SummarizedView view) {
 		EventsVolumeRequest eventsVolumeRequest = getVolumeRequest(view);
-		LOGGER.info("-------------------------------------------");
-		LOGGER.info("                                          ");
-		LOGGER.info(eventsVolumeRequest.urlPath());
+//		LOGGER.info("-------------------------------------------");
+//		LOGGER.info("                                          ");
+//		LOGGER.info(eventsVolumeRequest.urlPath());
 		try {
 		    StringBuilder stringBuilder = new StringBuilder("?");
 		    for (String p : eventsVolumeRequest.queryParams()) {
 		        stringBuilder.append("&").append(p);
             }
-			LOGGER.info(stringBuilder.toString());
+//			LOGGER.info(stringBuilder.toString());
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		LOGGER.info("                                          ");
-		LOGGER.info("-------------------------------------------");
+//		LOGGER.info("                                          ");
+//		LOGGER.info("-------------------------------------------");
 		return apiClient.get(eventsVolumeRequest);
 	}
 

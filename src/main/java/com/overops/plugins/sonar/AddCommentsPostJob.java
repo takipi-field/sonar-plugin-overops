@@ -261,14 +261,14 @@ public class AddCommentsPostJob implements PostJob {
             e.printStackTrace();
         }
         if (arcLink == null) {
-            arcLink = "EventUtil.getEventRecentLinkDefault( apiClient," +
+            arcLink = "EventUtil.getEventRecentLinkDefault apiClient," +
                     "  \"" + serviceId +
                     "\" ,  \"" + eventId +
                     "\" ,  \"" + from.toString(formatter) +
                     "\" ,  \"" + to.toString(formatter) +
-                    "\" , (\"" + applicationName +
-                    "\"), (), (\"" + deploymentName + "\")" +
-                    ", " + String.valueOf((int) (1440 * daysSpan)) + " )";
+                    "\" , \"" + applicationName +
+                    "\", , \"" + deploymentName + "\"" +
+                    ", " + String.valueOf((int) (1440 * daysSpan)) + "";
             log.info(arcLink);
         }
 
