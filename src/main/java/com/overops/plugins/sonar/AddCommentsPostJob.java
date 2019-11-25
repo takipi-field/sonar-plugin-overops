@@ -116,6 +116,7 @@ public class AddCommentsPostJob implements PostJob {
                     new GetRequest("api/ce/task").setParam("id", ceTaskId).setMediaType(MediaTypes.PROTOBUF);
 
             //Max waiting for 3 minutes
+            LOGGER.info(" ceTaskId: " + ceTaskId);
             tryGetReport(wsClient, ceTaskRequest, 180, 1000);
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,7 +125,7 @@ public class AddCommentsPostJob implements PostJob {
 
     private boolean tryGetReport(WsClient wsClient, WsRequest ceTaskRequest, int queryMaxAttempts, int queryInterval) {
         for (int attempts = 0; attempts < queryMaxAttempts; attempts++) {
-            LOGGER.info("Call base url: " + wsClient.wsConnector().baseUrl() + ",  path : " + ceTaskRequest.getPath());
+            LOGGER.info("Call url: " + wsClient.wsConnector().baseUrl() + ceTaskRequest.getPath());
             WsResponse wsResponse = wsClient.wsConnector().call(ceTaskRequest);
             try {
                 Ce.TaskResponse taskResponse = Ce.TaskResponse.parseFrom(wsResponse.contentStream());
@@ -133,7 +134,7 @@ public class AddCommentsPostJob implements PostJob {
                 switch (taskStatus) {
                     case IN_PROGRESS:
                     case PENDING:
-                        LOGGER.info("Waiting for report processing to complete...");
+                        LOGGER.info("(Attempts " + (attempts + 1 ) + "/" + queryMaxAttempts +  " )Waiting for report processing to complete...");
                         Thread.sleep(queryInterval);
                         break;
                     case SUCCESS:
