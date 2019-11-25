@@ -126,6 +126,7 @@ public class AddCommentsPostJob implements PostJob {
 
     private boolean tryGetReport(WsClient wsClient, WsRequest ceTaskRequest, int queryMaxAttempts, int queryInterval) {
         for (int attempts = 0; attempts < queryMaxAttempts; attempts++) {
+            LOGGER.info("Call base url: " + wsClient.wsConnector() + ",  path : " + ceTaskRequest.getPath());
             WsResponse wsResponse = wsClient.wsConnector().call(ceTaskRequest);
             try {
                 Ce.TaskResponse taskResponse = Ce.TaskResponse.parseFrom(wsResponse.contentStream());
