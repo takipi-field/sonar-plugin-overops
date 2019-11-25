@@ -41,26 +41,13 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
         context = ctx;
         file = context.getFile();
         String filePathJavaStyle = file.getAbsolutePath().replaceAll("/", ".");
-        List<OverOpsEventsStatistic.ClassStat> statForThisFile = overOpsEventsStatistic.getStatistic()
+        List<OverOpsEventsStatistic.ClassStat> fileStatistics = overOpsEventsStatistic.getStatistic()
                 .stream()
-                .filter(classStat -> {
-//                    log.info( "           classStat.fileName [" + classStat.fileName + "] is in " + filePathJavaStyle + "  "
-//                            + (filePathJavaStyle.indexOf(classStat.fileName) != -1));
-
-                    if (filePathJavaStyle.indexOf(classStat.fileName) != -1) {
-                        log.info( "");
-                        log.info("           classStat.fileName [" + classStat.fileName + "] is in " + filePathJavaStyle);
-                    }
-                    return filePathJavaStyle.indexOf(classStat.fileName) != -1;})
-                .filter(classStat -> {
-                    //log.info( "           [" + qualityGateKey + "] is in " + String.join("/",classStat.qualityGateToEventStat.keySet()) + "  " + classStat.qualityGateToEventStat.keySet().contains(qualityGateKey));
-                    if ( classStat.qualityGateToEventStat.keySet().contains(metric.qualityGateKey))
-                        log.info( "           [" + metric.qualityGateKey + "] is in " + String.join("/",classStat.qualityGateToEventStat.keySet()));
-                    return classStat.qualityGateToEventStat.keySet().contains(metric.qualityGateKey);
-                })
+                .filter(classStat -> filePathJavaStyle.indexOf(classStat.fileName) != -1)
+                .filter(classStat -> classStat.qualityGateToEventStat.keySet().contains(metric.qualityGateKey))
                 .collect(Collectors.toList());
 
-        for (OverOpsEventsStatistic.ClassStat classStat : statForThisFile) {
+        for (OverOpsEventsStatistic.ClassStat classStat : fileStatistics) {
             OverOpsEventsStatistic.EventInClassStat eventInClassStat = classStat.qualityGateToEventStat.get(metric.qualityGateKey);
             for (int lineNumber : eventInClassStat.lineToLineStat.keySet()) {
                 reportIssue(eventInClassStat.lineToLineStat.get(lineNumber));
@@ -76,12 +63,6 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
         long fileCount = getFileCount();
         boolean isMethodPresent = fileCount >= method_position;
         method_position = isMethodPresent ? method_position : 1;
-        //log.info(" ");
-        //log.info("           method_position " + event.error_location.method_position + "           original_line_number " + event.error_location.original_line_number);
-        //.info(" file lines : " + fileCount + "    overops line " + method_position + " is inside " + (isMethodPresent? " YES " : " NO ") + file.getPath());
-
-        //String url = "https://api.overops.com/api/v1/services/"+ serviceId +"/events/" + event.id;
-        //log.info("url " + url);
         log.info("                  Reporting " + lineStat.event.qualityGatesKey + " on " + lineStat.event.eventResult.error_location.prettified_name);
         String issueTitle = getIssueTitle(lineStat);
 

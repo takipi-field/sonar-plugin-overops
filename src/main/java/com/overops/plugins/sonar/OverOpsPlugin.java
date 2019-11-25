@@ -90,8 +90,8 @@ public class OverOpsPlugin implements Plugin {
 	public static String increasingErrorGateErrorRegressionDelta;
 	public static String increasingErrorGateErrorCriticalRegressionThreshold;
 	public static String increasingErrorGateApplySeasonality;
-	public static String login;
-	public static String pass;
+	public static String adminUserName;
+	public static String adminUserPassword;
 
 	@Override
 	public void define(Context context) {
@@ -308,10 +308,10 @@ public class OverOpsPlugin implements Plugin {
 		increasingErrorGateApplySeasonality = config.get(SONAR_OVEROPS_INCREASING_APPLY_SEASONALITY)
 				.orElse(APPLY_SEASONALITY_DEFAULT);
 
-		String userName = config.get(OverOpsProperties.SONAR_OVEROPS_USER_NAME).orElse("admin");
-		String userPassword = config.get(OverOpsProperties.SONAR_OVEROPS_USER_PASSWORD).orElse("admin");
+		adminUserName = config.get(OverOpsProperties.SONAR_OVEROPS_USER_NAME).orElse("admin");
+		adminUserPassword = config.get(OverOpsProperties.SONAR_OVEROPS_USER_PASSWORD).orElse("admin");
 		AUTH_DATA = Base64.encode(new StringBuilder()
-				.append(userName).append(":").append(userPassword)
+				.append(adminUserName).append(":").append(adminUserPassword)
 				.toString().getBytes());
 
 		to = DateTime.now();
@@ -361,9 +361,6 @@ public class OverOpsPlugin implements Plugin {
 		LOGGER.info("increasingErrorGateErrorRegressionDelta :" + increasingErrorGateErrorRegressionDelta);
 		LOGGER.info("increasingErrorGateErrorCriticalRegressionThreshold :" + increasingErrorGateErrorCriticalRegressionThreshold);
 		LOGGER.info("increasingErrorGateApplySeasonality :" + increasingErrorGateApplySeasonality);
-
-		LOGGER.info("login :" + login);
-		LOGGER.info("pass :" + pass);
 	}
 
 	private boolean validateVolumeResponse(UrlClient.Response<EventsResult> eventsResponse) {

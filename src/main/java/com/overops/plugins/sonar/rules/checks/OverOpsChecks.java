@@ -8,7 +8,7 @@ import java.util.Collections;
 
 public class OverOpsChecks {
 
-    private static final Collection<Class<? extends JavaCheck>> defaultChecks = new ArrayList<Class<? extends JavaCheck>>();
+    private static final Collection<Class<? extends JavaCheck>> defaultChecks = new ArrayList<>();
 
     public static final String REPOSITORY_KEY = "OverOps-Rules";
     public static final String OVEROPS_ROOT_TAG = "overops";

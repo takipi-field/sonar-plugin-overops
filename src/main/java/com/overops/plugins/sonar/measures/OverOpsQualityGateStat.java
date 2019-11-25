@@ -13,7 +13,7 @@ public class OverOpsQualityGateStat {
     public static final String RESURFACED_QG_MARKER = "Resurfaced";
     public static final String INCREASING_QG_MARKER = "Increasing";
 
-    public Map<String, RegressionRow> newEventsIds = new HashMap();
+    public Map<String, RegressionRow> newEventsIds = new HashMap<>();
     public Map<String, EventRow> resurfacedEventsIds = new HashMap<>();
     public Map<String, EventRow> criticalEventsIds = new HashMap<>();
     public Map<String, RegressionRow> increasingEventsIds = new HashMap<>();
@@ -34,13 +34,14 @@ public class OverOpsQualityGateStat {
 
     private void addResurfacedErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
         for (EventRow row : rrItem.errors) {
-            if((row.labels != null) &&
+            if ((row.labels != null) &&
                     (row.labels.indexOf("Resurfaced") != -1)) {
                 resurfacedEventsIds.put(row.id, row);
             }
         }
+
         for (EventRow row : rrItem.failures) {
-            if((row.labels != null) &&
+            if ((row.labels != null) &&
                     (row.labels.indexOf("Resurfaced") != -1)) {
                 resurfacedEventsIds.put(row.id, row);
             }
@@ -58,33 +59,39 @@ public class OverOpsQualityGateStat {
     }
 
     private void addIncreasingErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
-        for (RegressionRow row : rrItem.geIncErrors(true, true)) {
+        Collection<RegressionRow> regressionRows = rrItem.geIncErrors(true, true);
+        for (RegressionRow row : regressionRows) {
             increasingEventsIds.put(row.id, row);
         }
     }
 
     private void addNewErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
-        for (RegressionRow row : rrItem.getNewErrors(true, true)) {
+        Collection<RegressionRow> newErrors = rrItem.getNewErrors(true, true);
+        for (RegressionRow row : newErrors) {
             newEventsIds.put(row.id, row);
         }
     }
 
-    public Set<String> getQualityGates(String  id) {
+    public Set<String> getQualityGates(String id) {
         Set<String> result = new TreeSet<>();
+
         if (newEventsIds.keySet().contains(id)) {
             result.add(NEW_QG_MARKER);
         }
+
         if (resurfacedEventsIds.keySet().contains(id)) {
             result.add(RESURFACED_QG_MARKER);
         }
+
         if (criticalEventsIds.keySet().contains(id)) {
             result.add(CRITICAL_QG_MARKER);
         }
+
         if (increasingEventsIds.keySet().contains(id)) {
             result.add(INCREASING_QG_MARKER);
         }
 
-        if (result.size()==0) {
+        if (result.size() == 0) {
             result.add("NO_QUALITY_GATE_IT_SHOULD_BE_VERIFIED");
         }
 
