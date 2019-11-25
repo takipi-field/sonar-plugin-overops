@@ -115,7 +115,8 @@ public class AddCommentsPostJob implements PostJob {
             WsRequest ceTaskRequest =
                     new GetRequest("api/ce/task").setParam("id", ceTaskId).setMediaType(MediaTypes.PROTOBUF);
 
-            tryGetReport(wsClient, ceTaskRequest, 1000, 1000);
+            //Max waiting for 3 minutes
+            tryGetReport(wsClient, ceTaskRequest, 180, 1000);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -8,6 +8,8 @@ import org.sonar.api.resources.Qualifiers;
 
 import java.util.Arrays;
 
+import static com.overops.plugins.sonar.OverOpsPlugin.DEFAULT_VIEWID;
+
 public class OverOpsProperties {
     public static final String CATEGORY = "OverOps";
     public static final String SETTINGS_SUBCATEGORY = "Account Settings";
@@ -114,6 +116,7 @@ public class OverOpsProperties {
                         .subCategory(SETTINGS_SUBCATEGORY)
 						.onQualifiers(Qualifiers.PROJECT)
                         .type(PropertyType.STRING)
+						.defaultValue(DEFAULT_VIEWID)
                         .index(7)
                         .build(),
 
