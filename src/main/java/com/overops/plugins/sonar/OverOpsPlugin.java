@@ -1,22 +1,3 @@
-/*
- * Example Plugin for SonarQube
- * Copyright (C) 2009-2016 SonarSource SA
- * mailto:contact AT sonarsource DOT com
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
 package com.overops.plugins.sonar;
 
 import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
@@ -25,7 +6,6 @@ import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.measures.OverOpsQualityGateStat;
 import com.overops.plugins.sonar.rules.RuleDefinitionImplementation;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.functions.input.ReliabilityReportInput;
@@ -50,6 +30,7 @@ import org.sonar.api.utils.log.Loggers;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -310,7 +291,7 @@ public class OverOpsPlugin implements Plugin {
 
 		adminUserName = config.get(OverOpsProperties.SONAR_OVEROPS_USER_NAME).orElse("admin");
 		adminUserPassword = config.get(OverOpsProperties.SONAR_OVEROPS_USER_PASSWORD).orElse("admin");
-		AUTH_DATA = Base64.encode(new StringBuilder()
+		AUTH_DATA = Base64.getEncoder().encodeToString(new StringBuilder()
 				.append(adminUserName).append(":").append(adminUserPassword)
 				.toString().getBytes());
 
