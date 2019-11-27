@@ -113,7 +113,7 @@ public class OverOpsPlugin implements Plugin {
 
 		volumeResult = volumeResponse.data;
 		OverOpsQualityGateStat overOpsQualityGateStat = new OverOpsQualityGateStat(getReliabilityReport());
-		addAdditionalEvents(volumeResult, overOpsQualityGateStat);
+		//addAdditionalEvents(volumeResult, overOpsQualityGateStat);
 		overOpsEventsStatistic.setOverOpsQualityGateStat(overOpsQualityGateStat);
 
         for (EventResult event : volumeResult.events) {
