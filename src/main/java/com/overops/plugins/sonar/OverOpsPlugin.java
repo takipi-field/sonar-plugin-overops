@@ -1,7 +1,7 @@
 package com.overops.plugins.sonar;
 
-import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
 import com.overops.plugins.sonar.measures.MeasureDefinition;
+import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.measures.OverOpsQualityGateStat;
 import com.overops.plugins.sonar.rules.RuleDefinitionImplementation;
@@ -115,8 +115,21 @@ public class OverOpsPlugin implements Plugin {
 		OverOpsQualityGateStat overOpsQualityGateStat = new OverOpsQualityGateStat(getReliabilityReport());
 		//addAdditionalEvents(volumeResult, overOpsQualityGateStat);
 		overOpsEventsStatistic.setOverOpsQualityGateStat(overOpsQualityGateStat);
+		LOGGER.error(" ");
+		String[] newIds = overOpsQualityGateStat.newEventsIds.keySet().toArray(new String[0]);
+		LOGGER.error("newEventsIds [" +String.join(",", newIds) + "]");
+		LOGGER.error(" ");
+		String[] increasingIds = overOpsQualityGateStat.increasingEventsIds.keySet().toArray(new String[0]);
+		LOGGER.error("increasingIds [" +String.join(",", increasingIds) + "]");
+		LOGGER.error(" ");
+		String[] resurfacedIds = overOpsQualityGateStat.resurfacedEventsIds.keySet().toArray(new String[0]);
+		LOGGER.error("resurfacedIds [" +String.join(",", resurfacedIds) + "]");
+		LOGGER.error(" ");
+		String[] criticalIds = overOpsQualityGateStat.criticalEventsIds.keySet().toArray(new String[0]);
+		LOGGER.error("criticalIds [" +String.join(",", criticalIds) + "]");
+		LOGGER.error(" ");
 
-        for (EventResult event : volumeResult.events) {
+		for (EventResult event : volumeResult.events) {
 			LOGGER.info("================== event id" + event.id + " type:" + event.type  + " ================================");
 			LOGGER.info("");
 			overOpsEventsStatistic.add(event);
@@ -225,14 +238,13 @@ public class OverOpsPlugin implements Plugin {
 
 	private ReliabilityReport getReliabilityReport() {
         ReliabilityReportInput reportInput = new ReliabilityReportInput();
-        reportInput.timeFilter = TimeUtil.getLastWindowTimeFilter(TimeUnit.MINUTES.toMillis(daysSpan));
+		reportInput.timeFilter = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(daysSpan));
         reportInput.environments = serviceId;
         reportInput.view = viewName;
         reportInput.outputDrillDownSeries = true;
         reportInput.applications = applicationName;
         reportInput.deployments = deploymentName;
         reportInput.mode = ReliabilityReportInput.DEFAULT_REPORT;
-
 
         return ReliabilityReport.execute(apiClient, reportInput);
     }

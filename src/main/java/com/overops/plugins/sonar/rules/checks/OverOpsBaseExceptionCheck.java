@@ -13,15 +13,12 @@ import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.overops.plugins.sonar.OverOpsPlugin.serviceId;
 import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
 import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.INCREASING_QG_MARKER;
 
