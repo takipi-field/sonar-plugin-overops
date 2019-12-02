@@ -38,9 +38,10 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
         context = ctx;
         file = context.getFile();
         String filePathJavaStyle = file.getAbsolutePath().replaceAll("/", ".");
+        int endingIndex = filePathJavaStyle.length() - ".java".length();
         List<OverOpsEventsStatistic.ClassStat> fileStatistics = overOpsEventsStatistic.getStatistic()
                 .stream()
-                .filter(classStat -> filePathJavaStyle.indexOf(classStat.fileName) != -1)
+                .filter(classStat -> filePathJavaStyle.indexOf(classStat.fileName) == endingIndex - classStat.fileName.length())
                 .filter(classStat -> classStat.qualityGateToEventStat.keySet().contains(metric.qualityGateKey))
                 .collect(Collectors.toList());
 

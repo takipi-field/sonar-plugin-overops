@@ -56,7 +56,7 @@ public class OOResearch {
         reportInput.applications = application;
         reportInput.deployments = deployment;
         reportInput.mode = ReliabilityReportInput.DEFAULT_REPORT;
-        reportInput.regressionInput = getRegressionInput();
+        //reportInput.regressionInput = getRegressionInput();
 
         SummarizedView summarizedView = ViewUtil.getServiceViewByName(apiClient, serviceId, view);
 
