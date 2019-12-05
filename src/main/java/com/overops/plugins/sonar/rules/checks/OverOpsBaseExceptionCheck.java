@@ -1,9 +1,9 @@
 package com.overops.plugins.sonar.rules.checks;
 
 import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
+import com.overops.plugins.sonar.measures.OverOpsEventsStatistic.StatEvent;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.takipi.api.client.functions.output.RegressionRow;
-import com.takipi.api.client.result.event.EventResult;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.plugins.java.api.JavaFileScanner;
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.overops.plugins.sonar.OverOpsPlugin.getJavaStyleFilePath;
 import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
 import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.INCREASING_QG_MARKER;
 
@@ -37,11 +38,11 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
 
         context = ctx;
         file = context.getFile();
-        String filePathJavaStyle = file.getAbsolutePath().replaceAll("/", ".");
-        int endingIndex = filePathJavaStyle.length() - ".java".length();
+        String javaStyleFilePath = getJavaStyleFilePath(file.getAbsolutePath());
+        int endingIndex = javaStyleFilePath.length() - ".java".length();
         List<OverOpsEventsStatistic.ClassStat> fileStatistics = overOpsEventsStatistic.getStatistic()
                 .stream()
-                .filter(classStat -> filePathJavaStyle.indexOf(classStat.fileName) == endingIndex - classStat.fileName.length())
+                .filter(classStat -> javaStyleFilePath.indexOf(classStat.fileName) == endingIndex - classStat.fileName.length())
                 .filter(classStat -> classStat.qualityGateToEventStat.keySet().contains(metric.qualityGateKey))
                 .collect(Collectors.toList());
 
@@ -56,32 +57,32 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
     }
 
     public void reportIssue(OverOpsEventsStatistic.LineStat lineStat) {
-        EventResult event = lineStat.event.eventResult;
-        int method_position = event.error_location.original_line_number + 1;
+        StatEvent statEvent = lineStat.event;
+        int method_position = statEvent.eventMethodPosition + 1;
         long fileCount = getFileCount();
         boolean isMethodPresent = fileCount >= method_position;
         method_position = isMethodPresent ? method_position : 1;
-        log.info("                  Reporting " + lineStat.event.qualityGatesKey + " on " + lineStat.event.eventResult.error_location.prettified_name);
+        log.info("                  Reporting [" + lineStat.event.qualityGatesKey + "]  oMP [" + statEvent.eventMethodPosition + "]  on " + lineStat.event.eventClassName);
         String issueTitle = getIssueTitle(lineStat);
 
         context.addIssue(method_position , this, issueTitle);
     }
 
     private String getIssueTitle(OverOpsEventsStatistic.LineStat lineStat) {
-        EventResult event = lineStat.event.eventResult;
+        StatEvent statEvent = lineStat.event;
         String qualityGateKey = String.join(" and ", metric.qualityGate);
         StringBuilder stringBuilder = new StringBuilder();
         String messagePrefix = OverOpsMetrics.MESSAGE_PATTERN_PREFIX;
         if (lineStat.event.qualityGates.contains(INCREASING_QG_MARKER)) {
-            RegressionRow regressionRow = overOpsEventsStatistic.getOverOpsQualityGateStat().increasingEventsIds.get(event.id);
+            RegressionRow regressionRow = overOpsEventsStatistic.getOverOpsQualityGateStat().increasingEventsIds.get(statEvent.eventId);
             int percents = (int)(regressionRow.reg_delta * 100);
             messagePrefix = "has been occurring " + String.valueOf(percents) + "% more [ID-";
         }
         return stringBuilder.append(qualityGateKey)
                 .append(" ")
-                .append(event.summary)
+                .append(statEvent.eventSummary)
                 .append(messagePrefix)
-                .append(event.id)
+                .append(statEvent.eventId)
                 .append(OverOpsMetrics.MESSAGE_PATTERN_SUFFIX)
                 .toString();
     }

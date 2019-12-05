@@ -8,10 +8,10 @@ import com.google.gson.GsonBuilder;
 import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.rest.*;
+import com.overops.plugins.sonar.util.EventLinkEncoder;
 import com.overops.plugins.sonar.util.SimpleUrlClient;
 import com.overops.plugins.sonar.util.TextBuilder;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.event.EventUtil;
 import com.takipi.api.core.url.UrlClient;
 import com.takipi.common.util.Pair;
 import org.codehaus.plexus.util.StringUtils;
@@ -32,7 +32,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,18 +75,40 @@ public class AddCommentsPostJob implements PostJob {
 
         waitForSonarQubeCreatIssuesInDb();
 
-        Collection<OverOpsEventsStatistic.ClassStat> statistic = overOpsEventsStatistic.getStatistic();
-        for (OverOpsEventsStatistic.ClassStat classStat : statistic) {
-            log.info("    " + classStat.fileName);
-            for (String exName : classStat.qualityGateToEventStat.keySet()) {
-                log.info("           " + exName);
-            }
-        }
+        printStatistic();
 
         OverOpsMetrics.OverOpsMetric[] values = OverOpsMetrics.OverOpsMetric.values();
         for (OverOpsMetrics.OverOpsMetric metric : values) {
             addCommentsToIssuesPerRule(metric);
         }
+    }
+
+    private void printStatistic() {
+        log.info(" --------------------------------------------------------------------------------------->>>>   " );
+        log.info("    " );
+        log.info("    print statistic for post job ");
+        log.info("    " );
+        Collection<OverOpsEventsStatistic.ClassStat> statistic = overOpsEventsStatistic.getStatistic();
+        for (OverOpsEventsStatistic.ClassStat classStat : statistic) {
+            log.info("    " + classStat.fileName);
+            classStat.qualityGateToEventStat.forEach((logKey, logClassStat) ->{
+                log.info("          logged {" + logKey + "}  size [ " + logClassStat.total + "]");
+                logClassStat.lineToLineStat.forEach((logLine, logLineStat) ->{
+                    log.info("                     logged  L [" + logLine + "]  Type [ " + logLineStat.event.eventType + "] id <" + logLineStat.event.eventId + ">");
+                });
+            });
+            log.info("    " );
+            log.info(" ------   " );
+            log.info("    " );
+            classStat.reportableQualityGateToEventStat.forEach((reportableKey, reportableClassStat) ->{
+                log.info("                       {" + reportableKey + "} size [" + reportableClassStat.total + "]");
+                reportableClassStat.lineToLineStat.forEach((repLine, repLineStat) ->{
+                    log.info("                     rep  L [" + repLine + "]  Type [ " + repLineStat.event.eventType + "] <" + repLineStat.event.eventId + ">");
+                });
+            });
+        }
+        log.info("    " );
+        log.info(" --------------------------------------------------------------------------------------<<<<   " );
     }
 
     private Properties loadReportTaskProps() {
@@ -134,7 +159,7 @@ public class AddCommentsPostJob implements PostJob {
                 switch (taskStatus) {
                     case IN_PROGRESS:
                     case PENDING:
-                        LOGGER.info("(Attempts " + (attempts + 1 ) + "/" + queryMaxAttempts +  " )Waiting for report processing to complete...");
+                        LOGGER.info("(Attempts " + (attempts + 1) + "/" + queryMaxAttempts + " )Waiting for report processing to complete...");
                         Thread.sleep(queryInterval);
                         break;
                     case SUCCESS:
@@ -240,7 +265,7 @@ public class AddCommentsPostJob implements PostJob {
         String stackTrace = new TextBuilder().addArray(eventResult.stack_frames, "> at ").build();
 
         return "*Drill down into* " +
-                "[Event Analysis](" + getARCLinkForEvent(issueEventId) + ")" + "\n" +
+                "[Event Analysis](" + getARCLinkForEvent(eventResult) + ")" + "\n" +
                 "*Stack trace:*\n" +
                 stackTrace;
     }
@@ -250,26 +275,18 @@ public class AddCommentsPostJob implements PostJob {
         return first.isPresent() ? first.get() : null;
     }
 
-    private String getARCLinkForEvent(String eventId) {
+    private String getARCLinkForEvent(EventResult eventResult) {
+        String eventId = eventResult.id;
+        String similar_event_ids = eventResult.similar_event_ids == null ?
+                null : String.join(",", eventResult.similar_event_ids);
+
         String arcLink = null;
         try {
-            arcLink = EventUtil.getEventRecentLinkDefault(apiClient, serviceId, eventId, from, to,
+            arcLink = EventLinkEncoder.encodeLink(appHost,
                     Arrays.asList(applicationName), Arrays.asList(), Arrays.asList(deploymentName),
-                    (int) (1440 * daysSpan)
-            );
+                    serviceId, eventId, similar_event_ids, from, to);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        if (arcLink == null) {
-            arcLink = "EventUtil.getEventRecentLinkDefault apiClient," +
-                    "  \"" + serviceId +
-                    "\" ,  \"" + eventId +
-                    "\" ,  \"" + from.toString(formatter) +
-                    "\" ,  \"" + to.toString(formatter) +
-                    "\" , \"" + applicationName +
-                    "\", , \"" + deploymentName + "\"" +
-                    ", " + String.valueOf((int) (1440 * daysSpan)) + "";
-            log.info(arcLink);
         }
 
         return arcLink;

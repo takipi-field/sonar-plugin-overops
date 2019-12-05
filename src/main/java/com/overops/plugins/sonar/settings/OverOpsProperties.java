@@ -17,6 +17,7 @@ public class OverOpsProperties {
 
 	public static final String SONAR_OVEROPS_VIEW_ID = "sonar.overops.viewId";
 	public static final String SONAR_OVEROPS_API_HOST = "sonar.overops.apiHost";
+    public static final String SONAR_OVEROPS_APP_HOST = "sonar.overops.appHost";
 	public static final String SONAR_OVEROPS_API_KEY = "sonar.overops.apikey";
 	public static final String SONAR_OVEROPS_ENVIRONMENT_ID = "sonar.overops.environmentId";
 	public static final String SONAR_OVEROPS_APP_NAME = "sonar.overops.applicationName";
@@ -66,6 +67,16 @@ public class OverOpsProperties {
                         .category(CATEGORY)
                         .subCategory(SETTINGS_SUBCATEGORY)
 						.type(PropertyType.STRING)
+                        .index(2)
+                        .build(),
+
+                PropertyDefinition.builder(SONAR_OVEROPS_APP_HOST)
+                        .name("OverOps URL")
+                        .description("OverOps URL for APP endpoint")
+                        .defaultValue("https://app.overops.com")
+                        .category(CATEGORY)
+                        .subCategory(SETTINGS_SUBCATEGORY)
+                        .type(PropertyType.STRING)
                         .index(2)
                         .build(),
 

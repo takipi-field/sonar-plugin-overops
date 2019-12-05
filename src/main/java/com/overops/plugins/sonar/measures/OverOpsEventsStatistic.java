@@ -4,6 +4,7 @@ import com.takipi.api.client.result.event.EventResult;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,14 +13,14 @@ import java.util.Set;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsByQualityGate;
 import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.getKey;
 
-public class OverOpsEventsStatistic {
+public class OverOpsEventsStatistic implements Serializable {
     private static final Logger LOGGER = Loggers.get(OverOpsEventsStatistic.class);
-    private OverOpsQualityGateStat overOpsQualityGateStat;
+    private transient OverOpsQualityGateStat overOpsQualityGateStat;
     private Stat stat = new Stat();
 
     public void add(EventResult event) {
         StatEvent statEvent = new StatEvent(event, overOpsQualityGateStat.getQualityGates(event.id));
-        String key = statEvent.getClassName();
+        String key = statEvent.eventClassName;
         if (stat.get(key) == null) {
             LOGGER.info("      New stat for  " + key + "   qualityGate :" + statEvent.qualityGatesKey);
             stat.put(key, new ClassStat(statEvent));
@@ -40,25 +41,32 @@ public class OverOpsEventsStatistic {
         return stat.values();
     }
 
-    public static class Stat extends HashMap<String, ClassStat> {
+    public Set<String> getStatisticKeys() {
+        return stat.keySet();
+    }
+
+    public static class Stat extends HashMap<String, ClassStat> implements Serializable {
+
+        public Stat() {
+        }
 
         public void update(String key, StatEvent statEvent) {
             ClassStat classStat = get(key);
             classStat.increment(statEvent);
             LOGGER.info("           Update  on " + classStat.fileName +
-                    "  type [ " + statEvent.getType() +
+                    "  type [ " + statEvent.eventType +
                     " ]  times  = " + classStat.qualityGateToEventStat.get(statEvent.qualityGatesKey).total
                     + "   qualityGate :" + statEvent.qualityGatesKey);
         }
     }
 
-    public static class ClassStat {
+    public static class ClassStat implements Serializable {
         public String fileName;
         public Map<String, EventInClassStat> qualityGateToEventStat;
         public Map<String, EventInClassStat> reportableQualityGateToEventStat;
 
         public ClassStat(StatEvent statEvent) {
-            this.fileName = statEvent.getClassName();
+            this.fileName = statEvent.eventClassName;
             qualityGateToEventStat = new HashMap<>();
             reportableQualityGateToEventStat = new HashMap<>();
             qualityGateToEventStat.put(statEvent.qualityGatesKey, new EventInClassStat(statEvent));
@@ -102,27 +110,27 @@ public class OverOpsEventsStatistic {
         }
     }
 
-    public static class EventInClassStat {
+    public static class EventInClassStat implements Serializable {
         public int total;
         public Map<Integer, LineStat> lineToLineStat = new HashMap<>();
 
         public EventInClassStat(StatEvent statEvent) {
             total = 1;
-            lineToLineStat.put(getLine(statEvent), new LineStat(statEvent));
+            lineToLineStat.put(statEvent.eventMethodPosition, new LineStat(statEvent));
         }
 
         public void update(StatEvent statEvent) {
             total++;
-            LineStat lineStat = lineToLineStat.get(getLine(statEvent));
+            LineStat lineStat = lineToLineStat.get(statEvent.eventMethodPosition);
             if (lineStat == null) {
-                lineToLineStat.put(getLine(statEvent), new LineStat(statEvent));
+                lineToLineStat.put(statEvent.eventMethodPosition, new LineStat(statEvent));
             } else {
                 lineStat.update(statEvent);
             }
         }
     }
 
-    public static class LineStat {
+    public static class LineStat implements Serializable {
         public int total;
         public StatEvent event;
 
@@ -137,31 +145,23 @@ public class OverOpsEventsStatistic {
         }
     }
 
-    public static int getLine(StatEvent statEvent) {
-        return statEvent.getMethodPosition();
-    }
-
-    public static class StatEvent {
-        public EventResult eventResult;
+    public static class StatEvent implements Serializable {
+        public final String eventId;
+        public final String eventSummary;
+        public final String eventClassName;
+        public final String eventType;
+        public final int eventMethodPosition;
         public Set<String> qualityGates;
         public String qualityGatesKey;
 
         public StatEvent(EventResult eventResult, Set<String> qualityGates) {
-            this.eventResult = eventResult;
+            this.eventId = eventResult.id;
+            this.eventMethodPosition = eventResult.error_location.original_line_number;
+            this.eventType = eventResult.type;
+            this.eventClassName = eventResult.error_location.class_name;
+            this.eventSummary = eventResult.summary;
             this.qualityGates = qualityGates;
             this.qualityGatesKey = getKey(qualityGates);
-        }
-
-        public String getType() {
-            return eventResult.type;
-        }
-
-        public String getClassName() {
-            return eventResult.error_location.class_name;
-        }
-
-        private int getMethodPosition() {
-            return eventResult.error_location.method_position;
         }
     }
 }

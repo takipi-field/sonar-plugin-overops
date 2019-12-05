@@ -3,21 +3,19 @@ package com.overops.plugins.sonar.measures;
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
-import org.sonar.api.measures.Metric;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
-import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getMetricByQualityGate;
+import static com.overops.plugins.sonar.OverOpsPlugin.getJavaStyleFilePath;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsByQualityGate;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.getMetricsList;
 
 public class MeasureDefinition implements MeasureComputer {
-    private static final Logger log = Loggers.get(MeasureDefinition.class);
+    private OverOpsEventsStatistic overOpsEventsStatistic;
 
     @Override
     public MeasureComputerDefinition define(MeasureComputerDefinitionContext def) {
@@ -31,41 +29,26 @@ public class MeasureDefinition implements MeasureComputer {
     @Override
     public void compute(MeasureComputerContext context) {
         if (context.getComponent().getType() == Component.Type.FILE) {
-            String filePathJavaStyle = context.getComponent().getKey().replaceAll("/", ".");
+            String javaStyleFilePath = getJavaStyleFilePath(context.getComponent().getKey());
+            int endingIndex = javaStyleFilePath.length() - ".java".length();
+            readOverOpsEventsStatistic();
+            if (overOpsEventsStatistic == null) {
+                return;
+            }
+
             overOpsEventsStatistic.getStatistic()
                     .stream()
-                    .filter(classStat -> {
-//                        System.out.println("");
-//                        System.out.println("component that scan path " + filePathJavaStyle);
-//                        System.out.println("classStat.fileName " + classStat.fileName);
-                        return filePathJavaStyle.indexOf(classStat.fileName) != -1;})
+                    .filter(classStat -> javaStyleFilePath.indexOf(classStat.fileName) == endingIndex - classStat.fileName.length())
                     .collect(Collectors.toList())
-                    .forEach(classStat -> classStat.reportableQualityGateToEventStat.forEach((qualityGateKey, eventInClassStat) -> {
-                                OverOpsMetrics.OverOpsMetric overOpsMetric = getOverOpsByQualityGate(qualityGateKey);
-//                                System.out.println("        qualityGateKey [" + qualityGateKey + "]  overOpsMetric for it found " + (overOpsMetric != null));
-                                if (overOpsMetric != null) {
-                                    //If in the same line we had several times event occurs we count it once
-                                    if (overOpsMetric.isCombo()) {
-//                                        System.out.println(" >>>>>>  Combo detected       qualityGateKey [" + qualityGateKey + "]  overOpsMetric for it found " + (overOpsMetric != null));
-                                        try {
-                                            for (String gate :overOpsMetric.qualityGate){
-                                                Metric metric = getMetricByQualityGate(gate);
-//                                                System.out.println(" >>>>>> gate : " + gate + " metric != null " +(metric != null) );
-                                                if (metric != null) {
-//                                                    System.out.println(" >>>>>> gate : metric key " + metric.getKey());
-                                                    context.addMeasure(metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
-                                                }
-                                            }
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-
-                                    } else {
-                                        context.addMeasure(overOpsMetric.metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
-                                    }
-                                }
-                            })
-                    );
+                    .forEach(classStat -> {
+                        classStat.reportableQualityGateToEventStat.forEach((qualityGateKey, eventInClassStat) -> {
+                            OverOpsMetrics.OverOpsMetric overOpsMetric = getOverOpsByQualityGate(qualityGateKey);
+                            if (overOpsMetric != null) {
+                                //If in the same line we had several times event occurs we count it once
+                                context.addMeasure(overOpsMetric.metric.getKey(), eventInClassStat.lineToLineStat.keySet().size());
+                            }
+                        });
+                    });
         }
 
         if (context.getComponent().getType() != Component.Type.FILE) {
@@ -75,6 +58,24 @@ public class MeasureDefinition implements MeasureComputer {
                         .sum();
                 context.addMeasure(metric.key(), sum);
             });
+        }
+    }
+
+    private void readOverOpsEventsStatistic() {
+        if (overOpsEventsStatistic != null) {
+            return;
+        }
+
+        try {
+            FileInputStream file = new FileInputStream("too.txt");
+            ObjectInputStream in = new ObjectInputStream(file);
+
+            overOpsEventsStatistic = (OverOpsEventsStatistic) in.readObject();
+
+            in.close();
+            file.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
