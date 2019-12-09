@@ -4,10 +4,14 @@ import com.takipi.api.client.functions.output.EventRow;
 import com.takipi.api.client.functions.output.RegressionRow;
 import com.takipi.api.client.functions.output.ReliabilityReport;
 import com.takipi.api.client.functions.output.ReliabilityReportRow;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 import java.util.*;
 
 public class OverOpsQualityGateStat {
+    private static final Logger LOGGER = Loggers.get(OverOpsQualityGateStat.class);
+
     public static final String NEW_QG_MARKER = "New";
     public static final String CRITICAL_QG_MARKER = "Critical";
     public static final String RESURFACED_QG_MARKER = "Resurfaced";
@@ -20,6 +24,7 @@ public class OverOpsQualityGateStat {
 
     public OverOpsQualityGateStat(ReliabilityReport reliabilityReport) {
         if (reliabilityReport == null || reliabilityReport.items == null) {
+            LOGGER.error(" ReliabilityReport is empty");
             return;
         }
 

@@ -3,21 +3,15 @@ package com.overops.plugins.sonar;
 import com.overops.plugins.sonar.measures.MeasureDefinition;
 import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
-import com.overops.plugins.sonar.measures.OverOpsQualityGateStat;
 import com.overops.plugins.sonar.rules.RuleDefinitionImplementation;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
 import com.takipi.api.client.RemoteApiClient;
-import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.functions.input.ReliabilityReportInput;
-import com.takipi.api.client.functions.output.RegressionRow;
 import com.takipi.api.client.functions.output.ReliabilityReport;
-import com.takipi.api.client.functions.output.Series;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
-import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.util.validation.ValidationUtil;
-import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient;
 import com.takipi.common.util.TimeUtil;
 import org.codehaus.plexus.util.StringUtils;
@@ -32,9 +26,7 @@ import org.sonar.api.utils.log.Loggers;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.overops.plugins.sonar.settings.OverOpsProperties.*;
@@ -60,10 +52,8 @@ public class OverOpsPlugin implements Plugin {
     public static DateTimeFormatter formatter;
     public static RemoteApiClient apiClient;
     public static long daysSpan;
-    public static EventsResult volumeResult;
     public static OverOpsEventsStatistic overOpsEventsStatistic;
 
-    public HashMap<String, Integer> exceptions;
     public static String viewName;
     public static String newErrorGate;
     public static String resurfacedErrorGate;
@@ -78,8 +68,6 @@ public class OverOpsPlugin implements Plugin {
     public static String increasingErrorGateApplySeasonality;
     public static String adminUserName;
     public static String adminUserPassword;
-
-    public static String testX;
 
     @Override
     public void define(Context context) {
@@ -106,43 +94,7 @@ public class OverOpsPlugin implements Plugin {
         }
 
         apiClient = (RemoteApiClient) RemoteApiClient.newBuilder().setApiKey(apiKey).setHostname(apiHost).build();
-        SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewName);
-        if (view == null) {
-            LOGGER.error("Failed getting OverOps View, please check viewId or environmentKey.");
-            return false;
-        }
-
-        UrlClient.Response<EventsResult> volumeResponse = getVolumeResponse(view);
-
-        if (!validateVolumeResponse(volumeResponse)) {
-            return false;
-        }
-
-        volumeResult = volumeResponse.data;
-        OverOpsQualityGateStat overOpsQualityGateStat = new OverOpsQualityGateStat(getReliabilityReport());
-        addAdditionalEvents(volumeResult, overOpsQualityGateStat);
-        overOpsEventsStatistic.setOverOpsQualityGateStat(overOpsQualityGateStat);
-        LOGGER.error(" ");
-        String[] newIds = overOpsQualityGateStat.newEventsIds.keySet().toArray(new String[0]);
-        LOGGER.error("newEventsIds [" + String.join(",", newIds) + "]");
-        LOGGER.error(" ");
-        String[] increasingIds = overOpsQualityGateStat.increasingEventsIds.keySet().toArray(new String[0]);
-        LOGGER.error("increasingIds [" + String.join(",", increasingIds) + "]");
-        LOGGER.error(" ");
-        String[] resurfacedIds = overOpsQualityGateStat.resurfacedEventsIds.keySet().toArray(new String[0]);
-        LOGGER.error("resurfacedIds [" + String.join(",", resurfacedIds) + "]");
-        LOGGER.error(" ");
-        String[] criticalIds = overOpsQualityGateStat.criticalEventsIds.keySet().toArray(new String[0]);
-        LOGGER.error("criticalIds [" + String.join(",", criticalIds) + "]");
-        LOGGER.error(" ");
-
-        for (EventResult event : volumeResult.events) {
-            LOGGER.info("================== event id" + event.id + " type:" + event.type + " ================================");
-            LOGGER.info("");
-            overOpsEventsStatistic.add(event);
-            LOGGER.info("");
-            LOGGER.info("==============================================================");
-        }
+        overOpsEventsStatistic.setOverOpsQualityGateStat(getReliabilityReport());
 
         writeToFileOverOpsEventsStatistic(overOpsEventsStatistic);
 
@@ -163,121 +115,6 @@ public class OverOpsPlugin implements Plugin {
         }
     }
 
-    private void addAdditionalEvents(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat) {
-        EventResult original = volumeResult.events.get(0);
-        addIncreasing(volumeResult, overOpsQualityGateStat, cloneE(original));
-        addResurfaced(volumeResult, overOpsQualityGateStat, cloneE(original));
-        addCritical(volumeResult, overOpsQualityGateStat, cloneE(original));
-        addNewAndCritical(volumeResult, overOpsQualityGateStat, cloneE(original));
-        addNewAndResurfaced(volumeResult, overOpsQualityGateStat, cloneE(original));
-        addIncreasingAndCritical(volumeResult, overOpsQualityGateStat, cloneE(original));
-        addResurfacedAndCritical(volumeResult, overOpsQualityGateStat, cloneE(original));
-    }
-
-    private EventResult cloneE(EventResult original) {
-        EventResult eventResult = (EventResult) original.clone();
-        Location location = new Location();
-        location.method_position = original.error_location.method_position;
-        location.original_line_number = original.error_location.original_line_number;
-        location.prettified_name = original.error_location.prettified_name;
-        location.class_name = original.error_location.class_name;
-
-        eventResult.error_location = location;
-        return eventResult;
-    }
-
-    private void addResurfacedAndCritical(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
-        clone.id = String.valueOf(++idRef);
-        decorateResurfaced(clone, overOpsQualityGateStat);
-        decorateCritical(clone, overOpsQualityGateStat);
-        clone.error_location.prettified_name = " [Resurfaced and Critical gate exception on some method]";
-        clone.error_location.original_line_number = ++lineDelta;
-        clone.error_location.method_position = ++lineDelta;
-        volumeResult.events.add(clone);
-    }
-
-    private void addIncreasingAndCritical(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
-        clone.id = String.valueOf(++idRef);
-        decorateIncreasing(clone, overOpsQualityGateStat);
-        decorateCritical(clone, overOpsQualityGateStat);
-        clone.error_location.prettified_name = " [Increasing and Critical gate exception on some method]";
-        clone.error_location.original_line_number = ++lineDelta;
-        clone.error_location.method_position = ++lineDelta;
-        volumeResult.events.add(clone);
-    }
-
-    private void addNewAndResurfaced(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
-        clone.id = String.valueOf(++idRef);
-        decorateNew(clone, overOpsQualityGateStat);
-        decorateResurfaced(clone, overOpsQualityGateStat);
-        clone.error_location.prettified_name = " [Resurfaced and Critical gate exception on some method]";
-        clone.error_location.original_line_number = ++lineDelta;
-        clone.error_location.method_position = ++lineDelta;
-        volumeResult.events.add(clone);
-    }
-
-    private void addNewAndCritical(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
-        clone.id = String.valueOf(++idRef);
-        decorateNew(clone, overOpsQualityGateStat);
-        decorateCritical(clone, overOpsQualityGateStat);
-        clone.error_location.prettified_name = " [New and Critical gate exception on some method]";
-        clone.error_location.original_line_number = ++lineDelta;
-        clone.error_location.method_position = ++lineDelta;
-        volumeResult.events.add(clone);
-    }
-
-    private void addCritical(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
-        clone.id = String.valueOf(++idRef);
-        decorateCritical(clone, overOpsQualityGateStat);
-        clone.error_location.original_line_number = ++lineDelta;
-        clone.error_location.method_position = ++lineDelta;
-        volumeResult.events.add(clone);
-    }
-
-    private void addResurfaced(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
-        clone.id = String.valueOf(++idRef);
-        decorateResurfaced(clone, overOpsQualityGateStat);
-        clone.error_location.original_line_number = ++lineDelta;
-        clone.error_location.method_position = ++lineDelta;
-        volumeResult.events.add(clone);
-    }
-
-    private void addIncreasing(EventsResult volumeResult, OverOpsQualityGateStat overOpsQualityGateStat, EventResult clone) {
-        clone.id = String.valueOf(++idRef);
-        decorateIncreasing(clone, overOpsQualityGateStat);
-        clone.error_location.original_line_number = ++lineDelta;
-        clone.error_location.method_position = ++lineDelta;
-        volumeResult.events.add(clone);
-    }
-
-    public static int idRef = 10000;
-    public static int lineDelta = 4;
-
-    private void decorateNew(EventResult clone, OverOpsQualityGateStat overOpsQualityGateStat) {
-        clone.error_location.prettified_name = " [New gate exception on some method]";
-        overOpsQualityGateStat.newEventsIds.put(clone.id, null);
-    }
-
-    private void decorateIncreasing(EventResult clone, OverOpsQualityGateStat overOpsQualityGateStat) {
-        clone.error_location.prettified_name = " [Increasing gate exception on some method]";
-        Series<RegressionRow> series = new Series<>();
-        series.columns = new ArrayList<>();
-        RegressionRow regressionRow = new RegressionRow(series, 1);
-        regressionRow.reg_delta = 1.569d;
-
-        overOpsQualityGateStat.increasingEventsIds.put(clone.id, regressionRow);
-    }
-
-    private void decorateResurfaced(EventResult clone, OverOpsQualityGateStat overOpsQualityGateStat) {
-        clone.error_location.prettified_name = " [Resurfaced gate exception on some method]";
-        overOpsQualityGateStat.resurfacedEventsIds.put(clone.id, null);
-    }
-
-    private void decorateCritical(EventResult clone, OverOpsQualityGateStat overOpsQualityGateStat) {
-        clone.error_location.prettified_name = " [Critical gate exception on some method]";
-        overOpsQualityGateStat.criticalEventsIds.put(clone.id, null);
-    }
-
     private ReliabilityReport getReliabilityReport() {
         ReliabilityReportInput reportInput = new ReliabilityReportInput();
         reportInput.timeFilter = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(daysSpan));
@@ -295,20 +132,14 @@ public class OverOpsPlugin implements Plugin {
 
     private UrlClient.Response<EventsResult> getVolumeResponse(SummarizedView view) {
         EventsVolumeRequest eventsVolumeRequest = getVolumeRequest(view);
-//		LOGGER.info("-------------------------------------------");
-//		LOGGER.info("                                          ");
-//		LOGGER.info(eventsVolumeRequest.urlPath());
         try {
             StringBuilder stringBuilder = new StringBuilder("?");
             for (String p : eventsVolumeRequest.queryParams()) {
                 stringBuilder.append("&").append(p);
             }
-//			LOGGER.info(stringBuilder.toString());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-//		LOGGER.info("                                          ");
-//		LOGGER.info("-------------------------------------------");
         return apiClient.get(eventsVolumeRequest);
     }
 
@@ -402,16 +233,5 @@ public class OverOpsPlugin implements Plugin {
 
     public static String getJavaStyleFilePath(String filePath) {
         return filePath != null ? filePath.replaceAll("/", ".") : "";
-    }
-
-    private boolean validateVolumeResponse(UrlClient.Response<EventsResult> eventsResponse) {
-        if (eventsResponse.data.events == null) {
-            LOGGER.error("Failed getting OverOps events, please check Application Name or Deployment Name.");
-            return false;
-        } else if (eventsResponse.isBadResponse()) {
-            LOGGER.error("Bad API Response " + apiHost + " " + deploymentName + " " + applicationName);
-            return false;
-        }
-        return true;
     }
 }

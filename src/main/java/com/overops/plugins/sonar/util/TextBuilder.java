@@ -60,13 +60,15 @@ public class TextBuilder {
     }
 
 
-    public TextBuilder addArray(List<Location> stack_frames, String prefix) {
+    public TextBuilder addArray(List<String> stack_frames, String prefix) {
         if (stack_frames == null) return this;
 
-        for (Location stack_frame : stack_frames) {
-            stringBuilder.append(prefix).append(stack_frame.prettified_name).append("\n");
+        for (String stack_frame : stack_frames) {
+            stringBuilder.append(prefix).append(stack_frame).append("\n");
         }
 
         return this;
     }
 }
+
+

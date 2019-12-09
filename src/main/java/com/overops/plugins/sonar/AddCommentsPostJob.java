@@ -6,12 +6,12 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
+import com.overops.plugins.sonar.measures.OverOpsEventsStatistic.StatEvent;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.rest.*;
 import com.overops.plugins.sonar.util.EventLinkEncoder;
 import com.overops.plugins.sonar.util.SimpleUrlClient;
 import com.overops.plugins.sonar.util.TextBuilder;
-import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.core.url.UrlClient;
 import com.takipi.common.util.Pair;
 import org.codehaus.plexus.util.StringUtils;
@@ -94,7 +94,7 @@ public class AddCommentsPostJob implements PostJob {
             classStat.qualityGateToEventStat.forEach((logKey, logClassStat) ->{
                 log.info("          logged {" + logKey + "}  size [ " + logClassStat.total + "]");
                 logClassStat.lineToLineStat.forEach((logLine, logLineStat) ->{
-                    log.info("                     logged  L [" + logLine + "]  Type [ " + logLineStat.event.eventType + "] id <" + logLineStat.event.eventId + ">");
+                    log.info("                     logged  L [" + logLine + "]  id <" + logLineStat.event.eventId + ">");
                 });
             });
             log.info("    " );
@@ -103,7 +103,7 @@ public class AddCommentsPostJob implements PostJob {
             classStat.reportableQualityGateToEventStat.forEach((reportableKey, reportableClassStat) ->{
                 log.info("                       {" + reportableKey + "} size [" + reportableClassStat.total + "]");
                 reportableClassStat.lineToLineStat.forEach((repLine, repLineStat) ->{
-                    log.info("                     rep  L [" + repLine + "]  Type [ " + repLineStat.event.eventType + "] <" + repLineStat.event.eventId + ">");
+                    log.info("                     rep  L [" + repLine + "]  id <" + repLineStat.event.eventId + ">");
                 });
             });
         }
@@ -200,15 +200,15 @@ public class AddCommentsPostJob implements PostJob {
             boolean matched = matcher.find();
             if (matched) {
                 String issueEventId = matcher.group(1);
-                EventResult eventResult = getEventDataById(issueEventId);
-                if (eventResult != null && !isOverOpsCommentAdded(sqIssue, eventResult, severityType)) {
-                    addCommentToSonarQubeIssue(sqIssue, issueEventId, eventResult);
+                StatEvent statEventById = overOpsEventsStatistic.getStatEventById(issueEventId);
+                if (statEventById != null && !isOverOpsCommentAdded(sqIssue, severityType)) {
+                    addCommentToSonarQubeIssue(sqIssue, statEventById);
                 }
             }
         }
     }
 
-    private boolean isOverOpsCommentAdded(SQIssue sqIssue, EventResult eventResult, String severityType) {
+    private boolean isOverOpsCommentAdded(SQIssue sqIssue, String severityType) {
         SQIssueFullData fullData = getComments(sqIssue, severityType);
         if (fullData != null && fullData.issue != null && fullData.issue.comments != null) {
             Pattern overOpsMessagePattern = Pattern.compile("Drill down into");
@@ -245,8 +245,8 @@ public class AddCommentsPostJob implements PostJob {
         return Pair.of(HttpHeaders.AUTHORIZATION, "Basic " + AUTH_DATA);
     }
 
-    private void addCommentToSonarQubeIssue(SQIssue sqIssue, String issueEventId, EventResult eventResult) {
-        String description = getDescription(issueEventId, eventResult);
+    private void addCommentToSonarQubeIssue(SQIssue sqIssue, StatEvent statEvent) {
+        String description = getDescription(statEvent);
         try {
             SQSimpleRequest addComment = SQSimpleRequest.newBuilder()
                     .setUrl(SONAR_HOST_URL + "/api/issues/add_comment")
@@ -261,30 +261,22 @@ public class AddCommentsPostJob implements PostJob {
         }
     }
 
-    private String getDescription(String issueEventId, EventResult eventResult) {
-        String stackTrace = new TextBuilder().addArray(eventResult.stack_frames, "> at ").build();
+    private String getDescription(StatEvent statEvent) {
+        String stackTrace = new TextBuilder().addArray(statEvent.stack_frames, "> at ").build();
 
         return "*Drill down into* " +
-                "[Event Analysis](" + getARCLinkForEvent(eventResult) + ")" + "\n" +
+                "[Event Analysis](" + getARCLinkForEvent(statEvent) + ")" + "\n" +
                 "*Stack trace:*\n" +
                 stackTrace;
     }
 
-    private EventResult getEventDataById(String issueEventId) {
-        Optional<EventResult> first = OverOpsPlugin.volumeResult.events.stream().filter(eventResult -> eventResult.id.equals(issueEventId)).findFirst();
-        return first.isPresent() ? first.get() : null;
-    }
-
-    private String getARCLinkForEvent(EventResult eventResult) {
-        String eventId = eventResult.id;
-        String similar_event_ids = eventResult.similar_event_ids == null ?
-                null : String.join(",", eventResult.similar_event_ids);
-
+    private String getARCLinkForEvent(StatEvent statEvent) {
         String arcLink = null;
+
         try {
             arcLink = EventLinkEncoder.encodeLink(appHost,
                     Arrays.asList(applicationName), Arrays.asList(), Arrays.asList(deploymentName),
-                    serviceId, eventId, similar_event_ids, from, to);
+                    serviceId, statEvent.eventId, statEvent.similar_event_ids, from, to);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -42,7 +42,7 @@ public class OOResearch {
         String application = "App1";
         String view = "View1";
         String deployment = "Dep1";
-        int daysSpan = 7;
+        int daysSpan = 14;
         int time_span = 24 * 60 * daysSpan;
         DateTime to = DateTime.now();
         DateTime from = to.minusDays((int) daysSpan);
@@ -68,20 +68,12 @@ public class OOResearch {
                 .setIncludeStacktrace(true)
                 .build();
 
-        EventsRequest allEventsRequest = EventsRequest.newBuilder().setServiceId(serviceId).setFrom(from.toString(formatter))
-                .setTo(to.toString(formatter)).setViewId(summarizedView.id)
-                .addApp(application)
-                .addDeployment(deployment)
-                .setIncludeStacktrace(true)
-                .build();
-        UrlClient.Response<EventsResult> alleEventsResult = apiClient.get(allEventsRequest);
-
-
-
         ReliabilityReport reliabilityReport = ReliabilityReport.execute(apiClient, reportInput);
 
         Set<String> eventIdSetFromVolume = new HashSet<>();
         Set<String> eventIdSetFromReport = new HashSet<>();
+
+        UrlClient.Response<EventsResult> eventsResultResponse = apiClient.get(eventsVolumeRequest);
 
         for (Map.Entry<ReliabilityReportRow.Header, ReliabilityReport.ReliabilityReportItem> entry : reliabilityReport.items.entrySet()) {
             ReliabilityReportRow.Header rrHeader = entry.getKey();
@@ -95,7 +87,6 @@ public class OOResearch {
             System.out.println(" ------------------------------------- ");
             System.out.println("  ");
         }
-        UrlClient.Response<EventsResult> eventsResultResponse = apiClient.get(eventsVolumeRequest);
 
         System.out.println(" ------------------------------------- ");
         System.out.println(" ------------------------------------- ");
@@ -115,14 +106,7 @@ public class OOResearch {
             }
         });
         eventIdSetFromReport.removeAll(eventIdSetFromVolume);
-//        System.out.println(" ------------------------------------- ");
-//        System.out.println(" ------------------------------------- ");
-//        System.out.println(" Report event ids minus volume, should be empty ");
-//        System.out.println("  ");
-//
-//        eventIdSetFromReport.forEach(id -> {
-//            System.out.print("{ id:" + id + " } , ");
-//        });
+
     }
 
     private static void printResurfacedErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
