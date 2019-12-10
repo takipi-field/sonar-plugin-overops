@@ -25,13 +25,11 @@ public class OverOpsQualityGateStat {
             return;
         }
 
-        for (Map.Entry<ReliabilityReportRow.Header, ReliabilityReport.ReliabilityReportItem> entry : reliabilityReport.items.entrySet()) {
-            ReliabilityReport.ReliabilityReportItem rrItem = entry.getValue();
-            addNewErrors(rrItem);
-            addIncreasingErrors(rrItem);
-            addCriticalErrors(rrItem);
-            addResurfacedErrors(rrItem);
-        }
+        ReliabilityReport.ReliabilityReportItem rrItem = reliabilityReport.items.values().iterator().next();
+        addNewErrors(rrItem);
+        addIncreasingErrors(rrItem);
+        addCriticalErrors(rrItem);
+        addResurfacedErrors(rrItem);
     }
 
     private void addResurfacedErrors(ReliabilityReport.ReliabilityReportItem rrItem) {

@@ -41,12 +41,11 @@ public class OverOpsEventsStatistic implements Serializable {
     private List<StatEvent> getList(ReliabilityReport reliabilityReport) {
 
         ArrayList<StatEvent> result = new ArrayList<>();
-        for (Map.Entry<ReliabilityReportRow.Header, ReliabilityReport.ReliabilityReportItem> entry : reliabilityReport.items.entrySet()) {
-            ReliabilityReport.ReliabilityReportItem reliabilityReportItem = entry.getValue();
-            result.addAll(getStatEventsFromSeries(reliabilityReportItem.failures));
-            result.addAll(getStatEventsFromSeries(reliabilityReportItem.errors));
-            result.addAll(getStatEventsFromSeries(reliabilityReportItem.regressions));
-        }
+
+        ReliabilityReport.ReliabilityReportItem reliabilityReportItem = reliabilityReport.items.values().iterator().next();
+        result.addAll(getStatEventsFromSeries(reliabilityReportItem.failures));
+        result.addAll(getStatEventsFromSeries(reliabilityReportItem.errors));
+        result.addAll(getStatEventsFromSeries(reliabilityReportItem.regressions));
 
         return result;
     }
