@@ -62,7 +62,7 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
         long fileCount = getFileCount();
         boolean isMethodPresent = fileCount >= method_position;
         method_position = isMethodPresent ? method_position : 1;
-        log.info("                  Reporting [" + lineStat.event.qualityGatesKey + "]  oMP [" + statEvent.eventMethodPosition + "]  on " + lineStat.event.eventClassName);
+        log.info("                  Reporting [" + lineStat.event.qualityGatesKey + "]  oMP [" + statEvent.eventMethodPosition + "]  on " + lineStat.event.eventClassIdentifier);
         String issueTitle = getIssueTitle(lineStat);
 
         context.addIssue(method_position , this, issueTitle);

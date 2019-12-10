@@ -1,20 +1,18 @@
 package com.overops.plugins.sonar;
 
+import com.overops.plugins.sonar.measures.OverOpsEventsStatistic;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.data.view.SummarizedView;
-import com.takipi.api.client.functions.input.EventFilterInput;
 import com.takipi.api.client.functions.input.ReliabilityReportInput;
 import com.takipi.api.client.functions.output.EventRow;
 import com.takipi.api.client.functions.output.RegressionRow;
 import com.takipi.api.client.functions.output.ReliabilityReport;
 import com.takipi.api.client.functions.output.ReliabilityReportRow;
-import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil;
-import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.validation.ValidationUtil;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient;
@@ -88,6 +86,14 @@ public class OOResearch {
             System.out.println("  ");
         }
 
+        OverOpsEventsStatistic overOpsEventsStatistic  = new OverOpsEventsStatistic();
+        overOpsEventsStatistic.setOverOpsQualityGateStat(reliabilityReport);
+
+        testConsistency(eventIdSetFromVolume, eventIdSetFromReport, eventsResultResponse);
+
+    }
+
+    private static void testConsistency(Set<String> eventIdSetFromVolume, Set<String> eventIdSetFromReport, UrlClient.Response<EventsResult> eventsResultResponse) {
         System.out.println(" ------------------------------------- ");
         System.out.println(" ------------------------------------- ");
         System.out.println(" Volume events");
@@ -106,7 +112,6 @@ public class OOResearch {
             }
         });
         eventIdSetFromReport.removeAll(eventIdSetFromVolume);
-
     }
 
     private static void printResurfacedErrors(ReliabilityReport.ReliabilityReportItem rrItem) {

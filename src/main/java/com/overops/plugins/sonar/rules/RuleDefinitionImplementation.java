@@ -73,12 +73,6 @@ public class RuleDefinitionImplementation implements RulesDefinition, CheckRegis
             rule.addTags(ooMetrics.ruleTags);
             rule.setType(ooMetrics.ruleType);
             rule.setStatus(RuleStatus.READY);
-
-            // TODO find what is proper remediation
-//            if (metaDada.remediation != null) {
-//                rule.setDebtRemediationFunction(metaDada.remediation.remediationFunction(rule.debtRemediationFunctions()));
-//                rule.setGapDescription(metaDada.remediation.linearDesc);
-//            }
         }
     }
 

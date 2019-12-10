@@ -1,21 +1,17 @@
 package com.overops.plugins.sonar.measures;
 
 import com.takipi.api.client.functions.output.ReliabilityReport;
+import com.takipi.api.client.functions.output.ReliabilityReportRow;
 import com.takipi.api.client.functions.output.Series;
-import com.takipi.api.client.result.event.EventResult;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsByQualityGate;
 import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.getKey;
 
 public class OverOpsEventsStatistic implements Serializable {
-    private static final Logger LOGGER = Loggers.get(OverOpsEventsStatistic.class);
     private transient OverOpsQualityGateStat overOpsQualityGateStat;
     private Stat stat = new Stat();
     private HashMap<String, StatEvent> idToStatEvent = new HashMap<>();
@@ -23,9 +19,9 @@ public class OverOpsEventsStatistic implements Serializable {
     public void add(StatEvent statEvent) {
         idToStatEvent.put(statEvent.eventId, statEvent);
 
-        String key = statEvent.eventClassName;
+        String key = statEvent.eventClassIdentifier;
         if (stat.get(key) == null) {
-            LOGGER.info("      New stat for  " + key + "   qualityGate :" + statEvent.qualityGatesKey);
+            System.out.println("      New stat for  " + key + "   qualityGate :" + statEvent.qualityGatesKey);
             stat.put(key, new ClassStat(statEvent));
         } else {
             stat.update(key, statEvent);
@@ -35,10 +31,9 @@ public class OverOpsEventsStatistic implements Serializable {
     public void setOverOpsQualityGateStat(ReliabilityReport reliabilityReport) {
         this.overOpsQualityGateStat = new OverOpsQualityGateStat(reliabilityReport);
         printQualityGateStat();
-
         List<StatEvent> eventAdapter = getList(reliabilityReport);
 
-        for (StatEvent statEvent : eventAdapter) { ;
+        for (StatEvent statEvent : eventAdapter) {
             overOpsEventsStatistic.add(statEvent);
         }
     }
@@ -46,15 +41,11 @@ public class OverOpsEventsStatistic implements Serializable {
     private List<StatEvent> getList(ReliabilityReport reliabilityReport) {
 
         ArrayList<StatEvent> result = new ArrayList<>();
-
-
-        ReliabilityReport.ReliabilityReportItem reliabilityReportItem = reliabilityReport.items.get(0);
-        if (reliabilityReportItem != null) {
+        for (Map.Entry<ReliabilityReportRow.Header, ReliabilityReport.ReliabilityReportItem> entry : reliabilityReport.items.entrySet()) {
+            ReliabilityReport.ReliabilityReportItem reliabilityReportItem = entry.getValue();
             result.addAll(getStatEventsFromSeries(reliabilityReportItem.failures));
             result.addAll(getStatEventsFromSeries(reliabilityReportItem.errors));
             result.addAll(getStatEventsFromSeries(reliabilityReportItem.regressions));
-        } else {
-            LOGGER.error(" no stat data in reliabilityReportItem");
         }
 
         return result;
@@ -72,19 +63,19 @@ public class OverOpsEventsStatistic implements Serializable {
     }
 
     private void printQualityGateStat() {
-        LOGGER.error(" ");
+        System.out.println(" ");
         String[] newIds = overOpsQualityGateStat.newEventsIds.keySet().toArray(new String[0]);
-        LOGGER.error("newEventsIds [" + String.join(",", newIds) + "]");
-        LOGGER.error(" ");
+        System.out.println("newEventsIds [" + String.join(",", newIds) + "]");
+        System.out.println(" ");
         String[] increasingIds = overOpsQualityGateStat.increasingEventsIds.keySet().toArray(new String[0]);
-        LOGGER.error("increasingIds [" + String.join(",", increasingIds) + "]");
-        LOGGER.error(" ");
+        System.out.println("increasingIds [" + String.join(",", increasingIds) + "]");
+        System.out.println(" ");
         String[] resurfacedIds = overOpsQualityGateStat.resurfacedEventsIds.keySet().toArray(new String[0]);
-        LOGGER.error("resurfacedIds [" + String.join(",", resurfacedIds) + "]");
-        LOGGER.error(" ");
+        System.out.println("resurfacedIds [" + String.join(",", resurfacedIds) + "]");
+        System.out.println(" ");
         String[] criticalIds = overOpsQualityGateStat.criticalEventsIds.keySet().toArray(new String[0]);
-        LOGGER.error("criticalIds [" + String.join(",", criticalIds) + "]");
-        LOGGER.error(" ");
+        System.out.println("criticalIds [" + String.join(",", criticalIds) + "]");
+        System.out.println(" ");
     }
 
     public OverOpsQualityGateStat getOverOpsQualityGateStat() {
@@ -111,7 +102,7 @@ public class OverOpsEventsStatistic implements Serializable {
         public void update(String key, StatEvent statEvent) {
             ClassStat classStat = get(key);
             classStat.increment(statEvent);
-            LOGGER.info("           Update  on " + classStat.fileName +
+            System.out.println("           Update  on " + classStat.fileName +
                     " times  = " + classStat.qualityGateToEventStat.get(statEvent.qualityGatesKey).total
                     + "   qualityGate :" + statEvent.qualityGatesKey);
         }
@@ -123,7 +114,7 @@ public class OverOpsEventsStatistic implements Serializable {
         public Map<String, EventInClassStat> reportableQualityGateToEventStat;
 
         public ClassStat(StatEvent statEvent) {
-            this.fileName = statEvent.eventClassName;
+            this.fileName = statEvent.eventClassIdentifier;
             qualityGateToEventStat = new HashMap<>();
             reportableQualityGateToEventStat = new HashMap<>();
             qualityGateToEventStat.put(statEvent.qualityGatesKey, new EventInClassStat(statEvent));
@@ -205,34 +196,31 @@ public class OverOpsEventsStatistic implements Serializable {
     public static class StatEvent implements Serializable {
         public final String eventId;
         public final String eventSummary;
-        public final String eventClassName;
+        public final String eventClassIdentifier;
         public final int eventMethodPosition;
         public final String similar_event_ids;
         public final List<String> stack_frames;
         public final Set<String> qualityGates;
         public final String qualityGatesKey;
 
-        public StatEvent(EventResult eventResult, Set<String> qualityGates) {
-            this.eventId = eventResult.id;
-            this.eventMethodPosition = eventResult.error_location.original_line_number;
-            this.eventClassName = eventResult.error_location.class_name;
-            this.eventSummary = eventResult.summary;
-            this.stack_frames = eventResult.stack_frames.stream().map(l -> l.prettified_name).collect(Collectors.toList());
-            this.qualityGates = qualityGates;
-            this.qualityGatesKey = getKey(qualityGates);
-            this.similar_event_ids = String.join(",", eventResult.similar_event_ids);
-        }
-
         public StatEvent(Series<?> series, int index, OverOpsQualityGateStat overOpsQualityGateStat) {
 
             this.eventId = series.getString("id", index);
             this.eventMethodPosition = getLineNumber(series, index);
-            this.eventClassName = getClassName(series, index);
+            this.eventClassIdentifier = getClassName(series, index);
             this.eventSummary = series.getString("name", index);
             this.stack_frames = getStackFrames(series, index);
             this.similar_event_ids = series.getString("similar_event_ids", index);
             this.qualityGates = overOpsQualityGateStat.getQualityGates(eventId);
             this.qualityGatesKey = getKey(qualityGates);
+
+            printValues();
+        }
+
+        private void printValues() {
+            System.out.println(" ----->>>> " + eventClassIdentifier + " : id [" + eventId + "] L <" + eventMethodPosition + ">  S {" + eventSummary + "}");
+            System.out.println("                                     QG " + qualityGatesKey);
+            System.out.println("");
         }
 
         private int getLineNumber(Series<?> series, int index) {
@@ -242,7 +230,7 @@ public class OverOpsEventsStatistic implements Serializable {
 
         private String getClassName(Series<?> series, int index) {
             //TODO retrieve full path class name
-            return series.getString("error_location", index);
+            return series.getString("entry_point_name", index);
         }
 
         private List<String> getStackFrames(Series<?> series, int index) {

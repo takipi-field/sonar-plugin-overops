@@ -129,20 +129,6 @@ public class OverOpsPlugin implements Plugin {
         return reliabilityReport;
     }
 
-
-    private UrlClient.Response<EventsResult> getVolumeResponse(SummarizedView view) {
-        EventsVolumeRequest eventsVolumeRequest = getVolumeRequest(view);
-        try {
-            StringBuilder stringBuilder = new StringBuilder("?");
-            for (String p : eventsVolumeRequest.queryParams()) {
-                stringBuilder.append("&").append(p);
-            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return apiClient.get(eventsVolumeRequest);
-    }
-
     private void getConfigProperties(Configuration config) {
         SONAR_HOST_URL = config.get(SONAR_HOST_PROPERTY).orElse("No host found");
         serviceId = config.get(OverOpsProperties.SONAR_OVEROPS_ENVIRONMENT_ID).orElse(null);
@@ -199,16 +185,6 @@ public class OverOpsPlugin implements Plugin {
         }
 
         return true;
-    }
-
-    private EventsVolumeRequest getVolumeRequest(SummarizedView view) {
-        EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setServiceId(serviceId.toUpperCase()).setFrom(from.toString(formatter))
-                .setTo(to.toString(formatter)).setViewId(view.id).setVolumeType(ValidationUtil.VolumeType.hits).setIncludeStacktrace(true);
-
-        if (StringUtils.isNotEmpty(deploymentName)) builder.addDeployment(deploymentName);
-        if (StringUtils.isNotEmpty(applicationName)) builder.addApp(applicationName);
-
-        return builder.build();
     }
 
     public static void logConfigData() {
