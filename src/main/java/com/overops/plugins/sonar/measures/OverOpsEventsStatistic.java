@@ -1,7 +1,6 @@
 package com.overops.plugins.sonar.measures;
 
 import com.takipi.api.client.functions.output.ReliabilityReport;
-import com.takipi.api.client.functions.output.ReliabilityReportRow;
 import com.takipi.api.client.functions.output.Series;
 
 import java.io.Serializable;
