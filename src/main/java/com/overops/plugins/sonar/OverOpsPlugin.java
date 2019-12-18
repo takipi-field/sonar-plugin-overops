@@ -6,13 +6,8 @@ import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.rules.RuleDefinitionImplementation;
 import com.overops.plugins.sonar.settings.OverOpsProperties;
 import com.takipi.api.client.RemoteApiClient;
-import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.functions.input.ReliabilityReportInput;
 import com.takipi.api.client.functions.output.ReliabilityReport;
-import com.takipi.api.client.request.event.EventsVolumeRequest;
-import com.takipi.api.client.result.event.EventsResult;
-import com.takipi.api.client.util.validation.ValidationUtil;
-import com.takipi.api.core.url.UrlClient;
 import com.takipi.common.util.TimeUtil;
 import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
@@ -25,7 +20,6 @@ import org.sonar.api.utils.log.Loggers;
 
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 

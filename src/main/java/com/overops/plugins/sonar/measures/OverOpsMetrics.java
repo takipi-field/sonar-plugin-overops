@@ -87,10 +87,6 @@ public class OverOpsMetrics implements Metrics {
                 RuleType.BUG, Severity.CRITICAL, Constants.NEW_CRITICAL_QG_KEY,
                 new String[]{"-new", "-critical"}, "NEW AND CRITICAL QUALITY GATE",
                 new String[]{NEW_QG_MARKER, CRITICAL_QG_MARKER}),
-        NEW_RESURFACED_QG_METRIC("NEW_RESURFACED_QG", null,
-                RuleType.BUG, Severity.MAJOR, Constants.NEW_RESURFACED_QG_KEY,
-                new String[]{"-new", "-resurfaced"}, "NEW AND RESURFACED QUALITY GATE",
-                new String[]{NEW_QG_MARKER, RESURFACED_QG_MARKER}),
         RESURFACED_CRITICAL_QG_METRIC("RESURFACED_CRITICAL_QG", null,
                 RuleType.BUG, Severity.CRITICAL, Constants.RESURFACED_CRITICAL_QG_KEY,
                 new String[]{"-resurfaced", "-critical"}, "RESURFACED AND CRITICAL QUALITY GATE",
@@ -211,7 +207,6 @@ public class OverOpsMetrics implements Metrics {
             public static final String RESURFACED_QG_KEY = "ResurfacedQualityGate";
             public static final String INCREASING_QG_KEY = "IncreasingQualityGate";
             public static final String NEW_CRITICAL_QG_KEY = "NewCriticalQualityGate";
-            public static final String NEW_RESURFACED_QG_KEY = "NewResurfacedQualityGate";
             public static final String RESURFACED_CRITICAL_QG_KEY = "ResurfacedCriticalQualityGate";
             public static final String INCREASING_CRITICAL_QG_KEY = "IncreasingCriticalQualityGate";
         }
