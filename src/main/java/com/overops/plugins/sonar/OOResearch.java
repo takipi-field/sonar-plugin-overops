@@ -40,7 +40,7 @@ public class OOResearch {
         String application = "App1";
         String view = "View1";
         String deployment = "Dep1";
-        int daysSpan = 14;
+        int daysSpan = 1;
         int time_span = 24 * 60 * daysSpan;
         DateTime to = DateTime.now();
         DateTime from = to.minusDays((int) daysSpan);
@@ -54,6 +54,7 @@ public class OOResearch {
         reportInput.applications = application;
         reportInput.deployments = deployment;
         reportInput.mode = ReliabilityReportInput.DEFAULT_REPORT;
+        reportInput.requestStackframes = true;
         //reportInput.regressionInput = getRegressionInput();
 
         SummarizedView summarizedView = ViewUtil.getServiceViewByName(apiClient, serviceId, view);

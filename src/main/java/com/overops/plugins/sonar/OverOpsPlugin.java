@@ -118,6 +118,7 @@ public class OverOpsPlugin implements Plugin {
         reportInput.applications = applicationName;
         reportInput.deployments = deploymentName;
         reportInput.mode = ReliabilityReportInput.DEFAULT_REPORT;
+        reportInput.requestStackframes = true;
 
         ReliabilityReport reliabilityReport = ReliabilityReport.execute(apiClient, reportInput);
         return reliabilityReport;

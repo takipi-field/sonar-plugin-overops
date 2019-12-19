@@ -1,9 +1,7 @@
 package com.overops.plugins.sonar.measures;
 
-import com.takipi.api.client.functions.output.EventRow;
-import com.takipi.api.client.functions.output.RegressionRow;
-import com.takipi.api.client.functions.output.ReliabilityReport;
-import com.takipi.api.client.functions.output.ReliabilityReportRow;
+import com.takipi.api.client.functions.output.*;
+import com.takipi.api.client.functions.output.ReliabilityReport.ReliabilityReportItem;
 
 import java.util.*;
 
@@ -25,14 +23,14 @@ public class OverOpsQualityGateStat {
             return;
         }
 
-        ReliabilityReport.ReliabilityReportItem rrItem = reliabilityReport.items.values().iterator().next();
+        ReliabilityReportItem rrItem = reliabilityReport.items.values().iterator().next();
         addNewErrors(rrItem);
         addIncreasingErrors(rrItem);
         addCriticalErrors(rrItem);
         addResurfacedErrors(rrItem);
     }
 
-    private void addResurfacedErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
+    private void addResurfacedErrors(ReliabilityReportItem rrItem) {
         for (EventRow row : rrItem.errors) {
             if ((row.labels != null) &&
                     (row.labels.indexOf("Resurfaced") != -1)) {
@@ -52,20 +50,20 @@ public class OverOpsQualityGateStat {
         return String.join(".", qualityGates);
     }
 
-    private void addCriticalErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
+    private void addCriticalErrors(ReliabilityReportItem rrItem) {
         for (EventRow row : rrItem.failures) {
             criticalEventsIds.put(row.id, row);
         }
     }
 
-    private void addIncreasingErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
+    private void addIncreasingErrors(ReliabilityReportItem rrItem) {
         Collection<RegressionRow> regressionRows = rrItem.geIncErrors(true, true);
         for (RegressionRow row : regressionRows) {
             increasingEventsIds.put(row.id, row);
         }
     }
 
-    private void addNewErrors(ReliabilityReport.ReliabilityReportItem rrItem) {
+    private void addNewErrors(ReliabilityReportItem rrItem) {
         Collection<RegressionRow> newErrors = rrItem.getNewErrors(true, true);
         for (RegressionRow row : newErrors) {
             newEventsIds.put(row.id, row);

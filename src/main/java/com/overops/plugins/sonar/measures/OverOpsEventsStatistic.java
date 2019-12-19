@@ -1,10 +1,12 @@
 package com.overops.plugins.sonar.measures;
 
+import com.takipi.api.client.data.event.Location;
+import com.takipi.api.client.functions.output.BaseEventRow;
 import com.takipi.api.client.functions.output.ReliabilityReport;
-import com.takipi.api.client.functions.output.Series;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsByQualityGate;
@@ -30,33 +32,30 @@ public class OverOpsEventsStatistic implements Serializable {
     public void setOverOpsQualityGateStat(ReliabilityReport reliabilityReport) {
         this.overOpsQualityGateStat = new OverOpsQualityGateStat(reliabilityReport);
         printQualityGateStat();
-        List<StatEvent> eventAdapter = getList(reliabilityReport);
+        List<StatEvent> eventAdapter = getList();
 
         for (StatEvent statEvent : eventAdapter) {
             overOpsEventsStatistic.add(statEvent);
         }
     }
 
-    private List<StatEvent> getList(ReliabilityReport reliabilityReport) {
+    private List<StatEvent> getList() {
 
         ArrayList<StatEvent> result = new ArrayList<>();
-
-        ReliabilityReport.ReliabilityReportItem reliabilityReportItem = reliabilityReport.items.values().iterator().next();
-        result.addAll(getStatEventsFromSeries(reliabilityReportItem.failures));
-        result.addAll(getStatEventsFromSeries(reliabilityReportItem.errors));
-        result.addAll(getStatEventsFromSeries(reliabilityReportItem.regressions));
+        result.addAll(getStatEventsFromSeries(overOpsQualityGateStat.newEventsIds.values()));
+        result.addAll(getStatEventsFromSeries(overOpsQualityGateStat.criticalEventsIds.values()));
+        result.addAll(getStatEventsFromSeries(overOpsQualityGateStat.resurfacedEventsIds.values()));
+        result.addAll(getStatEventsFromSeries(overOpsQualityGateStat.increasingEventsIds.values()));
 
         return result;
     }
 
-    private Collection<StatEvent> getStatEventsFromSeries(Series<?> series) {
+    private <T extends BaseEventRow> Collection<StatEvent> getStatEventsFromSeries(Iterable<T> series) {
         ArrayList<StatEvent> result = new ArrayList<>();
 
-        int size = series.size();
-        for (int i = 0; i < size; i++) {
-            result.add(new StatEvent(series, i, overOpsQualityGateStat));
+        for (T baseEventRow : series) {
+            result.add(new StatEvent(baseEventRow, overOpsQualityGateStat));
         }
-
         return result;
     }
 
@@ -201,15 +200,24 @@ public class OverOpsEventsStatistic implements Serializable {
         public final Set<String> qualityGates;
         public final String qualityGatesKey;
 
-        public StatEvent(Series<?> series, int index, OverOpsQualityGateStat overOpsQualityGateStat) {
-
-            this.eventId = series.getString("id", index);
-            this.eventMethodPosition = getLineNumber(series, index);
-            this.eventClassIdentifier = getClassName(series, index);
-            this.eventSummary = series.getString("name", index);
-            this.stack_frames = getStackFrames(series, index);
-            this.similar_event_ids = series.getString("similar_event_ids", index);
+        public StatEvent(BaseEventRow row, OverOpsQualityGateStat overOpsQualityGateStat) {
+            this.eventId = row.id;
+            this.eventSummary = row.summary;
+            this.similar_event_ids = row.similar_event_ids;
             this.qualityGates = overOpsQualityGateStat.getQualityGates(eventId);
+
+            List<Location> stack_frames = row.stack_frames;
+            if (stack_frames != null && stack_frames.size() > 0) {
+                Location location = stack_frames.get(0);
+                this.eventMethodPosition = location.original_line_number;
+                this.eventClassIdentifier = location.class_name;
+                this.stack_frames = stack_frames.stream().map(l -> l.prettified_name).collect(Collectors.toList());
+            } else  {
+                this.eventMethodPosition = 1;
+                this.eventClassIdentifier = "no class identifier";
+                this.stack_frames = new ArrayList<>();
+            }
+
             this.qualityGatesKey = getKey(qualityGates);
 
             printValues();
@@ -219,23 +227,6 @@ public class OverOpsEventsStatistic implements Serializable {
             System.out.println(" ----->>>> " + eventClassIdentifier + " : id [" + eventId + "] L <" + eventMethodPosition + ">  S {" + eventSummary + "}");
             System.out.println("                                     QG " + qualityGatesKey);
             System.out.println("");
-        }
-
-        private int getLineNumber(Series<?> series, int index) {
-            //TODO retrieve line number
-            return 1;
-        }
-
-        private String getClassName(Series<?> series, int index) {
-            //TODO retrieve full path class name
-            return series.getString("entry_point_name", index);
-        }
-
-        private List<String> getStackFrames(Series<?> series, int index) {
-            //TODO retrieve StackFrames
-            ArrayList<String> result = new ArrayList<>();
-            result.add("TODO retrieve StackFrames");
-            return result;
         }
     }
 }
