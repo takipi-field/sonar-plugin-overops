@@ -8,8 +8,8 @@
 	<packaging>sonar-plugin</packaging>
 	<version>7.9</version>
 
-	<name>OverOps Plugin for SonarQube 6.7.x LTS</name>
-	<description>OverOps Plugin for SonarQube: </description>
+	<name>OverOps</name>
+	<description>Identify and drill down into runtime errors in Java applications</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- The lowest SQ api version is 7.2 -->
@@ -106,9 +106,13 @@
 				<version>1.18.0.372</version>
 				<extensions>true</extensions>
 				<configuration>
-					<pluginUrl>https://www.overops.com/</pluginUrl>
+					<pluginUrl>https://doc.overops.com/docs/sonarqube-integration/</pluginUrl>
 					<pluginKey>overops</pluginKey>
 					<pluginClass>com.overops.plugins.sonar.OverOpsPlugin</pluginClass>
+					<pluginSourcesUrl>https://github.com/takipi-field/sonar-plugin-overops</pluginSourcesUrl>
+					<pluginDisplayVersion>1.0</pluginDisplayVersion>
+					<pluginOrganizationName>OverOps</pluginOrganizationName>
+					<pluginOrganizationUrl>https://doc.overops.com/</pluginOrganizationUrl>
 				</configuration>
 			</plugin>
 			<plugin>
