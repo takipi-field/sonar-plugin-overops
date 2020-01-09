@@ -40,7 +40,7 @@ public class OOResearch {
         String application = "App1";
         String view = "View1";
         String deployment = "Dep1";
-        int daysSpan = 1;
+        int daysSpan = 30;
         int time_span = 24 * 60 * daysSpan;
         DateTime to = DateTime.now();
         DateTime from = to.minusDays((int) daysSpan);

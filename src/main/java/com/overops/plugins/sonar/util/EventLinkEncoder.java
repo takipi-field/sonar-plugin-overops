@@ -1,6 +1,7 @@
 package com.overops.plugins.sonar.util;
 
 import com.takipi.common.util.TimeUtil;
+import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class EventLinkEncoder {
 
         stringBuilder.append(eventId);
 
-        if (similar_event_ids != null) {
+        if (!StringUtils.isEmpty(similar_event_ids)) {
             stringBuilder.append(',').append(similar_event_ids);
         }
 

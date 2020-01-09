@@ -85,7 +85,8 @@ public class AddCommentsPostJob implements PostJob {
 
     private void printStatistic() {
         log.info(" --------------------------------------------------------------------------------------->>>>   " );
-        log.info("    " );
+        logConfigData();
+        log.info("   " );
         log.info("    print statistic for post job ");
         log.info("    " );
         Collection<OverOpsEventsStatistic.ClassStat> statistic = overOpsEventsStatistic.getStatistic();
@@ -272,6 +273,7 @@ public class AddCommentsPostJob implements PostJob {
 
     private String getARCLinkForEvent(StatEvent statEvent) {
         String arcLink = null;
+        LOGGER.info(" getARCLinkForEvent appHost " + appHost);
 
         try {
             arcLink = EventLinkEncoder.encodeLink(appHost,

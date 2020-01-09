@@ -32,9 +32,11 @@ public class OverOpsPlugin implements Plugin {
     public static final String DEFAULT_VIEWID = "All Exceptions";
     public static final String DEFAULT_OVER_OPS_API_HOST = "https://api.overops.com";
     public static final String SONAR_HOST_PROPERTY = "sonar.host.url";
+
+    public static OverOpsEventsStatistic overOpsEventsStatistic;
+
     public static String SONAR_HOST_URL;
     public static String AUTH_DATA;
-
     public static String serviceId;
     public static String apiHost;
     public static String appHost;
@@ -46,8 +48,6 @@ public class OverOpsPlugin implements Plugin {
     public static DateTimeFormatter formatter;
     public static RemoteApiClient apiClient;
     public static long daysSpan;
-    public static OverOpsEventsStatistic overOpsEventsStatistic;
-
     public static String viewName;
     public static String newErrorGate;
     public static String resurfacedErrorGate;
@@ -184,7 +184,8 @@ public class OverOpsPlugin implements Plugin {
 
     public static void logConfigData() {
         LOGGER.info("environmentKey :" + serviceId);
-        LOGGER.info("appHost :" + apiHost);
+        LOGGER.info("apiHost :" + apiHost);
+        LOGGER.info("appHost :" + appHost);
         LOGGER.info("deploymentName :" + deploymentName);
         LOGGER.info("applicationName :" + applicationName);
         LOGGER.info("daysSpan :" + daysSpan);
