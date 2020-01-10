@@ -39,6 +39,7 @@ public class EventLinkEncoder {
         String jsonString = String.format(TEMPLATE, serviceId, String.valueOf(fromTimeMillis), String.valueOf(toTimeMillis),
                 toList(servers), toList(apps), toList(deployments),
                 toEventIdsList(eventId, similar_event_ids), TimeUtil.getMillisAsString(to));
+        System.out.println("Before encoding str <" + jsonString + ">");
         String encode = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
 
         StringBuilder stringBuilder = new StringBuilder();
