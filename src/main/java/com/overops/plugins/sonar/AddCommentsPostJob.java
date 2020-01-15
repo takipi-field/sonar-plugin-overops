@@ -278,7 +278,7 @@ public class AddCommentsPostJob implements PostJob {
         try {
             arcLink = EventLinkEncoder.encodeLink(appHost,
                     Arrays.asList(applicationName), Arrays.asList(), Arrays.asList(deploymentName),
-                    serviceId, statEvent.eventId, statEvent.similar_event_ids, from, to);
+                    serviceId, statEvent.eventId, statEvent.similar_event_ids, from, to, overOpsEventsStatistic.getSourceCode(statEvent));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsByQualityGate;
-import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.getKey;
+import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.*;
 
 public class OverOpsEventsStatistic implements Serializable {
     private transient OverOpsQualityGateStat overOpsQualityGateStat;
@@ -89,6 +89,19 @@ public class OverOpsEventsStatistic implements Serializable {
 
     public StatEvent getStatEventById(String issueEventId) {
         return idToStatEvent.get(issueEventId);
+    }
+
+    public int getSourceCode(StatEvent statEvent) {
+        if (statEvent.qualityGates.contains(NEW_QG_MARKER)) {
+            return 70;
+        } else if (statEvent.qualityGates.contains(CRITICAL_QG_MARKER)) {
+            return 71;
+        } else if (statEvent.qualityGates.contains(RESURFACED_QG_MARKER)) {
+            return 72;
+        } else if (statEvent.qualityGates.contains(INCREASING_QG_MARKER)) {
+            return 73;
+        }
+        return 0;
     }
 
     public static class Stat extends HashMap<String, ClassStat> implements Serializable {

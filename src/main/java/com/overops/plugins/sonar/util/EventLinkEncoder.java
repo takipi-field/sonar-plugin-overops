@@ -19,7 +19,7 @@ public class EventLinkEncoder {
     public static String encodeLink(String appUrl,
                                     Collection<String> apps, Collection<String> servers, Collection<String> deployments,
                                     String serviceId, String eventId, String similar_event_ids,
-                                    DateTime from, DateTime to) {
+                                    DateTime from, DateTime to, int sourceCode) {
 
         long firstSeenMillis;
 
@@ -43,7 +43,7 @@ public class EventLinkEncoder {
         String encode = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
 
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(appUrl).append("/tale.html?snapshot=").append(encode);
+        stringBuilder.append(appUrl).append("/tale.html?snapshot=").append(encode).append("&source=").append(sourceCode);
 
         return stringBuilder.toString();
     }
