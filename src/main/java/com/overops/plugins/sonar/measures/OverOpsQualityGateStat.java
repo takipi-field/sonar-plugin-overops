@@ -23,11 +23,18 @@ public class OverOpsQualityGateStat {
             return;
         }
 
-        ReliabilityReportItem rrItem = reliabilityReport.items.values().iterator().next();
-        addNewErrors(rrItem);
-        addIncreasingErrors(rrItem);
-        addCriticalErrors(rrItem);
-        addResurfacedErrors(rrItem);
+        ReliabilityReportItem rrItem = reliabilityReport.items
+                .values()
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        if (rrItem != null) {
+            addNewErrors(rrItem);
+            addIncreasingErrors(rrItem);
+            addCriticalErrors(rrItem);
+            addResurfacedErrors(rrItem);
+        }
     }
 
     private void addResurfacedErrors(ReliabilityReportItem rrItem) {

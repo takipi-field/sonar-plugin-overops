@@ -8,13 +8,12 @@ import org.sonar.api.resources.Qualifiers;
 
 import java.util.Arrays;
 
-import static com.overops.plugins.sonar.OverOpsPlugin.DEFAULT_VIEWID;
-
 public class OverOpsProperties {
     public static final String CATEGORY = "OverOps";
     public static final String SETTINGS_SUBCATEGORY = "Account Settings";
 	public static final String QUALITY_GATE_OPTIONS_SUBCATEGORY = "Quality Gate Options";
 
+	public static final String SONAR_HOST_PROPERTY = "sonar.host.url";
 	public static final String SONAR_OVEROPS_VIEW_ID = "sonar.overops.viewId";
 	public static final String SONAR_OVEROPS_API_HOST = "sonar.overops.apiHost";
     public static final String SONAR_OVEROPS_APP_HOST = "sonar.overops.appHost";
@@ -36,6 +35,7 @@ public class OverOpsProperties {
 	public static final String SONAR_OVEROPS_INCREASING_REGRESSION_DELTA = "sonar.overops.increasing.regression.delta";
 	public static final String SONAR_OVEROPS_INCREASING_CRITICAL_REGRESSION_THRESHOLD = "sonar.overops.increasing.critical.regression.threshold";
 	public static final String SONAR_OVEROPS_INCREASING_APPLY_SEASONALITY = "sonar.overops.increasing.apply.seasonality";
+
 	public static final String BASELINE_TIME_WINDOW_DEFAULT = "7d";
 	public static final String ERROR_VOLUME_THRESHOLD_DEFAULT = "20";
 	public static final String ERROR_RATE_THRESHOLD_DEFAULT = "0.1";
@@ -47,6 +47,10 @@ public class OverOpsProperties {
 	public static final String CRITICAL_EXCEPTION_TYPES_DEFAULT = "";
 	public static final String RESURFACED_ERROR_GATE_DEFAULT = "true";
 	public static final String NEW_ERRORS_GATE_DEFAULT = "true";
+	public static final long SPAN_DAYS_DEFAULT = 1L;
+	public static final String VIEW_ID_DEFAULT = "All Exceptions";
+	public static final String OVER_OPS_API_HOST_DEFAULT = "https://api.overops.com";
+
 
 
 	public static List<PropertyDefinition> getProperties() {
@@ -57,6 +61,7 @@ public class OverOpsProperties {
                         .category(CATEGORY)
                         .subCategory(SETTINGS_SUBCATEGORY)
 						.type(PropertyType.PASSWORD)
+						.onQualifiers(Qualifiers.PROJECT)
                         .index(1)
                         .build(),
 
@@ -67,6 +72,7 @@ public class OverOpsProperties {
                         .category(CATEGORY)
                         .subCategory(SETTINGS_SUBCATEGORY)
 						.type(PropertyType.STRING)
+						.onQualifiers(Qualifiers.PROJECT)
                         .index(2)
                         .build(),
 
@@ -77,6 +83,7 @@ public class OverOpsProperties {
                         .category(CATEGORY)
                         .subCategory(SETTINGS_SUBCATEGORY)
                         .type(PropertyType.STRING)
+						.onQualifiers(Qualifiers.PROJECT)
                         .index(2)
                         .build(),
 
@@ -85,17 +92,19 @@ public class OverOpsProperties {
                         .category(CATEGORY)
 						.subCategory(SETTINGS_SUBCATEGORY)
                         .type(PropertyType.STRING)
+						.onQualifiers(Qualifiers.PROJECT)
                         .index(3)
                         .build(),
 
 				PropertyDefinition.builder(SONAR_OVEROPS_SPAN_DAYS)
                         .name("Days to Pull Back")
+						.description("Enter the amount of days to pull back default is 1")
                         .defaultValue("1")
                         .category(CATEGORY)
 						.subCategory(SETTINGS_SUBCATEGORY)
                         .type(PropertyType.INTEGER)
+						.onQualifiers(Qualifiers.PROJECT)
                         .index(4)
-						.description("Enter the amount of days to pull back default is 1")
                         .build(),
 
 				PropertyDefinition.builder(SONAR_OVEROPS_APP_NAME)
@@ -103,6 +112,7 @@ public class OverOpsProperties {
                         .category(CATEGORY)
 						.subCategory(SETTINGS_SUBCATEGORY)
                         .type(PropertyType.STRING)
+						.onQualifiers(Qualifiers.PROJECT)
                         .index(5)
 						.build(),
 
@@ -111,6 +121,7 @@ public class OverOpsProperties {
                         .category(CATEGORY)
                         .subCategory(SETTINGS_SUBCATEGORY)
                         .type(PropertyType.STRING)
+						.onQualifiers(Qualifiers.PROJECT)
                         .index(6)
                         .build(),
 
@@ -120,7 +131,8 @@ public class OverOpsProperties {
                         .category(CATEGORY)
                         .subCategory(SETTINGS_SUBCATEGORY)
                         .type(PropertyType.STRING)
-						.defaultValue(DEFAULT_VIEWID)
+						.defaultValue(VIEW_ID_DEFAULT)
+						.onQualifiers(Qualifiers.PROJECT)
                         .index(7)
                         .build(),
 

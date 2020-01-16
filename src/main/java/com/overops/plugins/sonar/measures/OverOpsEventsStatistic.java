@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
+import static com.overops.plugins.sonar.OverOpsConfigurationDataManager.overOpsEventsStatistic;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsByQualityGate;
 import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.*;
 

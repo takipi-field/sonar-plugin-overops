@@ -39,7 +39,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.overops.plugins.sonar.OverOpsPlugin.*;
+import static com.overops.plugins.sonar.OverOpsConfigurationDataManager.*;
+import static com.overops.plugins.sonar.OverOpsConfigurationDataManager.overOpsEventsStatistic;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.EXCEPTION_PATTERN;
 
 public class AddCommentsPostJob implements PostJob {
@@ -84,32 +85,32 @@ public class AddCommentsPostJob implements PostJob {
     }
 
     private void printStatistic() {
-        log.info(" --------------------------------------------------------------------------------------->>>>   " );
+        log.info(" --------------------------------------------------------------------------------------->>>>   ");
         logConfigData();
-        log.info("   " );
+        log.info("   ");
         log.info("    print statistic for post job ");
-        log.info("    " );
+        log.info("    ");
         Collection<OverOpsEventsStatistic.ClassStat> statistic = overOpsEventsStatistic.getStatistic();
         for (OverOpsEventsStatistic.ClassStat classStat : statistic) {
             log.info("    " + classStat.fileName);
-            classStat.qualityGateToEventStat.forEach((logKey, logClassStat) ->{
+            classStat.qualityGateToEventStat.forEach((logKey, logClassStat) -> {
                 log.info("          logged {" + logKey + "}  size [ " + logClassStat.total + "]");
-                logClassStat.lineToLineStat.forEach((logLine, logLineStat) ->{
+                logClassStat.lineToLineStat.forEach((logLine, logLineStat) -> {
                     log.info("                     logged  L [" + logLine + "]  id <" + logLineStat.event.eventId + ">");
                 });
             });
-            log.info("    " );
-            log.info(" ------   " );
-            log.info("    " );
-            classStat.reportableQualityGateToEventStat.forEach((reportableKey, reportableClassStat) ->{
+            log.info("    ");
+            log.info(" ------   ");
+            log.info("    ");
+            classStat.reportableQualityGateToEventStat.forEach((reportableKey, reportableClassStat) -> {
                 log.info("                       {" + reportableKey + "} size [" + reportableClassStat.total + "]");
-                reportableClassStat.lineToLineStat.forEach((repLine, repLineStat) ->{
+                reportableClassStat.lineToLineStat.forEach((repLine, repLineStat) -> {
                     log.info("                     rep  L [" + repLine + "]  id <" + repLineStat.event.eventId + ">");
                 });
             });
         }
-        log.info("    " );
-        log.info(" --------------------------------------------------------------------------------------<<<<   " );
+        log.info("    ");
+        log.info(" --------------------------------------------------------------------------------------<<<<   ");
     }
 
     private Properties loadReportTaskProps() {

@@ -1,9 +1,10 @@
 package com.overops.plugins.sonar.rules;
 
-import com.google.gson.Gson;
 import com.overops.plugins.sonar.measures.OverOpsMetrics;
 import com.overops.plugins.sonar.rules.checks.OverOpsChecks;
 import org.apache.commons.lang.StringUtils;
+import org.picocontainer.annotations.Inject;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.rule.RuleStatus;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.api.server.rule.RulesDefinitionAnnotationLoader;
@@ -19,11 +20,21 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+import static com.overops.plugins.sonar.OverOpsConfigurationDataManager.getOverOpsDataAndCreateStatistic;
+
 public class RuleDefinitionImplementation implements RulesDefinition, CheckRegistrar {
     private static final Logger LOGGER = Loggers.get(RuleDefinitionImplementation.class);
     private static final String RESOURCE_BASE_PATH = "/org/sonar/l10n/rules";
     private static final String OVER_OPS_REPOSITORY_NAME = "OverOps analyzer";
     private static final String JAVA_LANGUAGE = "java";
+
+    @Inject
+    public Configuration configuration;
+
+    public RuleDefinitionImplementation(Configuration configuration) {
+        this.configuration = configuration;
+        getOverOpsDataAndCreateStatistic(configuration);
+    }
 
     @Override
     public void register(RegistrarContext registrarContext) {

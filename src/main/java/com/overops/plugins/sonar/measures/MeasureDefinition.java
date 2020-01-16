@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static com.overops.plugins.sonar.OverOpsPlugin.getJavaStyleFilePath;
+import static com.overops.plugins.sonar.util.CommonMethods.getJavaStyleFilePath;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.getOverOpsByQualityGate;
 import static com.overops.plugins.sonar.measures.OverOpsMetrics.getMetricsList;
 

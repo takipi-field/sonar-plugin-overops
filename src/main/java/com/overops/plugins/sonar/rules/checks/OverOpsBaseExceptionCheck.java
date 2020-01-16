@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.overops.plugins.sonar.OverOpsPlugin.getJavaStyleFilePath;
-import static com.overops.plugins.sonar.OverOpsPlugin.overOpsEventsStatistic;
+import static com.overops.plugins.sonar.util.CommonMethods.getJavaStyleFilePath;
+import static com.overops.plugins.sonar.OverOpsConfigurationDataManager.overOpsEventsStatistic;
 import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.INCREASING_QG_MARKER;
 
 public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implements JavaFileScanner {
@@ -40,11 +40,9 @@ public abstract class OverOpsBaseExceptionCheck extends BaseTreeVisitor implemen
         file = context.getFile();
         String javaStyleFilePath = getJavaStyleFilePath(file.getAbsolutePath());
         int endingIndex = javaStyleFilePath.length() - ".java".length();
-        log.error(" Search issue for " + javaStyleFilePath);
         List<OverOpsEventsStatistic.ClassStat> fileStatistics = overOpsEventsStatistic.getStatistic()
                 .stream()
                 .filter(classStat -> {
-                    log.error("    checking f: " + classStat.fileName + " is " + (javaStyleFilePath.indexOf(classStat.fileName) == endingIndex - classStat.fileName.length()) );
                     return javaStyleFilePath.indexOf(classStat.fileName) == endingIndex - classStat.fileName.length();})
                 .filter(classStat -> classStat.qualityGateToEventStat.keySet().contains(metric.qualityGateKey))
                 .collect(Collectors.toList());
