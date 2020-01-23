@@ -5,7 +5,6 @@ import com.takipi.api.core.request.intf.ApiPostRequest;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SQSimpleRequest implements ApiPostRequest<SQIssuesResponse> {
