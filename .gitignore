@@ -2,3 +2,4 @@
 .idea
 .classpath
 .settings/
+.DS_Store
