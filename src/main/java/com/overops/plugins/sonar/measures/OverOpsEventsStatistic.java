@@ -13,7 +13,9 @@ import static com.overops.plugins.sonar.measures.OverOpsMetrics.OverOpsMetric.ge
 import static com.overops.plugins.sonar.measures.OverOpsQualityGateStat.*;
 
 public class OverOpsEventsStatistic implements Serializable {
-    private transient OverOpsQualityGateStat overOpsQualityGateStat;
+  private static final long serialVersionUID = -3512666416832453373L;
+
+  private transient OverOpsQualityGateStat overOpsQualityGateStat;
     private Stat stat = new Stat();
     private HashMap<String, StatEvent> idToStatEvent = new HashMap<>();
 
@@ -105,8 +107,9 @@ public class OverOpsEventsStatistic implements Serializable {
     }
 
     public static class Stat extends HashMap<String, ClassStat> implements Serializable {
+      private static final long serialVersionUID = 8537754052916605788L;
 
-        public Stat() {
+    public Stat() {
         }
 
         public void update(String key, StatEvent statEvent) {
@@ -119,7 +122,8 @@ public class OverOpsEventsStatistic implements Serializable {
     }
 
     public static class ClassStat implements Serializable {
-        public String fileName;
+      private static final long serialVersionUID = -5009574971566387166L;
+    public String fileName;
         public Map<String, EventInClassStat> qualityGateToEventStat;
         public Map<String, EventInClassStat> reportableQualityGateToEventStat;
 
@@ -169,7 +173,8 @@ public class OverOpsEventsStatistic implements Serializable {
     }
 
     public static class EventInClassStat implements Serializable {
-        public int total;
+    private static final long serialVersionUID = 5500890325486878171L;
+    public int total;
         public Map<Integer, LineStat> lineToLineStat = new HashMap<>();
 
         public EventInClassStat(StatEvent statEvent) {
@@ -189,7 +194,8 @@ public class OverOpsEventsStatistic implements Serializable {
     }
 
     public static class LineStat implements Serializable {
-        public int total;
+    private static final long serialVersionUID = -7959327603311558048L;
+    public int total;
         public StatEvent event;
 
         public LineStat(StatEvent event) {
@@ -204,7 +210,8 @@ public class OverOpsEventsStatistic implements Serializable {
     }
 
     public static class StatEvent implements Serializable {
-        public final String eventId;
+    private static final long serialVersionUID = -7845347872152704070L;
+    public final String eventId;
         public final String eventSummary;
         public final String eventClassIdentifier;
         public final int eventMethodPosition;
