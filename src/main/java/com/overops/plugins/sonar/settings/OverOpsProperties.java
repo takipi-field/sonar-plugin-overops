@@ -9,14 +9,14 @@ import org.sonar.api.resources.Qualifiers;
 import java.util.Arrays;
 
 public class OverOpsProperties {
-    public static final String CATEGORY = "OverOps";
-    public static final String SETTINGS_SUBCATEGORY = "Account Settings";
+	public static final String CATEGORY = "OverOps";
+	public static final String SETTINGS_SUBCATEGORY = "Account Settings";
 	public static final String QUALITY_GATE_OPTIONS_SUBCATEGORY = "Quality Gate Options";
 
 	public static final String SONAR_HOST_PROPERTY = "sonar.host.url";
 	public static final String SONAR_OVEROPS_VIEW_ID = "sonar.overops.viewId";
 	public static final String SONAR_OVEROPS_API_HOST = "sonar.overops.apiHost";
-    public static final String SONAR_OVEROPS_APP_HOST = "sonar.overops.appHost";
+	public static final String SONAR_OVEROPS_APP_HOST = "sonar.overops.appHost";
 	public static final String SONAR_OVEROPS_API_KEY = "sonar.overops.apikey";
 	public static final String SONAR_OVEROPS_ENVIRONMENT_ID = "sonar.overops.environmentId";
 	public static final String SONAR_OVEROPS_APP_NAME = "sonar.overops.applicationName";
@@ -56,85 +56,85 @@ public class OverOpsProperties {
 	public static List<PropertyDefinition> getProperties() {
 		return Arrays.asList(
 				PropertyDefinition.builder(SONAR_OVEROPS_API_KEY)
-                        .name("OverOps API Key")
+												.name("OverOps API Key")
 						.description("OverOps Api Key found in Account")
-                        .category(CATEGORY)
-                        .subCategory(SETTINGS_SUBCATEGORY)
+												.category(CATEGORY)
+												.subCategory(SETTINGS_SUBCATEGORY)
 						.type(PropertyType.PASSWORD)
 						.onQualifiers(Qualifiers.PROJECT)
-                        .index(1)
-                        .build(),
+												.index(1)
+												.build(),
 
 				PropertyDefinition.builder(SONAR_OVEROPS_API_HOST)
-                        .name("OverOps URL")
-                        .description("OverOps URL for API endpoint")
+												.name("OverOps URL")
+												.description("OverOps URL for API endpoint")
 						.defaultValue("https://api.overops.com")
-                        .category(CATEGORY)
-                        .subCategory(SETTINGS_SUBCATEGORY)
+												.category(CATEGORY)
+												.subCategory(SETTINGS_SUBCATEGORY)
 						.type(PropertyType.STRING)
 						.onQualifiers(Qualifiers.PROJECT)
-                        .index(2)
-                        .build(),
+												.index(2)
+												.build(),
 
-                PropertyDefinition.builder(SONAR_OVEROPS_APP_HOST)
-                        .name("OverOps URL")
-                        .description("OverOps URL for APP endpoint")
-                        .defaultValue("https://app.overops.com")
-                        .category(CATEGORY)
-                        .subCategory(SETTINGS_SUBCATEGORY)
-                        .type(PropertyType.STRING)
+								PropertyDefinition.builder(SONAR_OVEROPS_APP_HOST)
+												.name("OverOps URL")
+												.description("OverOps URL for APP endpoint")
+												.defaultValue("https://app.overops.com")
+												.category(CATEGORY)
+												.subCategory(SETTINGS_SUBCATEGORY)
+												.type(PropertyType.STRING)
 						.onQualifiers(Qualifiers.PROJECT)
-                        .index(2)
-                        .build(),
+												.index(2)
+												.build(),
 
 				PropertyDefinition.builder(SONAR_OVEROPS_ENVIRONMENT_ID)
-                        .name("OverOps Environment ID")
-                        .category(CATEGORY)
+												.name("OverOps Environment ID")
+												.category(CATEGORY)
 						.subCategory(SETTINGS_SUBCATEGORY)
-                        .type(PropertyType.STRING)
+												.type(PropertyType.STRING)
 						.onQualifiers(Qualifiers.PROJECT)
-                        .index(3)
-                        .build(),
+												.index(3)
+												.build(),
 
 				PropertyDefinition.builder(SONAR_OVEROPS_SPAN_DAYS)
-                        .name("Days to Pull Back")
+												.name("Days to Pull Back")
 						.description("Enter the amount of days to pull back default is 1")
-                        .defaultValue("1")
-                        .category(CATEGORY)
+												.defaultValue("1")
+												.category(CATEGORY)
 						.subCategory(SETTINGS_SUBCATEGORY)
-                        .type(PropertyType.INTEGER)
+												.type(PropertyType.INTEGER)
 						.onQualifiers(Qualifiers.PROJECT)
-                        .index(4)
-                        .build(),
+												.index(4)
+												.build(),
 
 				PropertyDefinition.builder(SONAR_OVEROPS_APP_NAME)
-                        .name("Application Name")
-                        .category(CATEGORY)
+												.name("Application Name")
+												.category(CATEGORY)
 						.subCategory(SETTINGS_SUBCATEGORY)
-                        .type(PropertyType.STRING)
+												.type(PropertyType.STRING)
 						.onQualifiers(Qualifiers.PROJECT)
-                        .index(5)
+												.index(5)
 						.build(),
 
 				PropertyDefinition.builder(SONAR_OVEROPS_DEP_NAME)
-                        .name("Deployment Name")
-                        .category(CATEGORY)
-                        .subCategory(SETTINGS_SUBCATEGORY)
-                        .type(PropertyType.STRING)
+												.name("Deployment Name")
+												.category(CATEGORY)
+												.subCategory(SETTINGS_SUBCATEGORY)
+												.type(PropertyType.STRING)
 						.onQualifiers(Qualifiers.PROJECT)
-                        .index(6)
-                        .build(),
+												.index(6)
+												.build(),
 
 				PropertyDefinition.builder(SONAR_OVEROPS_VIEW_ID)
-                        .name("View")
+												.name("View")
 						.description("View name")
-                        .category(CATEGORY)
-                        .subCategory(SETTINGS_SUBCATEGORY)
-                        .type(PropertyType.STRING)
+												.category(CATEGORY)
+												.subCategory(SETTINGS_SUBCATEGORY)
+												.type(PropertyType.STRING)
 						.defaultValue(VIEW_ID_DEFAULT)
 						.onQualifiers(Qualifiers.PROJECT)
-                        .index(7)
-                        .build(),
+												.index(7)
+												.build(),
 
 				PropertyDefinition.builder(SONAR_OVEROPS_USER_NAME)
 						.name("User name")
