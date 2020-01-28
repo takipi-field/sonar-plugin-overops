@@ -97,7 +97,7 @@ public class OverOpsMetrics implements Metrics {
                 new String[]{INCREASING_QG_MARKER, CRITICAL_QG_MARKER});
 
         public final String overOpsType;
-        public final Metric metric;
+        public final Metric<Integer> metric;
         public final RuleType ruleType;
         public final Severity severity;
         public final String ruleKey;
@@ -108,7 +108,7 @@ public class OverOpsMetrics implements Metrics {
         public final String qualityGateKey;
 
         OverOpsMetric(String overOpsType,
-                      Metric metric,
+                      Metric<Integer> metric,
                       RuleType ruleType,
                       Severity severity,
                       String ruleKey,
@@ -119,7 +119,7 @@ public class OverOpsMetrics implements Metrics {
         }
 
         OverOpsMetric(String overOpsType,
-                      Metric metric,
+                      Metric<Integer> metric,
                       RuleType ruleType,
                       Severity severity,
                       String ruleKey,
@@ -134,7 +134,7 @@ public class OverOpsMetrics implements Metrics {
             this.ruleTags = tags.toArray(new String[tags.size()]);
         }
 
-        OverOpsMetric(String overOpsType, Metric metric, RuleType ruleType, Severity severity, String ruleKey, String ruleTitle, String[] qualityGateArray) {
+        OverOpsMetric(String overOpsType, Metric<Integer> metric, RuleType ruleType, Severity severity, String ruleKey, String ruleTitle, String[] qualityGateArray) {
             this.overOpsType = overOpsType;
             this.metric = metric;
             this.ruleType = ruleType;
@@ -146,7 +146,7 @@ public class OverOpsMetrics implements Metrics {
             this.qualityGateKey = getKey(qualityGate);
         }
 
-        public static Metric getMetric(String overOpsType) {
+        public static Metric<Integer> getMetric(String overOpsType) {
             for (OverOpsMetric overOpsMetric : values()) {
                 if (overOpsMetric.overOpsType.equals(overOpsType)) {
                     return overOpsMetric.metric;
@@ -157,7 +157,7 @@ public class OverOpsMetrics implements Metrics {
         }
 
 
-        public static Metric getMetricByQualityGate(String qualityGateKey) {
+        public static Metric<Integer> getMetricByQualityGate(String qualityGateKey) {
             for (OverOpsMetric overOpsMetric : values()) {
                 if (overOpsMetric.qualityGateKey.equals(qualityGateKey)) {
                     return overOpsMetric.metric;
@@ -213,11 +213,8 @@ public class OverOpsMetrics implements Metrics {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public List<Metric> getMetrics() {
-        return getMetricsList();
-    }
-
-    public static List<Metric> getMetricsList() {
         return asList(NewQualityGateCount, IncreasingQualityGateCount, ResurfacedQualityGateCount, CriticalQualityGateCount);
     }
 }
