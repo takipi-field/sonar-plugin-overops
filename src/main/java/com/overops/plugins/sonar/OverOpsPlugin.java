@@ -17,6 +17,6 @@ public class OverOpsPlugin implements Plugin {
 		context.addExtensions(OverOpsMetrics.class, EventsSensor.class, EventsMetricComputer.class);
 
 		// post job - add ARC links to issues as comments
-		// context.addExtension(OverOpsPostJob.class);
+		context.addExtension(OverOpsPostJob.class);
 	}
 }

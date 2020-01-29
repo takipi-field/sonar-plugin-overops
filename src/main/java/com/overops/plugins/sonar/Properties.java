@@ -17,6 +17,7 @@ public class Properties {
 
 	// properties
 	public static final String API_URL = "overops.api.url";
+	public static final String APP_URL = "overops.app.url";
 	public static final String API_KEY = "overops.api.key";
 	public static final String ENVIRONMENT_ID = "overops.environment.id";
 	public static final String APPLICATION_NAME = "overops.application.name";
@@ -25,6 +26,7 @@ public class Properties {
 
 	// property defaults
 	public static final String DEFAULT_API_URL = "https://api.overops.com";
+	public static final String DEFAULT_APP_URL = "https://app.overops.com";
 	public static final String DEFAULT_APPLICATION_NAME = "All";
 	public static final String DEFAULT_CRITICAL_EXCEPTION_TYPES = "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError";
 
@@ -44,14 +46,25 @@ public class Properties {
 				.index(1)
 				.build(),
 
-			PropertyDefinition.builder(API_KEY)
+			PropertyDefinition.builder(APP_URL)
+				.name("App URL")
+				.description("The complete URL including port and protocol of the OverOps UI (e.g. https://app.overops.com or http://host.domain.com:8080)")
+				.defaultValue(DEFAULT_APP_URL)
+				.category(CATEGORY)
+				.subCategory(SUBCATEGORY_GENERAL)
+				.type(PropertyType.STRING)
+				.onQualifiers(Qualifiers.PROJECT)
+				.index(2)
+				.build(),
+
+				PropertyDefinition.builder(API_KEY)
 				.name("API Token")
 				.description("The OverOps REST API token to use for authentication. This can be obtained from the OverOps dashboard under Settings -> Account.")
 				.category(CATEGORY)
 				.subCategory(SUBCATEGORY_GENERAL)
 				.type(PropertyType.PASSWORD)
 				.onQualifiers(Qualifiers.PROJECT)
-				.index(2)
+				.index(3)
 				.build(),
 
 			PropertyDefinition.builder(ENVIRONMENT_ID)
@@ -61,7 +74,7 @@ public class Properties {
 				.subCategory(SUBCATEGORY_GENERAL)
 				.type(PropertyType.STRING)
 				.onQualifiers(Qualifiers.PROJECT)
-				.index(3)
+				.index(4)
 				.build(),
 
 			PropertyDefinition.builder(APPLICATION_NAME)
@@ -71,7 +84,7 @@ public class Properties {
 				.subCategory(SUBCATEGORY_GENERAL)
 				.type(PropertyType.STRING)
 				.onQualifiers(Qualifiers.PROJECT)
-				.index(4)
+				.index(5)
 				.build(),
 
 			PropertyDefinition.builder(DEPLOYMENT_NAME)
@@ -81,7 +94,7 @@ public class Properties {
 				.subCategory(SUBCATEGORY_GENERAL)
 				.type(PropertyType.STRING)
 				.onQualifiers(Qualifiers.PROJECT)
-				.index(5)
+				.index(6)
 				.build(),
 
 			PropertyDefinition.builder(CRITICAL_EXCEPTION_TYPES)
@@ -92,7 +105,7 @@ public class Properties {
 				.subCategory(SUBCATEGORY_QUALITY_GATE)
 				.type(PropertyType.STRING)
 				.onQualifiers(Qualifiers.PROJECT)
-				.index(6)
+				.index(7)
 				.build()
 		);
 	}

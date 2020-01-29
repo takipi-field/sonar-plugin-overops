@@ -29,7 +29,7 @@ public class Event {
 	private String deployment;
 	private String criticalExceptionTypes;
 
-	public Event(Series<SeriesRow> events, int index, String deployment, String criticalExceptionTypes) {
+	public Event(Series<SeriesRow> events, int index, String deployment, String criticalExceptionTypes, String appUrl) {
 		this.deployment = deployment;
 		this.criticalExceptionTypes = criticalExceptionTypes;
 
@@ -46,6 +46,9 @@ public class Event {
 		if (StringUtils.isBlank(stackFrames)) {
 			throw new IllegalArgumentException("Missing stack_frames for event id " + id);
 		}
+
+		// format link
+		link = appUrl + "/tale.html?snapshot=" + link + "&source=70";
 
 		Type listType = new TypeToken<ArrayList<Location>>(){}.getType();
 		List<Location> locationList = new Gson().fromJson(stackFrames, listType);
@@ -115,13 +118,11 @@ public class Event {
 
 	// friendly, formatted issue message
 	public String getMessage() {
-		StringBuilder sb = new StringBuilder("[");
-		sb.append(id);
-		sb.append("] ");
+		StringBuilder sb = new StringBuilder();
 
-		if (isNew()) sb.append("NEW, ");
-		if (isCritical()) sb.append("CRITICAL, ");
-		if (isResurfaced()) sb.append("RESURFACED, ");
+		if (isNew()) sb.append("New, ");
+		if (isCritical()) sb.append("Critical, ");
+		if (isResurfaced()) sb.append("Resurfaced, ");
 
 		sb.append(typeMessage);
 		return sb.toString();

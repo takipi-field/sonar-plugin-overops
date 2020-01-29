@@ -1,13 +1,16 @@
 package com.overops.plugins.sonar;
 
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.functions.input.EventsInput;
 import com.takipi.api.client.functions.output.QueryResult;
@@ -34,6 +37,7 @@ import org.sonar.api.utils.log.Loggers;
 import static com.overops.plugins.sonar.Properties.*;
 import static com.overops.plugins.sonar.JavaRulesDefinition.*;
 import static com.overops.plugins.sonar.OverOpsMetrics.*;
+import static com.overops.plugins.sonar.JsonStore.STORE_FILE;
 
 public class EventsSensor implements Sensor {
 
@@ -49,6 +53,7 @@ public class EventsSensor implements Sensor {
 	@Override
 	public void execute(SensorContext context) {
 		String apiUrl = context.config().get(API_URL).orElse(DEFAULT_API_URL);
+		String appUrl = context.config().get(APP_URL).orElse(DEFAULT_APP_URL);
 		String apiKey = context.config().get(API_KEY).orElse(null);
 		String envId = context.config().get(ENVIRONMENT_ID).orElse(null);
 
@@ -62,6 +67,7 @@ public class EventsSensor implements Sensor {
 				.orElse(DEFAULT_CRITICAL_EXCEPTION_TYPES);
 
 		LOGGER.debug(API_URL + ": " + apiUrl);
+		LOGGER.debug(APP_URL + ": " + appUrl);
 		LOGGER.debug(API_KEY + ": " + apiKey.substring(0, 5) + "***************");
 		LOGGER.debug(ENVIRONMENT_ID + ": " + envId);
 
@@ -74,6 +80,11 @@ public class EventsSensor implements Sensor {
 		if (StringUtils.isBlank(apiUrl)) {
 			LOGGER.warn("OverOps API URL is required.");
 			return;
+		}
+
+		// default to API URL if app URL is missing
+		if (StringUtils.isBlank(appUrl)) {
+			appUrl = apiUrl;
 		}
 
 		if (StringUtils.isBlank(apiKey)) {
@@ -91,6 +102,10 @@ public class EventsSensor implements Sensor {
 			LOGGER.info("OverOps Deployment Name is required.");
 			return;
 		}
+
+		// TODO validate this all in the scanner so we don't get this far w/o
+		// credentials
+		// TODO including making a successful API call
 
 		try {
 			// construct overops api client
@@ -140,7 +155,7 @@ public class EventsSensor implements Sensor {
 			HashMap<String, ArrayList<Event>> fileEvents = new HashMap<String, ArrayList<Event>>();
 			for (int i = 0; i < events.size(); i++) {
 				try {
-					Event event = new Event(events, i, depName, criticalExceptionTypes);
+					Event event = new Event(events, i, depName, criticalExceptionTypes, appUrl);
 					fileEvents.putIfAbsent(event.getKey(), new ArrayList<Event>());
 					fileEvents.get(event.getKey()).add(event);
 				} catch (IllegalArgumentException ex) {
@@ -150,6 +165,10 @@ public class EventsSensor implements Sensor {
 
 			// add issues and measures to each file
 			FileSystem fs = context.fileSystem();
+
+			// save for later
+			JsonStore jsonStore = new JsonStore();
+			jsonStore.setEventsJson(new ArrayList<EventsJson>(fileEvents.size()));
 
 			for (Map.Entry<String, ArrayList<Event>> fileEvent : fileEvents.entrySet()) {
 				String filePath = fileEvent.getKey();
@@ -169,6 +188,13 @@ public class EventsSensor implements Sensor {
 				Integer criticalCount = 0;
 				Integer resurfacedCount = 0;
 
+				EventsJson eventsJson = new EventsJson();
+				eventsJson.setRule(EVENT_RULE.toString());
+				eventsJson.setComponentKey(context.project().key() + ":" + sourceFile);
+
+				List<IssueComment> issueList = new ArrayList<IssueComment>(eventList.size());
+				eventsJson.setIssues(issueList);
+
 				// add issues
 				for (Event event : eventList) {
 					LOGGER.debug("creating new issue for event: " + event.toString());
@@ -185,6 +211,10 @@ public class EventsSensor implements Sensor {
 					if (event.isNew()) newCount++;
 					if (event.isCritical()) criticalCount++;
 					if (event.isResurfaced()) resurfacedCount++;
+
+					// save for later
+					IssueComment issueComment = new IssueComment(event);
+					eventsJson.getIssues().add(issueComment);
 				}
 
 				// add measures
@@ -211,7 +241,16 @@ public class EventsSensor implements Sensor {
 					.on(sourceFile)
 					.withValue(eventList.size())
 					.save();
+
+				// save to temporary file to add comments in post job step
+				jsonStore.getEventsJson().add(eventsJson);
 			}
+
+			// save to disk
+			String jsonified = new Gson().toJson(jsonStore);
+			FileWriter writer = new FileWriter(STORE_FILE);
+			writer.write(jsonified);
+			writer.close();
 
 		} catch (Exception ex) {
 			LOGGER.error("OverOps sensor encountered an error.");
