@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
+import com.overops.plugins.sonar.config.JavaRulesDefinition;
+import com.overops.plugins.sonar.model.Event;
+import com.overops.plugins.sonar.model.EventsJson;
+import com.overops.plugins.sonar.model.IssueComment;
+import com.overops.plugins.sonar.model.JsonStore;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.functions.input.EventsInput;
 import com.takipi.api.client.functions.output.QueryResult;
@@ -34,10 +39,10 @@ import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
-import static com.overops.plugins.sonar.Properties.*;
-import static com.overops.plugins.sonar.JavaRulesDefinition.*;
-import static com.overops.plugins.sonar.OverOpsMetrics.*;
-import static com.overops.plugins.sonar.JsonStore.STORE_FILE;
+import static com.overops.plugins.sonar.config.Properties.*;
+import static com.overops.plugins.sonar.config.JavaRulesDefinition.*;
+import static com.overops.plugins.sonar.config.OverOpsMetrics.*;
+import static com.overops.plugins.sonar.model.JsonStore.STORE_FILE;
 
 public class EventsSensor implements Sensor {
 

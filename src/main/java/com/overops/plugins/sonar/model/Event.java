@@ -1,4 +1,4 @@
-package com.overops.plugins.sonar;
+package com.overops.plugins.sonar.model;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -149,30 +149,9 @@ public class Event {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("[");
-		sb.append("id=");
-		sb.append(id);
-		sb.append(", key=");
-		sb.append(filePath);
-		sb.append(", link=");
-		sb.append(link);
-		sb.append(", name=");
-		sb.append(name);
-		sb.append(", typeMessage=");
-		sb.append(typeMessage);
-		sb.append(", introducedBy=");
-		sb.append(introducedBy);
-		sb.append(", labels=");
-		sb.append(labels);
-		sb.append(", stackFrames=");
-		sb.append(stackFrames);
-		sb.append(", isNew=");
-		sb.append(isNew() ? "true" : "false");
-		sb.append(", isCritical=");
-		sb.append(isCritical() ? "true" : "false");
-		sb.append(", isResurfaced=");
-		sb.append(isResurfaced() ? "true" : "false");
-
-		return sb.toString();
+		return "Event [criticalExceptionTypes=" + criticalExceptionTypes + ", deployment=" + deployment + ", filePath="
+				+ filePath + ", id=" + id + ", introducedBy=" + introducedBy + ", labels=" + labels + ", link=" + link
+				+ ", location=" + location + ", name=" + name + ", stackFrames=" + stackFrames + ", typeMessage=" + typeMessage
+				+ "]";
 	}
 }

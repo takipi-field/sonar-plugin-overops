@@ -1,4 +1,4 @@
-package com.overops.plugins.sonar;
+package com.overops.plugins.sonar.config;
 
 import java.util.List;
 import org.sonar.api.measures.Metric;

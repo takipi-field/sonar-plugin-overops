@@ -12,6 +12,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
+import com.overops.plugins.sonar.model.EventsJson;
+import com.overops.plugins.sonar.model.IssueComment;
+import com.overops.plugins.sonar.model.JsonStore;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -39,11 +42,11 @@ import org.sonar.api.batch.postjob.PostJobDescriptor;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
-import static com.overops.plugins.sonar.JsonStore.STORE_FILE;
+import static com.overops.plugins.sonar.model.JsonStore.STORE_FILE;
 
-public class OverOpsPostJob implements PostJob {
+public class AddArcComment implements PostJob {
 
-	private static final Logger LOGGER = Loggers.get(OverOpsPostJob.class);
+	private static final Logger LOGGER = Loggers.get(AddArcComment.class);
 
 	@Override
 	public void describe(PostJobDescriptor descriptor) {

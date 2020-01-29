@@ -1,5 +1,9 @@
 package com.overops.plugins.sonar;
 
+import com.overops.plugins.sonar.config.JavaRulesDefinition;
+import com.overops.plugins.sonar.config.OverOpsMetrics;
+import com.overops.plugins.sonar.config.Properties;
+
 import org.sonar.api.Plugin;
 
 public class OverOpsPlugin implements Plugin {
@@ -17,6 +21,6 @@ public class OverOpsPlugin implements Plugin {
 		context.addExtensions(OverOpsMetrics.class, EventsSensor.class, EventsMetricComputer.class);
 
 		// post job - add ARC links to issues as comments
-		context.addExtension(OverOpsPostJob.class);
+		context.addExtension(AddArcComment.class);
 	}
 }

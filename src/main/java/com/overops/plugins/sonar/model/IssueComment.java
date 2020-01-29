@@ -1,4 +1,4 @@
-package com.overops.plugins.sonar;
+package com.overops.plugins.sonar.model;
 
 public class IssueComment {
 	private int line;
@@ -66,16 +66,7 @@ public class IssueComment {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("IssueComment[");
-		sb.append("line=");
-		sb.append(line);
-		sb.append(", message=");
-		sb.append(message);
-		sb.append(", comment=");
-		sb.append(comment);
-		sb.append("]");
-
-		return sb.toString();
+		return "IssueComment [comment=" + comment + ", line=" + line + ", message=" + message + "]";
 	}
 
 }

@@ -4,7 +4,7 @@ import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
 
-import static com.overops.plugins.sonar.OverOpsMetrics.*;
+import static com.overops.plugins.sonar.config.OverOpsMetrics.*;
 
 public class EventsMetricComputer implements MeasureComputer {
 

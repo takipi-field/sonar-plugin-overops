@@ -1,4 +1,4 @@
-package com.overops.plugins.sonar;
+package com.overops.plugins.sonar.config;
 
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.rule.RuleStatus;

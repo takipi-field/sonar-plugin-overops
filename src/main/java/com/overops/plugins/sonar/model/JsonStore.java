@@ -1,4 +1,4 @@
-package com.overops.plugins.sonar;
+package com.overops.plugins.sonar.model;
 
 import java.util.List;
 
