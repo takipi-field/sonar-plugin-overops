@@ -15,12 +15,13 @@ import com.takipi.api.client.util.regression.RegressionStringUtil;
 import org.apache.commons.lang.StringUtils;
 
 public class Event {
-	public static final String FIELDS = "id,stack_frames,link,name,typeMessage,introduced_by,labels";
+	public static final String FIELDS = "id,stack_frames,link,name,type,message,introduced_by,labels";
 
 	private int id;
 	private String link;
 	private String name;
-	private String typeMessage;
+	private String type;
+	private String message;
 	private String introducedBy;
 	private String labels;
 	private String stackFrames;
@@ -38,9 +39,10 @@ public class Event {
 		stackFrames  = (String) events.getValue(1, index);         // stack_frames
 		link         = (String) events.getValue(2, index);         // link
 		name         = (String) events.getValue(3, index);         // name
-		typeMessage  = (String) events.getValue(4, index);         // typeMessage
-		introducedBy = (String) events.getValue(5, index);         // introduced_by
-		labels       = (String) events.getValue(6, index);         // labels
+		type         = (String) events.getValue(4, index);         // type
+		message      = (String) events.getValue(5, index);         // message
+		introducedBy = (String) events.getValue(6, index);         // introduced_by
+		labels       = (String) events.getValue(7, index);         // labels
 
 		// parse stackFrames
 		if (StringUtils.isBlank(stackFrames)) {
@@ -81,8 +83,22 @@ public class Event {
 	public String getName() {
 		return name;
 	}
-	public String getTypeMessage() {
-		return typeMessage;
+	public String getType() {
+		return type;
+	}
+	// friendly, formatted issue message
+	public String getMessage() {
+		StringBuilder sb = new StringBuilder();
+
+		if (isNew()) sb.append("New, ");
+		if (isCritical()) sb.append("Critical, ");
+		if (isResurfaced()) sb.append("Resurfaced, ");
+
+		sb.append(type);
+		sb.append(": ");
+		sb.append(message);
+
+		return sb.toString();
 	}
 	public String getIntroducedBy() {
 		return introducedBy;
@@ -116,18 +132,6 @@ public class Event {
 		return labels.contains(RegressionStringUtil.RESURFACED_ISSUE);
 	}
 
-	// friendly, formatted issue message
-	public String getMessage() {
-		StringBuilder sb = new StringBuilder();
-
-		if (isNew()) sb.append("New, ");
-		if (isCritical()) sb.append("Critical, ");
-		if (isResurfaced()) sb.append("Resurfaced, ");
-
-		sb.append(typeMessage);
-		return sb.toString();
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
@@ -151,7 +155,7 @@ public class Event {
 	public String toString() {
 		return "Event [criticalExceptionTypes=" + criticalExceptionTypes + ", deployment=" + deployment + ", filePath="
 				+ filePath + ", id=" + id + ", introducedBy=" + introducedBy + ", labels=" + labels + ", link=" + link
-				+ ", location=" + location + ", name=" + name + ", stackFrames=" + stackFrames + ", typeMessage=" + typeMessage
-				+ "]";
+				+ ", location=" + location + ", message=" + message + ", name=" + name + ", stackFrames=" + stackFrames
+				+ ", type=" + type + "]";
 	}
 }

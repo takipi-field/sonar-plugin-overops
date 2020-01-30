@@ -71,6 +71,8 @@ public class EventsSensor implements Sensor {
 		String criticalExceptionTypes = context.config().get(CRITICAL_EXCEPTION_TYPES)
 				.orElse(DEFAULT_CRITICAL_EXCEPTION_TYPES);
 
+		String ignoreTypes = context.config().get(IGNORE_TYPES).orElse(DEFAULT_IGNORE_TYPES);
+
 		String login = context.config().get("sonar.login").orElse(null);
 
 		LOGGER.debug(API_URL + ": " + apiUrl);
@@ -150,26 +152,37 @@ public class EventsSensor implements Sensor {
 
 			Collection<Series<SeriesRow>> series = response.data.getSeries();
 
-			// this query only returns one series
+			// this shouldn't happen, but stop here if it does
 			if (!series.iterator().hasNext()) {
-				LOGGER.info("No OverOps events found.");
 				return;
 			}
 
 			Series<SeriesRow> events = series.iterator().next();
-
-			LOGGER.info("found " + events.size() + " errors");
 
 			// loop through all the events, mapping them by source file (there can be multiple issues per file)
 			HashMap<String, ArrayList<Event>> fileEvents = new HashMap<String, ArrayList<Event>>();
 			for (int i = 0; i < events.size(); i++) {
 				try {
 					Event event = new Event(events, i, depName, criticalExceptionTypes, appUrl);
+
+					// ignore specific types
+					if (ignoreTypes.contains(event.getType())) {
+						LOGGER.debug("skipping " + event.getMessage());
+						continue;
+					}
+
 					fileEvents.putIfAbsent(event.getKey(), new ArrayList<Event>());
 					fileEvents.get(event.getKey()).add(event);
+
 				} catch (IllegalArgumentException ex) {
 					LOGGER.warn(ex.getMessage()); // when unable to parse stack_frames
 				}
+			}
+
+			// stop here if there are no events
+			if (fileEvents.size() == 0) {
+				LOGGER.info("No OverOps events found.");
+				return;
 			}
 
 			// add issues and measures to each file
