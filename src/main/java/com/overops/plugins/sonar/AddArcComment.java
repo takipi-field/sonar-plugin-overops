@@ -74,6 +74,16 @@ public class AddArcComment implements PostJob {
 
 			List<EventsJson> eventsJson = jsonStore.getEventsJson();
 
+			// stop if there are no events
+			if (eventsJson.size() < 1) {
+				LOGGER.info("No comments");
+
+				// clean up
+				File store = new File(STORE_FILE);
+				store.delete();
+				return;
+			}
+
 			CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
 			URI sonarHostUri = new URI(sonarHostUrl);
