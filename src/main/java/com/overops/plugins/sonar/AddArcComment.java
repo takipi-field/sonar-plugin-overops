@@ -59,8 +59,10 @@ public class AddArcComment implements PostJob {
 
 		LOGGER.info("Adding issue comments with OverOps links");
 
+		// see: https://docs.sonarqube.org/latest/extend/web-api/
+		// login can be username or token. if token, password is blank.
 		String login = context.config().get("sonar.login").orElse(null);
-		String password = context.config().get("sonar.password").orElse(null);
+		String password = context.config().get("sonar.password").orElse("");
 		String sonarHostUrl = context.config().get("sonar.host.url").orElse(null);
 
 		BufferedReader storeFile;
