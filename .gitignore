@@ -1,2 +1,9 @@
 /target/
+
 .idea
+.classpath
+.settings/
+.vscode/
+.project
+
+.DS_Store
