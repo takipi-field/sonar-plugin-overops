@@ -71,6 +71,8 @@ public class EventsSensor implements Sensor {
 		String criticalExceptionTypes = context.config().get(CRITICAL_EXCEPTION_TYPES)
 				.orElse(DEFAULT_CRITICAL_EXCEPTION_TYPES);
 
+		String login = context.config().get("sonar.login").orElse(null);
+
 		LOGGER.debug(API_URL + ": " + apiUrl);
 		LOGGER.debug(APP_URL + ": " + appUrl);
 		LOGGER.debug(API_KEY + ": " + apiKey.substring(0, 5) + "***************");
@@ -108,9 +110,11 @@ public class EventsSensor implements Sensor {
 			return;
 		}
 
-		// TODO validate this all in the scanner so we don't get this far w/o
-		// credentials
-		// TODO including making a successful API call
+		// sonar login is needed to add post job comments
+		if (StringUtils.isBlank(login)) {
+			LOGGER.warn("Sonar login token or username and password are required.");
+			return;
+		}
 
 		try {
 			// construct overops api client
