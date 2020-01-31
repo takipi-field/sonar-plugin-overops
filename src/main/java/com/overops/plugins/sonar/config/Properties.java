@@ -23,14 +23,14 @@ public class Properties {
 	public static final String APPLICATION_NAME = "overops.application.name";
 	public static final String DEPLOYMENT_NAME = "overops.deployment.name";
 	public static final String CRITICAL_EXCEPTION_TYPES = "overops.critical.exception.types";
-	public static final String IGNORE_TYPES = "overops.ignore.types";
+	public static final String IGNORE_EVENT_TYPES = "overops.ignore.event.types";
 
 	// property defaults
 	public static final String DEFAULT_API_URL = "https://api.overops.com";
 	public static final String DEFAULT_APP_URL = "https://app.overops.com";
 	public static final String DEFAULT_APPLICATION_NAME = "All";
 	public static final String DEFAULT_CRITICAL_EXCEPTION_TYPES = "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError";
-	public static final String DEFAULT_IGNORE_TYPES = "Timer,Logged Warning,Logged Error";
+	public static final String DEFAULT_IGNORE_EVENT_TYPES = "Timer,Logged Warning,Logged Error";
 
 	// constants
 	public static final String VIEW_NAME = "All Events";
@@ -91,7 +91,7 @@ public class Properties {
 
 			PropertyDefinition.builder(DEPLOYMENT_NAME)
 				.name("Deployment Name")
-				.description("(Optional) Deployment Name as specified in OverOps. Defaults to sonar.buildString.")
+				.description("Deployment Name as specified in OverOps. Defaults to sonar.buildString.")
 				.category(CATEGORY)
 				.subCategory(SUBCATEGORY_GENERAL)
 				.type(PropertyType.STRING)
@@ -110,10 +110,10 @@ public class Properties {
 				.index(7)
 				.build(),
 
-			PropertyDefinition.builder(IGNORE_TYPES)
+			PropertyDefinition.builder(IGNORE_EVENT_TYPES)
 				.name("Ignore Event Types")
 				.description("A comma delimited list of specific types of events to ignore (e.g. Timer,Logged Warning,Logged Error)")
-				.defaultValue(DEFAULT_IGNORE_TYPES)
+				.defaultValue(DEFAULT_IGNORE_EVENT_TYPES)
 				.category(CATEGORY)
 				.subCategory(SUBCATEGORY_QUALITY_GATE)
 				.type(PropertyType.STRING)
