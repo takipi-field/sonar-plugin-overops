@@ -71,7 +71,7 @@ public class EventsSensor implements Sensor {
 		String criticalExceptionTypes = context.config().get(CRITICAL_EXCEPTION_TYPES)
 				.orElse(DEFAULT_CRITICAL_EXCEPTION_TYPES);
 
-		String ignoreTypes = context.config().get(IGNORE_TYPES).orElse(DEFAULT_IGNORE_TYPES);
+		String ignoreTypes = context.config().get(IGNORE_EVENT_TYPES).orElse(DEFAULT_IGNORE_EVENT_TYPES);
 
 		String login = context.config().get("sonar.login").orElse(null);
 
