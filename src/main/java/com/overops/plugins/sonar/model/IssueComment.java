@@ -5,6 +5,8 @@ public class IssueComment {
 	private String message;
 	private String comment;
 
+	public static String LINK_TEXT = "View event analysis in OverOps →";
+
 	public IssueComment() {
 
 	}
@@ -36,7 +38,7 @@ public class IssueComment {
 
 	private void setCommentFromLink(String link) {
 		// use markdown
-		StringBuilder sb = new StringBuilder("[View event analysis in OverOps →]");
+		StringBuilder sb = new StringBuilder("[" + LINK_TEXT + "]");
 		sb.append("(");
 		sb.append(link);
 		sb.append(")");
