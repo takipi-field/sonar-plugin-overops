@@ -112,8 +112,8 @@ public class AddArcComment implements PostJob {
 				String rule = events.getRule();
 				List<IssueComment> issues = events.getIssues();
 
-				String reqUri = sonarHostUri.toString() + "/api/issues/search?ps=500&rules=" + rule + "&componentKeys="
-						+ componentKey;
+				String reqUri = sonarHostUri.toString() + "/api/issues/search?ps=500&additionalFields=comments" +
+						"&rules=" + rule + "&componentKeys=" + componentKey;
 
 				HttpGet req = new HttpGet(reqUri);
 				CloseableHttpResponse res = httpClient.execute(targetHost, req, httpContext);
@@ -149,28 +149,47 @@ public class AddArcComment implements PostJob {
 
 						// add link as a comment
 						if (issues.contains(thisIssue)) {
+
 							IssueComment issue = issues.get(issues.indexOf(thisIssue));
 
-							URIBuilder builder = new URIBuilder(sonarHostUri.toString()+ "/api/issues/add_comment");
-							builder.setParameter("issue", key);
-							builder.setParameter("text",issue.getComment());
+							// check to see if this comment already exists
+							boolean commentExists = false;
+							JsonArray comments = responseIssue.get("comments").getAsJsonArray();
 
-							HttpPost post = new HttpPost(builder.build());
-							CloseableHttpResponse postRes = httpClient.execute(targetHost, post, httpContext);
+							for (JsonElement comment : comments) {
+								JsonObject c = comment.getAsJsonObject();
+								String markdown = c.get("markdown").getAsString();
 
-							if (postRes.getStatusLine().getStatusCode() != 200) {
-								LOGGER.error("OverOps plugin was unable to add issue comment");
-							} else {
-								LOGGER.info("Comment added successfully [" + key + "]");
+								if (markdown.contains(IssueComment.LINK_TEXT)) {
+									commentExists = true;
+									break;
+								}
 							}
 
-							postRes.close();
+							// add comment if it doesn't already exist
+							if (!commentExists) {
+								URIBuilder builder = new URIBuilder(sonarHostUri.toString()+ "/api/issues/add_comment");
+								builder.setParameter("issue", key);
+								builder.setParameter("text",issue.getComment());
+
+								HttpPost post = new HttpPost(builder.build());
+								CloseableHttpResponse postRes = httpClient.execute(targetHost, post, httpContext);
+
+								if (postRes.getStatusLine().getStatusCode() != 200) {
+									LOGGER.error("OverOps plugin was unable to add issue comment");
+								} else {
+									LOGGER.info("Comment added successfully [" + key + "]");
+								}
+
+								postRes.close();
+							} else {
+								LOGGER.info("Comment not updated");
+							}
 						}
 					}
 				} finally {
 					res.close();
 				}
-
 			}
 
 			// clean up
