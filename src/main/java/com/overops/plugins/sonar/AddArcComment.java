@@ -175,13 +175,16 @@ public class AddArcComment implements PostJob {
 								HttpPost post = new HttpPost(builder.build());
 								CloseableHttpResponse postRes = httpClient.execute(targetHost, post, httpContext);
 
-								if (postRes.getStatusLine().getStatusCode() != 200) {
-									LOGGER.error("OverOps plugin was unable to add issue comment");
-								} else {
-									LOGGER.info("Comment added successfully [" + key + "]");
+								try {
+									if (postRes.getStatusLine().getStatusCode() != 200) {
+										LOGGER.error("OverOps plugin was unable to add issue comment");
+									} else {
+										LOGGER.info("Comment added successfully [" + key + "]");
+									}
+								} finally {
+									postRes.close();
 								}
 
-								postRes.close();
 							} else {
 								LOGGER.info("Comment not updated");
 							}
