@@ -29,7 +29,7 @@ To install the plugin manually, download the [latest version](/takipi-field/sona
 
 ### Activate the OverOps Event Rule
 
-The plugin adds the OverOps Event [rule](https://docs.sonarqube.org/latest/user-guide/rules/) for Java.To enable the plugin to create issues when scanning your code, you’ll need to activate the OverOps Event rule for the [Quality Profile](https://docs.sonarqube.org/latest/instance-administration/quality-profiles/) used in your project.
+The plugin adds the OverOps Event [rule](https://docs.sonarqube.org/latest/user-guide/rules/) for Java. To enable the plugin to create issues when scanning your code, you’ll need to activate the OverOps Event rule for the [Quality Profile](https://docs.sonarqube.org/latest/instance-administration/quality-profiles/) used in your project.
 
 ![OverOps Event Rule](readme/rule.png)
 
@@ -43,18 +43,18 @@ The OverOps plugin adds four metrics that can be used as [Quality Gate](https://
 
 The plugin is configured using [analysis parameters](https://docs.sonarqube.org/latest/analysis/analysis-parameters/), which can be set in multiple places at both the global and project level.
 
-*Note: In addition to the overops properties listed below, you’ll also need to set the `sonar.host.url` and authentication parameters. See Analysis Parameters for details.*
+*Note: In addition to the overops properties listed below, you’ll also need to set the `sonar.host.url` and authentication parameters. See [Analysis Parameters](https://docs.sonarqube.org/latest/analysis/analysis-parameters/) for details.*
 
 | Name | Property | Default | Description |
 | ---- | -------- | ------- | ----------- |
-| API URL | `overops.api.url` | `https://api.overops.com` | The complete URL including port and protocol of the OverOps API |
-| App URL | `overops.app.url` | `https://app.overops.com` | The complete URL including port and protocol of the OverOps UI |
+| API URL | `overops.api.url` | https://api.overops.com | The complete URL including port and protocol of the OverOps API |
+| App URL | `overops.app.url` | https://app.overops.com | The complete URL including port and protocol of the OverOps UI |
 | API Token | `overops.api.key` | | The OverOps REST API token to use for authentication. |
 | Environment ID | `overops.environment.id` | | The OverOps environment identifier |
 | Application Name | `overops.application.name` | | Application Name as specified in OverOps (Optional) |
 | Deployment Name | `overops.deployment.name` | | Deployment Name as specified in OverOps. If blank, `sonar.buildString` is used |
-| Critical Exception Types| `overops.critical.exception.types` | `NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError` | A comma delimited list of critical exception types
-| Ignore Event Types | `overops.ignore.event.types` | `Timer,Logged Warning,Logged Error` | A comma delimited list of types of events to ignore
+| Critical Exception Types| `overops.critical.exception.types` | NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError` | A comma delimited list of critical exception types
+| Ignore Event Types | `overops.ignore.event.types` | Timer,Logged Warning,Logged Error | A comma delimited list of types of events to ignore
 
 ![Settings](readme/settings.png)
 
