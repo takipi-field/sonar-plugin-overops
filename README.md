@@ -1,19 +1,19 @@
 # OverOps SonarQube Plugin
 
-Adds [OverOps](https://www.overops.com/) event data as Issues and Metrics in SonarQube. *(Java only, SonarQube 7.9.1 - 8.1)*
+Add [OverOps](https://www.overops.com/) event data as Issues and Metrics in SonarQube. *(Java only, SonarQube 7.9.1 - 8.1)*
 
-[Installing the plugin](#installing-the-plugin)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Building from source](#building-from-source)  
+[Installing the OverOps Plugin](#installing-the-overops-plugin)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Building from Source](#building-from-source)  
 [Setup](#setup)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Enabling the rule for your profile](#enabling-the-rule-for-your-profile)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Configuring quality gates](#configuring-quality-gates)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Configuring the plugin](#configuring-the-plugin)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Activate the OverOps Event Rule](#activate-the-overops-event-rule)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Configure Quality Gates](#configure-quality-gates)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Configure the Plugin](#configure-the-plugin)  
 [Running the plugin](#running-the-plugin)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Scanning your code](#scanning-your-code)  
-[OverOps data in SonarQube](#overops-data-in-sonarqube)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Quality Gates](#quality-gates)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Scan your code](#scan-your-code)  
+[Viewing OverOps Data in SonarQube](#viewing-overops-data-in-sonarqube)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Quality Gate](#quality-gate)  
 &nbsp;&nbsp;&nbsp;&nbsp;[Issues](#issues)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Measures](#measures)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Metrics](#metrics)  
 
 ## Installing the OverOps Plugin
 
@@ -103,6 +103,6 @@ For example:
 
 The plugin adds four metrics: Critical Errors, New Errors, Resurfaced Errors, and Unique Errors. The measure reported for each of these metrics shows the number of errors found in this deployment. The metrics are not mutually exclusive. A single error can be counted in multiple metrics. All errors are counted in the Unique Errors metric.
 
-![OverOps Measures](readme/overops-measures.png)
+![OverOps Metrics](readme/overops-metrics.png)
 
-![Measures](readme/measures.png)
+![Metrics](readme/metrics.png)
