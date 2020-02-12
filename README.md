@@ -53,7 +53,7 @@ The plugin is configured using [analysis parameters](https://docs.sonarqube.org/
 | Environment ID | `overops.environment.id` | | The OverOps environment identifier |
 | Application Name | `overops.application.name` | | Application Name as specified in OverOps (Optional) |
 | Deployment Name | `overops.deployment.name` | | Deployment Name as specified in OverOps. If blank, `sonar.buildString` is used |
-| Critical Exception Types| `overops.critical.exception.types` | NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError` | A comma delimited list of critical exception types
+| Critical Exception Types| `overops.critical.exception.types` | NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError | A comma delimited list of critical exception types
 | Ignore Event Types | `overops.ignore.event.types` | Timer,Logged Warning,Logged Error | A comma delimited list of types of events to ignore
 
 ![Settings](readme/settings.png)
