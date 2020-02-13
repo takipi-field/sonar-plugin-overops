@@ -15,7 +15,7 @@
 		<sonar.pluginKey>overops</sonar.pluginKey>
 		<sonar.apiVersion>7.9.1</sonar.apiVersion>
 		<jdk.min.version>1.8</jdk.min.version>
-		<sonar.sources>src/main/java,src/main/js</sonar.sources>
+		<sonar.sources>src/main/java</sonar.sources>
 		<sonar.java.plugin.version>4.2</sonar.java.plugin.version>
 	</properties>
 
