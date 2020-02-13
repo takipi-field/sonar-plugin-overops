@@ -1,1 +1,9 @@
 language: java
+addons:
+  sonarcloud:
+    organization: "overops"
+    token:
+      secure: "EUw3xbIi5/T919nmldgxGL0mKeURItJBdqSQtDv0d4nPyW3RyDKWU3W0X97djeX38Cj0PsPO96doWhZ4hHIWTJc3t+aEDrJooWxCIX6gLyY/yObj3mDZVpr8Bt4rWWXr+sOH7P3snygWxVx5awihUFE8BNIUPRtK3d5g2tk4XDZp77qeqWlU2jaWPoMBjbfZXKV+mupjjlCHV7pBoHmTJaEUd7PvLE0xC6E8tIEHCYuze205FdiPUBVDZH6iDYPAe/aMVUV9MgxW2d+l1+ltV4JAL57fAjh5urlxbD/HVjfVfZM4qcSln7X0OPl6uStUPJLtvCbHu+g9+wBXUkqTPd4Kev6RfbLk5JrMeZFvZIcy55WsXZs6i3qXY+TzaK4HvRLP4L0gL/8rJOsWnUy2TRHmjp7u7wiNbyZr5vr4q7KMg3s8mi5XnR+/ct+5ToKkZKyMcKzum/rsfYhqZvn1nkbCyI7o7ePDaVnjBbvH/e9bVjGXH4YAoq6VFTHbJVLtQixESrs+waUTnTi0LTvf2I88Dn48T526SoQOw5GM2MrDUlQEwDpYDPu8XaoK7eCv2tIii96+GIM6IDPWCuzeoHKT+kNAzOPpK8P6B1WEmZ+k6e6V3K7kaaupjPgK2RjMz4XD6faOtKi9GWjakup4jIWhx7XwigdzuoYkkGyGApo="
+
+script:
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=takipi-field_sonar-plugin-overops
