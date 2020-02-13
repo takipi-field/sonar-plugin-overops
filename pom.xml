@@ -12,7 +12,7 @@
 	<description>Identify and drill down into runtime errors in Java applications</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- The lowest SQ api version is 7.2 -->
+		<sonar.pluginKey>overops</sonar.pluginKey>
 		<sonar.apiVersion>7.9.1</sonar.apiVersion>
 		<jdk.min.version>1.8</jdk.min.version>
 		<sonar.sources>src/main/java,src/main/js</sonar.sources>
