@@ -1,5 +1,9 @@
 # OverOps SonarQube Plugin
 
+[![Build Status](https://travis-ci.org/takipi-field/sonar-plugin-overops.svg?branch=develop)](https://travis-ci.org/takipi-field/sonar-plugin-overops)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=takipi-field_sonar-plugin-overops&metric=alert_status)](https://sonarcloud.io/dashboard?id=takipi-field_sonar-plugin-overops)
+
 Add [OverOps](https://www.overops.com/) event data as Issues and Metrics in SonarQube. *(Java only, SonarQube 7.9.1 - 8.1)*
 
 [Installing the OverOps Plugin](#installing-the-overops-plugin)  
