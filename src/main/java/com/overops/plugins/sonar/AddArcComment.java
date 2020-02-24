@@ -1,12 +1,16 @@
 package com.overops.plugins.sonar;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +52,11 @@ public class AddArcComment implements PostJob {
 
 	private static final Logger LOGGER = Loggers.get(AddArcComment.class);
 
+	private URI sonarHostUri;
+	private HttpHost targetHost;
+	private HttpClientContext httpContext;
+	private CloseableHttpClient httpClient;
+
 	@Override
 	public void describe(PostJobDescriptor descriptor) {
 		descriptor.name("add issue comments with OverOps link");
@@ -59,12 +68,6 @@ public class AddArcComment implements PostJob {
 
 		LOGGER.info("Adding issue comments with OverOps links");
 
-		// see: https://docs.sonarqube.org/latest/extend/web-api/
-		// login can be username or token. if token, password is blank.
-		String login = context.config().get("sonar.login").orElse(null);
-		String password = context.config().get("sonar.password").orElse("");
-		String sonarHostUrl = context.config().get("sonar.host.url").orElse(null);
-
 		BufferedReader storeFile;
 		try {
 			storeFile = new BufferedReader(new FileReader(STORE_FILE));
@@ -75,45 +78,29 @@ public class AddArcComment implements PostJob {
 			List<EventsJson> eventsJson = jsonStore.getEventsJson();
 
 			// stop if there are no events
-			if (eventsJson.size() < 1) {
+			if (eventsJson.isEmpty()) {
 				LOGGER.info("No comments");
 
 				// clean up
-				File store = new File(STORE_FILE);
-				store.delete();
+				cleanUp();
 				return;
 			}
-
-			CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-
-			URI sonarHostUri = new URI(sonarHostUrl);
-			HttpHost targetHost = new HttpHost(sonarHostUri.getHost(), sonarHostUri.getPort(), sonarHostUri.getScheme());
-
-			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-					new UsernamePasswordCredentials(login, password));
-
-			AuthCache authCache = new BasicAuthCache();
-			BasicScheme basicAuth = new BasicScheme();
-
-			authCache.put(targetHost, basicAuth);
-
-			HttpClientContext httpContext = HttpClientContext.create();
-			httpContext.setCredentialsProvider(credsProvider);
-			httpContext.setAuthCache(authCache);
 
 			// wait for 60 seconds for tasks to finish
 			// data from scanner is not immediately available in the backend
 			LOGGER.info("Waiting for background tasks...");
 			TimeUnit.MINUTES.sleep(1);
 
+			setHttpContext(context);
+			httpClient = HttpClientBuilder.create().build();
+
 			for (EventsJson events : eventsJson) {
 				String componentKey = events.getComponentKey();
 				String rule = events.getRule();
 				List<IssueComment> issues = events.getIssues();
 
-				String reqUri = sonarHostUri.toString() + "/api/issues/search?ps=500&additionalFields=comments" +
-						"&rules=" + rule + "&componentKeys=" + componentKey;
+				String reqUri = sonarHostUri.toString() + "/api/issues/search?ps=500&additionalFields=comments"
+						+ "&rules=" + rule + "&componentKeys=" + componentKey;
 
 				HttpGet req = new HttpGet(reqUri);
 				CloseableHttpResponse res = httpClient.execute(targetHost, req, httpContext);
@@ -148,44 +135,7 @@ public class AddArcComment implements PostJob {
 						thisIssue.setMessage(message);
 
 						// add link as a comment
-						if (issues.contains(thisIssue)) {
-
-							IssueComment issue = issues.get(issues.indexOf(thisIssue));
-
-							// check to see if this comment already exists
-							boolean commentExists = false;
-							JsonArray comments = responseIssue.get("comments").getAsJsonArray();
-
-							for (JsonElement comment : comments) {
-								JsonObject c = comment.getAsJsonObject();
-								String markdown = c.get("markdown").getAsString();
-
-								if (markdown.contains(IssueComment.LINK_TEXT)) {
-									commentExists = true;
-									break;
-								}
-							}
-
-							// add comment if it doesn't already exist
-							if (!commentExists) {
-								URIBuilder builder = new URIBuilder(sonarHostUri.toString()+ "/api/issues/add_comment");
-								builder.setParameter("issue", key);
-								builder.setParameter("text",issue.getComment());
-
-								HttpPost post = new HttpPost(builder.build());
-								CloseableHttpResponse postRes = httpClient.execute(targetHost, post, httpContext);
-
-								if (postRes.getStatusLine().getStatusCode() != 200) {
-									LOGGER.error("OverOps plugin was unable to add issue comment");
-								} else {
-									LOGGER.info("Comment added successfully [" + key + "]");
-								}
-
-								postRes.close();
-							} else {
-								LOGGER.info("Comment not updated");
-							}
-						}
+						addComment(issues, thisIssue, responseIssue, key);
 					}
 				} finally {
 					res.close();
@@ -193,10 +143,7 @@ public class AddArcComment implements PostJob {
 			}
 
 			// clean up
-			File store = new File(STORE_FILE);
-			if (!store.delete()) {
-				LOGGER.warn("Unable to delete overops_db.json.");
-			}
+			cleanUp();
 
 		} catch (FileNotFoundException ex) {
 			LOGGER.info("overops_db.json not found: skipping OverOps post job");
@@ -214,4 +161,85 @@ public class AddArcComment implements PostJob {
 
 	}
 
+	void setHttpContext(PostJobContext context) throws URISyntaxException {
+		// see: https://docs.sonarqube.org/latest/extend/web-api/
+		// login can be username or token. if token, password is blank.
+		String login = context.config().get("sonar.login").orElse(null);
+		String password = context.config().get("sonar.password").orElse("");
+		String sonarHostUrl = context.config().get("sonar.host.url").orElse(null);
+
+		// set sonarHostUri
+		sonarHostUri = new URI(sonarHostUrl);
+
+		// set targetHost
+		targetHost = new HttpHost(sonarHostUri.getHost(), sonarHostUri.getPort(), sonarHostUri.getScheme());
+
+		// set httpContext with credentials
+		CredentialsProvider credsProvider = new BasicCredentialsProvider();
+		credsProvider.setCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()),
+				new UsernamePasswordCredentials(login, password));
+
+		AuthCache authCache = new BasicAuthCache();
+		BasicScheme basicAuth = new BasicScheme();
+
+		authCache.put(targetHost, basicAuth);
+
+		httpContext = HttpClientContext.create();
+		httpContext.setCredentialsProvider(credsProvider);
+		httpContext.setAuthCache(authCache);
+	}
+
+	void cleanUp() {
+		Path path = Paths.get(STORE_FILE);
+		try {
+			Files.delete(path);
+		} catch (IOException ex) {
+			LOGGER.warn("Unable to delete overops_db.json.");
+		}
+	}
+
+	void addComment(List<IssueComment> issues, IssueComment thisIssue, JsonObject responseIssue, String key)
+			throws URISyntaxException, IOException {
+		if (issues.contains(thisIssue)) {
+
+			IssueComment issue = issues.get(issues.indexOf(thisIssue));
+
+			// check to see if this comment already exists
+			boolean commentExists = false;
+			JsonArray comments = responseIssue.get("comments").getAsJsonArray();
+
+			for (JsonElement comment : comments) {
+				JsonObject c = comment.getAsJsonObject();
+				String markdown = c.get("markdown").getAsString();
+
+				if (markdown.contains(IssueComment.LINK_TEXT)) {
+					commentExists = true;
+					break;
+				}
+			}
+
+			// add comment if it doesn't already exist
+			if (!commentExists) {
+				URIBuilder builder = new URIBuilder(sonarHostUri.toString() + "/api/issues/add_comment");
+				builder.setParameter("issue", key);
+				builder.setParameter("text", issue.getComment());
+
+				HttpPost post = new HttpPost(builder.build());
+				CloseableHttpResponse postRes = httpClient.execute(targetHost, post, httpContext);
+
+				try {
+					if (postRes.getStatusLine().getStatusCode() != 200) {
+						LOGGER.error("OverOps plugin was unable to add issue comment");
+					} else {
+						LOGGER.info("Comment added successfully [" + key + "]");
+					}
+				} finally {
+					postRes.close();
+				}
+
+			} else {
+				LOGGER.info("Comment not updated");
+			}
+		}
+	}
 }

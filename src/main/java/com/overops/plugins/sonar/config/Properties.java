@@ -10,6 +10,11 @@ import static java.util.Arrays.asList;
 
 public class Properties {
 
+	// Utility classes should not have public constructors
+	Properties() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	// sonar UI
 	public static final String CATEGORY = "OverOps";
 	public static final String SUBCATEGORY_GENERAL = "General Settings";

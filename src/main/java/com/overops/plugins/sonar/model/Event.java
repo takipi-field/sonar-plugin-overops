@@ -55,15 +55,12 @@ public class Event {
 		Type listType = new TypeToken<ArrayList<Location>>(){}.getType();
 		List<Location> locationList = new Gson().fromJson(stackFrames, listType);
 
-		if (locationList.size() < 1) {
+		if (locationList.isEmpty()){
 			throw new IllegalArgumentException("Missing location for event id " + id);
 		}
 
 		// there is only one location in the list
 		location = locationList.get(0);
-
-		// location.class_name;
-		// location.original_line_number;
 
 		// match **/com/example/path/ClassName.java
 		StringBuilder matchPattern = new StringBuilder("**");
