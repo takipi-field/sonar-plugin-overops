@@ -21,7 +21,7 @@ public class JavaRulesDefinition implements RulesDefinition {
 		NewRule eventRule = repository.createRule(EVENT_RULE.rule())
 			.setName("OverOps Event")
 			.setHtmlDescription("This issue was detected by OverOps")
-			.setTags("overops")
+			.setTags(REPOSITORY)
 			.setStatus(RuleStatus.READY) // default
 			.setSeverity(Severity.MAJOR) // default
 			.setActivatedByDefault(true)

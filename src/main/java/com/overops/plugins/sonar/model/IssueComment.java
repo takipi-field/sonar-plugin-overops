@@ -5,7 +5,7 @@ public class IssueComment {
 	private String message;
 	private String comment;
 
-	public static String LINK_TEXT = "View event analysis in OverOps →";
+	public static final String LINK_TEXT = "View event analysis in OverOps →";
 
 	public IssueComment() {
 
