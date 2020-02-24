@@ -95,7 +95,6 @@ public class EventsSensorTest {
 		tester.initConfig(context);
 
 		assertDoesNotThrow(() -> tester.validateConfig());
-		// assertThrows(IllegalArgumentException.class, () -> tester.validateConfig());
 	}
 
 	@Test
@@ -157,6 +156,36 @@ public class EventsSensorTest {
 
 		tester.initConfig(context);
 
+		Map.Entry<String, ArrayList<Event>> fileEvent = fileEvent(tester);
+
+		JsonStore jsonStore = new JsonStore();
+		jsonStore.setEventsJson(new ArrayList<EventsJson>(1));
+
+		assertDoesNotThrow(() -> {
+			tester.addIssuesAndMetrics(context, fileEvent, jsonStore);
+		});
+	}
+
+	@Test
+	public void addIssuesAndMetricsNullSourceFile() {
+		EventsSensor tester = new EventsSensor();
+		TestSensorContext context = new TestSensorContext();
+
+		context.fileSystem.sourceFile = null;
+
+		tester.initConfig(context);
+
+		Map.Entry<String, ArrayList<Event>> fileEvent = fileEvent(tester);
+
+		JsonStore jsonStore = new JsonStore();
+		jsonStore.setEventsJson(new ArrayList<EventsJson>(1));
+
+		assertDoesNotThrow(() -> {
+			tester.addIssuesAndMetrics(context, fileEvent, jsonStore);
+		});
+	}
+
+	private Map.Entry<String, ArrayList<Event>> fileEvent(EventsSensor tester) {
 		Series<SeriesRow> events = new Series<>();
 
 		ArrayList<Object> list = new ArrayList<>(8);
@@ -178,14 +207,8 @@ public class EventsSensorTest {
 
 		HashMap<String, ArrayList<Event>> fileEvents = tester.mapFileEvents(events);
 
-		JsonStore jsonStore = new JsonStore();
-		jsonStore.setEventsJson(new ArrayList<EventsJson>(fileEvents.size()));
-
 		Map.Entry<String, ArrayList<Event>> fileEvent = fileEvents.entrySet().iterator().next();
 
-		assertDoesNotThrow(() -> {
-			tester.addIssuesAndMetrics(context, fileEvent, jsonStore);
-		});
+		return fileEvent;
 	}
-
 }
