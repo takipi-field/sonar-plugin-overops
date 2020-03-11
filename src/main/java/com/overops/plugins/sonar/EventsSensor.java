@@ -85,13 +85,13 @@ public class EventsSensor implements Sensor {
 			Pair<DateTime, DateTime> depTimes = RegressionUtil
 				.getDeploymentsActiveWindow(apiClient, envId, Arrays.asList(depName.split(",")));
 
-			LOGGER.debug("timefilter: " + TimeUtil.getTimeFilter(depTimes));
-
 			// stop if deployment not found
 			if (depTimes == null || depTimes.getFirst() == null) {
 				LOGGER.error("Deployment " + depName + " not found.");
 				return;
 			}
+
+			LOGGER.debug("timefilter: " + TimeUtil.getTimeFilter(depTimes));
 
 			EventsInput eventsInput = new EventsInput();
 			eventsInput.fields = Event.FIELDS; // defines response columns
