@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/takipi-field/sonar-plugin-overops.svg?branch=develop)](https://travis-ci.org/takipi-field/sonar-plugin-overops)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=takipi-field_sonar-plugin-overops&metric=alert_status)](https://sonarcloud.io/dashboard?id=takipi-field_sonar-plugin-overops)
 
-Add [OverOps](https://www.overops.com/) event data as Issues and Metrics in SonarQube. *(Java only, SonarQube 7.9.1 - 8.1)*
+Add [OverOps](https://www.overops.com/) event data as Issues and Metrics in SonarQube. *(Java only, SonarQube 7.9.1 - 8.2)*
 
 [Installing the OverOps Plugin](#installing-the-overops-plugin)  
 &nbsp;&nbsp;&nbsp;&nbsp;[Building from Source](#building-from-source)  
@@ -25,7 +25,7 @@ To install the plugin manually, download the [latest version](/takipi-field/sona
 ### Building from Source
 
 1. Clone this repo and in the root directory run `mvn clean package`
-2. Go into the `/target` and copy the `overops-1.0.3.jar` into the Sonar server `extensions/plugins` directory
+2. Go into the `/target` and copy the `overops-1.0.4.jar` into the Sonar server `extensions/plugins` directory
 3. Restart the server and plugin will auto install onto it.
 
 ## Setup
