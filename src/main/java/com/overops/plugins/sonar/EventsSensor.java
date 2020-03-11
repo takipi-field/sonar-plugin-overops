@@ -87,7 +87,7 @@ public class EventsSensor implements Sensor {
 
 			// stop if deployment not found
 			if (depTimes == null || depTimes.getFirst() == null) {
-				LOGGER.error("Deployment " + depName + " not found.");
+				LOGGER.error("Deployment " + depName + " not found. Check for data in OverOps and ensure shutdownGracetime property is set. See https://support.overops.com/hc/en-us/articles/360041054474-Best-Practice-Short-lived-application-considerations");
 				return;
 			}
 
