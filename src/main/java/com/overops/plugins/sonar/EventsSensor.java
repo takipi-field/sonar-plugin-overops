@@ -272,11 +272,18 @@ public class EventsSensor implements Sensor {
 		// add issues
 		for (Event event : eventList) {
 			LOGGER.debug("creating new issue for event: " + event.toString());
+
+			int lineNumber = event.getLocation().original_line_number;
+			if (lineNumber < 1) {
+				LOGGER.error("invalid line number for event: " + event.toString());
+				return;
+			}
+
 			NewIssue newIssue = context.newIssue().forRule(EVENT_RULE).gap(ARBITRARY_GAP);
 
 			NewIssueLocation primaryLocation = newIssue.newLocation()
 				.on(sourceFile)
-				.at(sourceFile.selectLine(event.getLocation().original_line_number)) // int line number
+				.at(sourceFile.selectLine(lineNumber)) // int line number
 				// message must not be greater than MESSAGE_MAX_SIZE
 				.message(StringUtils.abbreviate(event.getMessage(), NewIssueLocation.MESSAGE_MAX_SIZE));
 			newIssue.at(primaryLocation);
