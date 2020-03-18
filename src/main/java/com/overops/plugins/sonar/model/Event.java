@@ -40,7 +40,7 @@ public class Event {
 		link         = (String) events.getValue(2, index);         // link
 		name         = (String) events.getValue(3, index);         // name
 		type         = (String) events.getValue(4, index);         // type
-		message      = (String) events.getValue(5, index);         // message
+		message      = ((String) events.getValue(5, index)).trim();// message (INTG-538: trim whitespace)
 		introducedBy = (String) events.getValue(6, index);         // introduced_by
 		labels       = (String) events.getValue(7, index);         // labels
 
