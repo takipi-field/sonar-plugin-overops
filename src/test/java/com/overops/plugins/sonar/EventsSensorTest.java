@@ -185,6 +185,37 @@ public class EventsSensorTest {
 		});
 	}
 
+	@Test
+	public void saveFileEventsEmpty() {
+		EventsSensor tester = new EventsSensor();
+		TestSensorContext context = new TestSensorContext();
+
+		tester.initConfig(context);
+
+		HashMap<String, ArrayList<Event>> fileEvents = new HashMap<>();
+
+		assertDoesNotThrow(() -> {
+			tester.saveFileEvents(fileEvents);
+		});
+	}
+
+	@Test
+	public void saveFileEvents() {
+		EventsSensor tester = new EventsSensor();
+		TestSensorContext context = new TestSensorContext();
+
+		tester.initConfig(context);
+
+		HashMap<String, ArrayList<Event>> fileEvents = new HashMap<>();
+		Map.Entry<String, ArrayList<Event>> fileEvent = fileEvent(tester);
+
+		fileEvents.put(fileEvent.getKey(), fileEvent.getValue());
+
+		assertDoesNotThrow(() -> {
+			tester.saveFileEvents(fileEvents);
+		});
+	}
+
 	private Map.Entry<String, ArrayList<Event>> fileEvent(EventsSensor tester) {
 		Series<SeriesRow> events = new Series<>();
 
