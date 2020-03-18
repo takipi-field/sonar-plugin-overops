@@ -1,6 +1,7 @@
 package com.overops.plugins.sonar;
 
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -58,6 +59,8 @@ public class EventsSensor implements Sensor {
 	private String ignoreTypes;
 	private String login;
 
+	private SensorContext context;
+
 	@Override
 	public void describe(SensorDescriptor descriptor) {
 		descriptor.name("OverOps Event Issues Sensor");
@@ -67,6 +70,8 @@ public class EventsSensor implements Sensor {
 
 	@Override
 	public void execute(SensorContext context) {
+
+		this.context = context;
 
 		initConfig(context);
 
@@ -121,25 +126,7 @@ public class EventsSensor implements Sensor {
 			// loop through all the events, mapping them by source file (there can be multiple issues per file)
 			HashMap<String, ArrayList<Event>> fileEvents = mapFileEvents(events);
 
-			// stop here if there are no events
-			if (fileEvents.size() == 0) {
-				LOGGER.info("No OverOps events found.");
-				return;
-			}
-
-			// save for later
-			JsonStore jsonStore = new JsonStore();
-			jsonStore.setEventsJson(new ArrayList<EventsJson>(fileEvents.size()));
-
-			for (Map.Entry<String, ArrayList<Event>> fileEvent : fileEvents.entrySet()) {
-				addIssuesAndMetrics(context, fileEvent, jsonStore);
-			}
-
-			// save to disk
-			String jsonified = new Gson().toJson(jsonStore);
-			try (FileWriter writer = new FileWriter(STORE_FILE)) {
-				writer.write(jsonified);
-			}
+			saveFileEvents(fileEvents);
 
 		} catch (Exception ex) {
 			LOGGER.error("OverOps sensor encountered an error.");
@@ -174,6 +161,28 @@ public class EventsSensor implements Sensor {
 			}
 		}
 		return fileEvents;
+	}
+
+	void saveFileEvents(HashMap<String, ArrayList<Event>> fileEvents) throws IOException {
+		// stop here if there are no events
+		if (fileEvents.size() == 0) {
+			LOGGER.info("No OverOps events found.");
+			return;
+		}
+
+		// save for later
+		JsonStore jsonStore = new JsonStore();
+		jsonStore.setEventsJson(new ArrayList<EventsJson>(fileEvents.size()));
+
+		for (Map.Entry<String, ArrayList<Event>> fileEvent : fileEvents.entrySet()) {
+			addIssuesAndMetrics(context, fileEvent, jsonStore);
+		}
+
+		// save to disk
+		String jsonified = new Gson().toJson(jsonStore);
+		try (FileWriter writer = new FileWriter(STORE_FILE)) {
+			writer.write(jsonified);
+		}
 	}
 
 	void initConfig(SensorContext context) {
@@ -238,6 +247,12 @@ public class EventsSensor implements Sensor {
 	}
 
 	void addIssuesAndMetrics(SensorContext context, Map.Entry<String, ArrayList<Event>> fileEvent, JsonStore jsonStore) {
+
+		if (context == null) {
+			LOGGER.error("Null context");
+			return;
+		}
+
 		// add issues and measures to each file
 		FileSystem fs = context.fileSystem();
 
