@@ -25,7 +25,7 @@ To install the plugin manually, download the [latest version](/takipi-field/sona
 ### Building from Source
 
 1. Clone this repo and in the root directory run `mvn clean package`
-2. Go into the `/target` and copy the `overops-1.0.4.jar` into the Sonar server `extensions/plugins` directory
+2. Go into the `/target` and copy the `overops-1.0.5.jar` into the Sonar server `extensions/plugins` directory
 3. Restart the server and plugin will auto install onto it.
 
 ## Setup
