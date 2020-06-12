@@ -2,6 +2,9 @@ package com.overops.plugins.sonar.model;
 
 import java.util.List;
 
+/**
+ * Sonar representation of OverOps Event
+ */
 public class EventsJson {
 	private String rule;
 	private String componentKey; 

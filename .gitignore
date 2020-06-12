@@ -1,5 +1,6 @@
 /target/
 
+*.iml
 .idea
 .classpath
 .settings/
@@ -7,3 +8,5 @@
 .project
 
 .DS_Store
+
+overops_db.json

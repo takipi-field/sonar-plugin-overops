@@ -14,8 +14,13 @@ import com.takipi.api.client.util.regression.RegressionStringUtil;
 
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * Represents OverOps Events
+ *
+ * This makes OverOps as Influx easier to work with
+ */
 public class Event {
-	public static final String FIELDS = "id,stack_frames,link,name,type,message,introduced_by,labels";
+	public static final String FIELDS = "id,stack_frames,link,name,type,message,introduced_by,labels,source_file_path,original_line_number";
 
 	private int id;
 	private String link;
@@ -29,8 +34,11 @@ public class Event {
 	private String filePath;
 	private String deployment;
 	private String criticalExceptionTypes;
+	private String sourceFilePath;
+	private Double originalLineNumber;
 
 	public Event(Series<SeriesRow> events, int index, String deployment, String criticalExceptionTypes, String appUrl) {
+
 		this.deployment = deployment;
 		this.criticalExceptionTypes = criticalExceptionTypes;
 
@@ -43,14 +51,16 @@ public class Event {
 		message      = ((String) events.getValue(5, index)).trim();// message (INTG-538: trim whitespace)
 		introducedBy = (String) events.getValue(6, index);         // introduced_by
 		labels       = (String) events.getValue(7, index);         // labels
+		sourceFilePath = (String) events.getValue(8, index);       // source_file_path
+		originalLineNumber = (Double) events.getValue(9, index);   // original_line_number
+
+		// format link
+		link = appUrl + "/tale.html?snapshot=" + link + "&source=70";
 
 		// parse stackFrames
 		if (StringUtils.isBlank(stackFrames)) {
 			throw new IllegalArgumentException("Missing stack_frames for event id " + id);
 		}
-
-		// format link
-		link = appUrl + "/tale.html?snapshot=" + link + "&source=70";
 
 		Type listType = new TypeToken<ArrayList<Location>>(){}.getType();
 		List<Location> locationList = new Gson().fromJson(stackFrames, listType);
@@ -60,15 +70,26 @@ public class Event {
 		}
 
 		// there is only one location in the list
+		// ----> with .NET apparently this doesn't hold true
 		location = locationList.get(0);
 
-		// match **/com/example/path/ClassName.java
-		StringBuilder matchPattern = new StringBuilder("**");
-		matchPattern.append(File.separator);
-		matchPattern.append(location.class_name.replace(".", File.separator));
-		matchPattern.append(".java");
+		if (!sourceFilePath.isEmpty()) {
+			// use source file path if available (CS)
+			filePath = sourceFilePath;
+			// this cast makes me uncomfortable, but it's really an int to begin with...
+			location.original_line_number = (int) Math.round(originalLineNumber);
+		} else {
+			// compute file patch match pattern (Java)
 
-		filePath = matchPattern.toString();
+			// match **/com/example/path/ClassName.java
+			StringBuilder matchPattern = new StringBuilder("**");
+			matchPattern.append(File.separator);
+			matchPattern.append(location.class_name.replace(".", File.separator));
+			matchPattern.append(".java");
+
+			filePath = matchPattern.toString();
+		}
+
 	}
 
 	public int getId() {
