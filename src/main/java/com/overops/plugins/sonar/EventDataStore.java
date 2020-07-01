@@ -1,8 +1,6 @@
 package com.overops.plugins.sonar;
 
 import com.overops.plugins.sonar.model.EventsJson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +10,6 @@ import java.util.List;
  */
 public class EventDataStore {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventDataStore.class);
     private static final EventDataStore INSTANCE = new EventDataStore();
 
     public static EventDataStore instance(){

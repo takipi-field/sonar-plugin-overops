@@ -8,10 +8,10 @@ import org.sonar.api.config.PropertyDefinition;
 
 import java.util.List;
 
-public class PropertiesTest {
+class PropertiesTest {
 
 	@Test
-	public void getProperties() {
+	void getProperties() {
 		List<PropertyDefinition> properties = Properties.getProperties();
 		assertThat(properties).containsExactly(PROP_API_URL,
 				PROP_APP_URL,

@@ -4,14 +4,10 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 
 import static com.overops.plugins.sonar.config.OverOpsRulesDefinition.*;
 
 public class JavaEventSensor extends AbstractEventSensor {
-
-	private static final Logger LOGGER = Loggers.get(JavaEventSensor.class);
 
 	@Override
 	public void describe(SensorDescriptor descriptor) {

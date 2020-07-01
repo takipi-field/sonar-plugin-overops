@@ -9,6 +9,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.overops.plugins.sonar.model.Event;
 import com.overops.plugins.sonar.model.EventsJson;
 import com.overops.plugins.sonar.model.IssueComment;
@@ -23,7 +27,7 @@ import org.sonar.api.batch.postjob.issue.PostJobIssue;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.Settings;
 
-public class AddArcCommentTest {
+class AddArcCommentTest {
 
 	@BeforeEach
 	public void beforeAll(){
@@ -31,7 +35,7 @@ public class AddArcCommentTest {
 	}
 
 	@Test
-	public void execute() throws IOException {
+	void execute() throws IOException {
 		EventsJson eventsJson = new EventsJson();
 		eventsJson.setRule("test rule");
 		eventsJson.setComponentKey("test:key");
@@ -75,7 +79,7 @@ public class AddArcCommentTest {
 	}
 
 	@Test
-	public void executeEmpty() throws IOException {
+	void executeEmpty() throws IOException {
 		EventDataStore.instance().setData(new ArrayList<EventsJson>(0));
 
 		AddArcComment tester = new AddArcComment();
@@ -85,7 +89,7 @@ public class AddArcCommentTest {
 	}
 
 	@Test
-	public void executeException() throws IOException {
+	void executeException() throws IOException {
 		EventDataStore.instance().setData(null);
 
 		AddArcComment tester = new AddArcComment();
@@ -95,7 +99,7 @@ public class AddArcCommentTest {
 	}
 
 	@Test
-	public void setHttpContext() throws URISyntaxException {
+	void setHttpContext() throws URISyntaxException {
 		EventDataStore.instance().setData(null);
 		AddArcComment tester = new AddArcComment();
 		PostJobContext context = new TestPostJobContextImpl();

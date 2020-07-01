@@ -41,7 +41,7 @@ import static com.overops.plugins.sonar.config.Properties.CRITICAL_EXCEPTION_TYP
  */
 public abstract class AbstractEventSensor implements EventSensor {
 
-    private static final Logger LOGGER = Loggers.get(JavaEventSensor.class);
+    private static final Logger LOGGER = Loggers.get(AbstractEventSensor.class);
 
     protected String apiUrl;
     protected String appUrl;
@@ -205,7 +205,7 @@ public abstract class AbstractEventSensor implements EventSensor {
                     continue;
                 }
 
-                fileEvents.putIfAbsent(event.getKey(), new ArrayList<Event>());
+                fileEvents.putIfAbsent(event.getKey(), new ArrayList<>());
                 fileEvents.get(event.getKey()).add(event);
 
             } catch (IllegalArgumentException ex) {

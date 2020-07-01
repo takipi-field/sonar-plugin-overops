@@ -19,7 +19,7 @@ import static com.overops.plugins.sonar.config.Properties.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public abstract class AbstractEventSensorTest {
+abstract class AbstractEventSensorTest {
 
 	private EventSensor tester;
 
@@ -32,14 +32,14 @@ public abstract class AbstractEventSensorTest {
 	}
 
 	@Test
-	public void execute() {
+	void execute() {
 		SensorContext context = new TestSensorContext();
 
 		assertDoesNotThrow(() -> tester.execute(context));
 	}
 
 	@Test
-	public void executeInvalidConfig() {
+	void executeInvalidConfig() {
 		TestSensorContext context = new TestSensorContext();
 
 		context.config.config.remove(API_URL);
@@ -49,7 +49,7 @@ public abstract class AbstractEventSensorTest {
 	}
 
 	@Test
-	public void validateConfigAppUrl() {
+	void validateConfigAppUrl() {
 		TestSensorContext context = new TestSensorContext();
 
 		context.config.config.remove(APP_URL);
@@ -61,7 +61,7 @@ public abstract class AbstractEventSensorTest {
 	}
 
 	@Test
-	public void validateConfigApiKey() {
+	void validateConfigApiKey() {
 		TestSensorContext context = new TestSensorContext();
 
 		context.config.config.remove(API_KEY);
@@ -73,7 +73,7 @@ public abstract class AbstractEventSensorTest {
 	}
 
 	@Test
-	public void validateConfigEnvId() {
+	void validateConfigEnvId() {
 		TestSensorContext context = new TestSensorContext();
 
 		context.config.config.remove(ENVIRONMENT_ID);
@@ -85,7 +85,7 @@ public abstract class AbstractEventSensorTest {
 	}
 
 	@Test
-	public void validateConfigDepName() {
+	void validateConfigDepName() {
 		TestSensorContext context = new TestSensorContext();
 
 		context.config.config.remove(DEPLOYMENT_NAME);
@@ -97,7 +97,7 @@ public abstract class AbstractEventSensorTest {
 	}
 
 	@Test
-	public void validateConfigLogin() {
+	void validateConfigLogin() {
 		TestSensorContext context = new TestSensorContext();
 
 		context.config.config.remove("sonar.login");
@@ -109,7 +109,7 @@ public abstract class AbstractEventSensorTest {
 	}
 
 	@Test
-	public void addIssuesAndMetrics() {
+	void addIssuesAndMetrics() {
 		SensorContext context = new TestSensorContext();
 
 		tester.initConfig(context);
@@ -122,7 +122,7 @@ public abstract class AbstractEventSensorTest {
 	}
 
 	@Test
-	public void addIssuesAndMetricsNullSourceFile() {
+	void addIssuesAndMetricsNullSourceFile() {
 		TestSensorContext context = new TestSensorContext();
 
 		context.fileSystem.sourceFile = null;
@@ -137,7 +137,7 @@ public abstract class AbstractEventSensorTest {
 	}
 
 	@Test
-	public void saveFileEventsEmpty() {
+	void saveFileEventsEmpty() {
 		TestSensorContext context = new TestSensorContext();
 
 		tester.initConfig(context);

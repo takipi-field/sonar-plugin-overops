@@ -8,10 +8,10 @@ import org.sonar.api.server.rule.RulesDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OverOpsRulesDefinitionTest {
+class OverOpsRulesDefinitionTest {
 
     @Test
-    public void execute(){
+    void execute(){
         OverOpsRulesDefinition definition = new OverOpsRulesDefinition();
         RulesDefinition.Context context = new RulesDefinition.Context();
 

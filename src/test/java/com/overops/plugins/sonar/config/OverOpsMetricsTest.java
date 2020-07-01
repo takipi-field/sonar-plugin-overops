@@ -11,10 +11,10 @@ import static com.overops.plugins.sonar.config.OverOpsMetrics.RESURFACED;
 import static com.overops.plugins.sonar.config.OverOpsMetrics.UNIQUE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OverOpsMetricsTest {
+class OverOpsMetricsTest {
 
     @Test
-    public void getMetrics(){
+    void getMetrics(){
         OverOpsMetrics overOpsMetrics = new OverOpsMetrics();
         List<Metric> metrics = overOpsMetrics.getMetrics();
 
