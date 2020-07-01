@@ -8,7 +8,7 @@ import org.sonar.api.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OverOpsPluginTest {
+class OverOpsPluginTest {
 
     @Test
     void test(){

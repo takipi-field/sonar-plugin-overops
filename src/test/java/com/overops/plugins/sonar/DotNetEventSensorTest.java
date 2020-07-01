@@ -6,7 +6,7 @@ import org.sonar.api.batch.sensor.internal.DefaultSensorDescriptor;
 import static com.overops.plugins.sonar.config.OverOpsRulesDefinition.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DotNetEventSensorTest extends AbstractEventSensorTest {
+class DotNetEventSensorTest extends AbstractEventSensorTest {
 
 	@Test
 	void testDescribe(){

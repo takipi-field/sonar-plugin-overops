@@ -149,6 +149,20 @@ abstract class AbstractEventSensorTest {
 		});
 	}
 
+	@Test
+	void saveFileEvents() {
+		TestSensorContext context = new TestSensorContext();
+		EventDataStore.instance().setData(new ArrayList<>());
+		tester.execute(context);
+
+		HashMap<String, ArrayList<Event>> fileEvents = new HashMap<>();
+		fileEvents.put("1", fileEvent(tester).getValue());
+
+		assertDoesNotThrow(() -> {
+			tester.saveFileEvents(fileEvents);
+		});
+	}
+
 	private Map.Entry<String, ArrayList<Event>> fileEvent(EventSensor tester) {
 		Series<SeriesRow> events = new Series<>();
 

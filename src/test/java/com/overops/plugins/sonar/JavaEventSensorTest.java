@@ -7,7 +7,7 @@ import static com.overops.plugins.sonar.config.OverOpsRulesDefinition.JAVA_LANGU
 import static com.overops.plugins.sonar.config.OverOpsRulesDefinition.JAVA_REPOSITORY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class JavaEventSensorTest extends AbstractEventSensorTest {
+class JavaEventSensorTest extends AbstractEventSensorTest {
 
 	@Test
 	void testDescribe(){
