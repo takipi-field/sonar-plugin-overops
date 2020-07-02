@@ -1,14 +1,17 @@
 package com.overops.plugins.sonar.model;
 
+/**
+ * Sonar Comments
+ */
 public class IssueComment {
+
 	private int line;
 	private String message;
 	private String comment;
 
-	public static final String LINK_TEXT = "View event analysis in OverOps →";
+	public static final String LINK_TEXT = "View event analysis in OverOps";
 
 	public IssueComment() {
-
 	}
 
 	public IssueComment(Event event) {

@@ -1,24 +1,16 @@
 package com.overops.plugins.sonar;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.overops.plugins.sonar.model.EventsJson;
 import com.overops.plugins.sonar.model.IssueComment;
-import com.overops.plugins.sonar.model.JsonStore;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -46,8 +38,11 @@ import org.sonar.api.batch.postjob.PostJobDescriptor;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
-import static com.overops.plugins.sonar.model.JsonStore.STORE_FILE;
-
+/**
+ * Add Arc Screen Comment
+ *
+ * Post Job that reads the cached events and creates a Sonar comment with a link to the Arc screen
+ */
 public class AddArcComment implements PostJob {
 
 	private static final Logger LOGGER = Loggers.get(AddArcComment.class);
@@ -68,28 +63,15 @@ public class AddArcComment implements PostJob {
 
 		LOGGER.info("Adding issue comments with OverOps links");
 
-		BufferedReader storeFile;
 		try {
-			storeFile = new BufferedReader(new FileReader(STORE_FILE));
-
-			// convert the json file back to object
-			JsonStore jsonStore = new Gson().fromJson(storeFile, JsonStore.class);
-
-			List<EventsJson> eventsJson = jsonStore.getEventsJson();
-
-			// stop if there are no events
-			if (eventsJson.isEmpty()) {
-				LOGGER.info("No comments");
-
-				// clean up
-				cleanUp();
-				return;
-			}
+			List<EventsJson> eventsJson =  EventDataStore.instance().getData();
+			LOGGER.info("Fetched Events: {}", eventsJson.size());
 
 			// wait for 60 seconds for tasks to finish
 			// data from scanner is not immediately available in the backend
 			LOGGER.info("Waiting for background tasks...");
-			TimeUnit.MINUTES.sleep(1);
+			String pauseForTheCasue = System.getProperty("overops.pauseForTheCause", "1");
+			TimeUnit.MINUTES.sleep(Integer.parseInt(pauseForTheCasue));
 
 			setHttpContext(context);
 			httpClient = HttpClientBuilder.create().build();
@@ -141,12 +123,6 @@ public class AddArcComment implements PostJob {
 					res.close();
 				}
 			}
-
-			// clean up
-			cleanUp();
-
-		} catch (FileNotFoundException ex) {
-			LOGGER.info("overops_db.json not found: skipping OverOps post job");
 		} catch (Exception ex) {
 			LOGGER.error("OverOps post job encountered an error.");
 			LOGGER.error(ex.getMessage());
@@ -187,15 +163,6 @@ public class AddArcComment implements PostJob {
 		httpContext = HttpClientContext.create();
 		httpContext.setCredentialsProvider(credsProvider);
 		httpContext.setAuthCache(authCache);
-	}
-
-	void cleanUp() {
-		Path path = Paths.get(STORE_FILE);
-		try {
-			Files.delete(path);
-		} catch (IOException ex) {
-			LOGGER.warn("Unable to delete overops_db.json.");
-		}
 	}
 
 	void addComment(List<IssueComment> issues, IssueComment thisIssue, JsonObject responseIssue, String key)
