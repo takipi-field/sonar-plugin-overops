@@ -1,6 +1,6 @@
 package com.overops.plugins.sonar;
 
-import com.overops.plugins.sonar.config.JavaRulesDefinition;
+import com.overops.plugins.sonar.config.OverOpsRulesDefinition;
 import com.overops.plugins.sonar.config.OverOpsMetrics;
 import com.overops.plugins.sonar.config.Properties;
 
@@ -15,10 +15,10 @@ public class OverOpsPlugin implements Plugin {
 		context.addExtensions(Properties.getProperties());
 
 		// define rules for issues
-		context.addExtension(JavaRulesDefinition.class);
+		context.addExtension(OverOpsRulesDefinition.class);
 
 		// analyzer - add metrics and issues
-		context.addExtensions(OverOpsMetrics.class, EventsSensor.class, EventsMetricComputer.class);
+		context.addExtensions(OverOpsMetrics.class, JavaEventSensor.class, DotNetEventSensor.class, EventsMetricComputer.class);
 
 		// post job - add ARC links to issues as comments
 		context.addExtension(AddArcComment.class);

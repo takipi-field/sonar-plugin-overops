@@ -6,6 +6,9 @@ import org.sonar.api.measures.Metrics;
 
 import static java.util.Arrays.asList;
 
+/**
+ * Sonar Metrics Configuration
+ */
 public class OverOpsMetrics implements Metrics {
 
 	public static final String OVEROPS = "OverOps";
@@ -43,7 +46,6 @@ public class OverOpsMetrics implements Metrics {
 		.create();
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public List<Metric> getMetrics() {
 		return asList(NEW, CRITICAL, RESURFACED, UNIQUE);
 	}

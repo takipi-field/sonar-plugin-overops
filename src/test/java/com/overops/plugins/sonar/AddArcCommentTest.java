@@ -1,26 +1,25 @@
 package com.overops.plugins.sonar;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static com.overops.plugins.sonar.model.JsonStore.STORE_FILE;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.overops.plugins.sonar.model.Event;
 import com.overops.plugins.sonar.model.EventsJson;
 import com.overops.plugins.sonar.model.IssueComment;
-import com.overops.plugins.sonar.model.JsonStore;
 import com.takipi.api.client.functions.output.Series;
 import com.takipi.api.client.functions.output.SeriesRow;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sonar.api.batch.AnalysisMode;
 import org.sonar.api.batch.postjob.PostJobContext;
@@ -28,30 +27,15 @@ import org.sonar.api.batch.postjob.issue.PostJobIssue;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.Settings;
 
-public class AddArcCommentTest {
+class AddArcCommentTest {
 
-	@Test
-	public void cleanUp() throws IOException {
-		Path path = Paths.get(STORE_FILE);
-		Files.deleteIfExists(path);
-		Files.createFile(path);
-
-		AddArcComment tester = new AddArcComment();
-		assertDoesNotThrow(() -> tester.cleanUp());
-
-		// run again to test catching IOException
-		assertDoesNotThrow(() -> tester.cleanUp());
+	@BeforeEach
+	public void beforeAll(){
+		System.setProperty("overops.pauseForTheCause","0");
 	}
 
 	@Test
-	public void execute() throws IOException {
-		Path path = Paths.get(STORE_FILE);
-		Files.deleteIfExists(path);
-
-		// save empty array
-		JsonStore jsonStore = new JsonStore();
-		jsonStore.setEventsJson(new ArrayList<EventsJson>(1));
-
+	void execute() throws IOException {
 		EventsJson eventsJson = new EventsJson();
 		eventsJson.setRule("test rule");
 		eventsJson.setComponentKey("test:key");
@@ -72,6 +56,8 @@ public class AddArcCommentTest {
 		list.add("message");
 		list.add("introduced_by");
 		list.add("labels");
+		list.add("source_file_path");
+		list.add(10d);
 
 		ArrayList<List<Object>> listOfList = new ArrayList<List<Object>>(1);
 		listOfList.add(list);
@@ -84,14 +70,7 @@ public class AddArcCommentTest {
 		IssueComment issueComment = new IssueComment(event);
 		eventsJson.getIssues().add(issueComment);
 
-		// save to temporary file to add comments in post job step
-		jsonStore.getEventsJson().add(eventsJson);
-
-		// save to disk
-		String jsonified = new Gson().toJson(jsonStore);
-		try (FileWriter writer = new FileWriter(STORE_FILE)) {
-			writer.write(jsonified);
-		}
+		EventDataStore.instance().setData(Arrays.asList(eventsJson));
 
 		AddArcComment tester = new AddArcComment();
 		PostJobContext context = new TestPostJobContextImpl();
@@ -100,19 +79,8 @@ public class AddArcCommentTest {
 	}
 
 	@Test
-	public void executeEmpty() throws IOException {
-		Path path = Paths.get(STORE_FILE);
-		Files.deleteIfExists(path);
-
-		// save empty array
-		JsonStore jsonStore = new JsonStore();
-		jsonStore.setEventsJson(new ArrayList<EventsJson>(0));
-
-		// save to disk
-		String jsonified = new Gson().toJson(jsonStore);
-		try (FileWriter writer = new FileWriter(STORE_FILE)) {
-			writer.write(jsonified);
-		}
+	void executeEmpty() throws IOException {
+		EventDataStore.instance().setData(new ArrayList<EventsJson>(0));
 
 		AddArcComment tester = new AddArcComment();
 		PostJobContext context = null;
@@ -121,10 +89,8 @@ public class AddArcCommentTest {
 	}
 
 	@Test
-	public void executeException() throws IOException {
-		Path path = Paths.get(STORE_FILE);
-		Files.deleteIfExists(path);
-		Files.createFile(path);
+	void executeException() throws IOException {
+		EventDataStore.instance().setData(null);
 
 		AddArcComment tester = new AddArcComment();
 		PostJobContext context = null;
@@ -133,18 +99,8 @@ public class AddArcCommentTest {
 	}
 
 	@Test
-	public void executeFileNotFound() throws IOException {
-		Path path = Paths.get(STORE_FILE);
-		Files.deleteIfExists(path);
-
-		AddArcComment tester = new AddArcComment();
-		PostJobContext context = null;
-
-		assertDoesNotThrow(() -> tester.execute(context));
-	}
-
-	@Test
-	public void setHttpContext() throws URISyntaxException {
+	void setHttpContext() throws URISyntaxException {
+		EventDataStore.instance().setData(null);
 		AddArcComment tester = new AddArcComment();
 		PostJobContext context = new TestPostJobContextImpl();
 		assertDoesNotThrow(() -> tester.setHttpContext(context));
