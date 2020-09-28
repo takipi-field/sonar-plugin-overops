@@ -6,7 +6,7 @@ OVEROPS_API_KEY=yQMle3xNR31MmsZDa6qoQaVFPSGHgWGa8w/317LM
 OVEROPS_ENVIRONMENT=S1
 
 # Build Plugin
-# mvn clean install
+mvn clean install
 
 # Spin up Sonar with Plugin and a Collector
 docker-compose up -d
