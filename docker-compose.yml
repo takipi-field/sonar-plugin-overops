@@ -7,13 +7,5 @@ services:
     - "9000:9000"
     # volumes:
       # - sonarqube:/opt/sonarqube
-  collector:
-    image: overops/collector
-    ports:
-    - "6060:6060"
-    environment:
-    - TAKIPI_BASE_URL=https://backend.overops.com
-    - TAKIPI_LISTEN_PORT=6060
-    - TAKIPI_SECRET_KEY=S40694#AdFwe0pc7N+vlAfH#ZU1BR8ghyjd28D4yMlUsTDyg7k6PKt9aqJ6bIFe0AEQ=#d17a}
 # volumes:
 #   sonarqube:

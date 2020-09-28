@@ -1,9 +1,9 @@
 SONAR_URL=http://localhost:9000
 
-OVEROPS_APP_URL=http://localhost:80808
-OVEROPS_API_URL=http://localhost:80808
-OVEROPS_API_KEY=yQMle3xNR31MmsZDa6qoQaVFPSGHgWGa8w/317LM
-OVEROPS_ENVIRONMENT=S1
+OVEROPS_APP_URL=https://app.overops.com
+OVEROPS_API_URL=https://api.overops.com
+OVEROPS_API_KEY=
+OVEROPS_ENVIRONMENT=
 
 # Build Plugin
 mvn clean install
