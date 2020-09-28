@@ -1,0 +1,11 @@
+version: '2.0'
+services:
+  sonar:
+    build:
+      context: .
+    ports:
+    - "9000:9000"
+    # volumes:
+      # - sonarqube:/opt/sonarqube
+# volumes:
+#   sonarqube:
