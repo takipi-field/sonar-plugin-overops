@@ -1,11 +1,38 @@
 version: '2.0'
 services:
+
+  # Default Login: default.user@company.com / 123456
+  overops-server:
+    image: overops/server
+    ports:
+      - "8080:8080"
+      - "25:25"
+      - "465:465"
+      - "587:587"
+      - "2525:2525"
+    environment: 
+      HOST_URL: overops-server:8080
+      FRONTEND_URL: http://localhost:8080
+  collector:
+    image: overops/collector
+    ports:
+    - "6060:6060"
+    environment:
+      TAKIPI_BASE_URL: http://overops-server:8080
+      TAKIPI_LISTEN_PORT: 6060
+      TAKIPI_SECRET_KEY: S1#qrXOZTWZsAzN2X0x#02G06kYSRWvet5HQJcq+LVAALN/a8Vu4QqKGIr/d+Ho=#84ae
+      TAKIPI_SERVER_NAME: docker
   sonar:
     build:
       context: .
     ports:
     - "9000:9000"
-    # volumes:
-      # - sonarqube:/opt/sonarqube
-# volumes:
-#   sonarqube:
+    volumes:
+    - sonarqube:/opt/sonarqube
+volumes:
+  sonarqube: {}
+
+networks:
+  overops:
+    driver: bridge
+  
