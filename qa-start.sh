@@ -1,12 +1,11 @@
 SONAR_URL=http://localhost:9000
 
-OVEROPS_APP_URL=https://app.overops.com
-OVEROPS_API_URL=https://api.overops.com
-OVEROPS_API_KEY=
-OVEROPS_ENVIRONMENT=
+OVEROPS_APP_URL=http://localhost:8080
+OVEROPS_API_URL=http://localhost:8080
+OVEROPS_ENVIRONMENT=S1
 
 # Build Plugin
-mvn clean install
+# mvn clean install
 
 # Spin up Sonar with Plugin and a Collector
 docker-compose up -d
@@ -24,8 +23,7 @@ echo ""
 
 # Configure OverOps Plugin Variables
 curl -u admin:admin --request POST "$SONAR_URL/api/settings/set?key=overops.app.url&value=$OVEROPS_APP_URL"
-curl -u admin:admin --request POST "$SONAR_URL/api/settings/set?key=overops.api.url&value=$OVEROPS_APP_URL"
-curl -u admin:admin --request POST "$SONAR_URL/api/settings/set?key=overops.api.key&value=$OVEROPS_API_KEY"
+curl -u admin:admin --request POST "$SONAR_URL/api/settings/set?key=overops.api.url&value=$OVEROPS_API_URL"
 curl -u admin:admin --request POST "$SONAR_URL/api/settings/set?key=overops.environment.id&value=$OVEROPS_ENVIRONMENT"
 
 # CS
